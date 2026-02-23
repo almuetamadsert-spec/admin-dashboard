@@ -1,0 +1,67 @@
+<%- include('../partials/head', { title: 'العملاء' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">العملاء</h4>
+<div class="card mb-3">
+  <div class="card-body">
+    <form method="post" action="/admin/customers" class="row g-2">
+      <div class="col-md-3"><input type="text" name="name" class="form-control" placeholder="الاسم *" required></div>
+      <div class="col-md-2"><input type="text" name="phone" class="form-control" placeholder="الهاتف"></div>
+      <div class="col-md-2"><input type="email" name="email" class="form-control" placeholder="البريد"></div>
+      <div class="col-md-3"><input type="text" name="address" class="form-control" placeholder="العنوان"></div>
+      <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">إضافة عميل</button></div>
+    </form>
+  </div>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>الهاتف</th>
+          <th>البريد</th>
+          <th>العنوان</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% customers.forEach(function(c) { %>
+        <tr>
+          <td><%= c.name %></td>
+          <td><%= c.phone || '—' %></td>
+          <td><%= c.email || '—' %></td>
+          <td><%= c.address || '—' %></td>
+          <td>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal<%= c.id %>">تعديل</button>
+            <form action="/admin/customers/delete/<%= c.id %>" method="post" class="d-inline" onsubmit="return confirm('حذف العميل؟');">
+              <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
+            </form>
+          </td>
+        </tr>
+        <div class="modal fade" id="editModal<%= c.id %>" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <form method="post" action="/admin/customers/edit/<%= c.id %>">
+                <div class="modal-header"><h5 class="modal-title">تعديل العميل</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                  <div class="mb-2"><input type="text" name="name" class="form-control" value="<%= c.name %>" placeholder="الاسم" required></div>
+                  <div class="mb-2"><input type="text" name="phone" class="form-control" value="<%= c.phone || '' %>" placeholder="الهاتف"></div>
+                  <div class="mb-2"><input type="email" name="email" class="form-control" value="<%= c.email || '' %>" placeholder="البريد"></div>
+                  <div class="mb-2"><input type="text" name="address" class="form-control" value="<%= c.address || '' %>" placeholder="العنوان"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button><button type="submit" class="btn btn-primary">حفظ</button></div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <% }); %>
+        <% if (!customers.length) { %>
+        <tr><td colspan="5" class="text-center text-muted">لا يوجد عملاء</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/scripts') %>

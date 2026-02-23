@@ -1,0 +1,44 @@
+<%- include('../partials/head', { title: 'الطلبات' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">الطلبات</h4>
+<div class="mb-3">
+  <a href="/admin/orders/new" class="btn btn-primary"><i class="bi bi-plus"></i> إنشاء طلب</a>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>رقم الطلب</th>
+          <th>العميل</th>
+          <th>الهاتف</th>
+          <th>المبلغ</th>
+          <th>الحالة</th>
+          <th>التاريخ</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% orders.forEach(function(o) { %>
+        <tr>
+          <td><%= o.order_number %></td>
+          <td><%= o.customer_name || '—' %></td>
+          <td><%= o.customer_phone || '—' %></td>
+          <td><%= Number(o.total_amount).toFixed(2) %> د.ل</td>
+          <td>
+            <span class="badge bg-<%= o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'danger' : 'warning' %>"><%= o.status %></span>
+          </td>
+          <td><%= new Date(o.created_at).toLocaleDateString('ar-LY') %></td>
+          <td><a href="/admin/orders/view/<%= o.id %>" class="btn btn-sm btn-outline-primary">عرض</a></td>
+        </tr>
+        <% }); %>
+        <% if (!orders.length) { %>
+        <tr><td colspan="7" class="text-center text-muted">لا توجد طلبات</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/scripts') %>

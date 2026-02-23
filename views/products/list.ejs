@@ -1,0 +1,55 @@
+<%- include('../partials/head', { title: 'المنتجات' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">المنتجات</h4>
+<div class="mb-3">
+  <a href="/admin/products/new" class="btn btn-primary"><i class="bi bi-plus"></i> إضافة منتج</a>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>صورة</th>
+          <th>الاسم</th>
+          <th>السعر</th>
+          <th>التخفيض</th>
+          <th>الشركة</th>
+          <th>التصنيف</th>
+          <th>المخزون</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% products.forEach(function(p) { %>
+        <tr>
+          <td>
+            <% if (p.image_path) { %>
+              <img src="/uploads/<%= p.image_path %>" alt="" style="width:50px;height:50px;object-fit:cover;border-radius:6px">
+            <% } else { %>
+              <span class="text-muted">—</span>
+            <% } %>
+          </td>
+          <td><%= p.name_ar || p.name_en || '—' %></td>
+          <td><%= Number(p.price).toFixed(2) %> د.ل</td>
+          <td><%= p.discount_percent ? p.discount_percent + '%' : '—' %></td>
+          <td><%= p.company || '—' %></td>
+          <td><%= p.category_name || '—' %></td>
+          <td><%= p.stock %></td>
+          <td>
+            <a href="/admin/products/edit/<%= p.id %>" class="btn btn-sm btn-outline-primary">تعديل</a>
+            <form action="/admin/products/delete/<%= p.id %>" method="post" class="d-inline" onsubmit="return confirm('حذف المنتج؟');">
+              <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+        <% if (!products.length) { %>
+        <tr><td colspan="8" class="text-center text-muted">لا توجد منتجات</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/scripts') %>

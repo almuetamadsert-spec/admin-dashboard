@@ -1,0 +1,55 @@
+<%- include('../partials/head', { title: 'تفاصيل الطلب' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">طلب #<%= order.order_number %></h4>
+<div class="row">
+  <div class="col-md-8">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6>العميل</h6>
+        <p class="mb-0"><%= order.customer_name || '—' %> | <%= order.customer_phone || '—' %> | <%= order.customer_email || '—' %></p>
+        <% if (order.customer_address) { %><p class="text-muted small mb-0"><%= order.customer_address %></p><% } %>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">المنتجات</div>
+      <table class="table mb-0">
+        <thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
+        <tbody>
+          <% items.forEach(function(i) { %>
+          <tr>
+            <td><%= i.product_name %></td>
+            <td><%= i.quantity %></td>
+            <td><%= Number(i.unit_price).toFixed(2) %> د.ل</td>
+            <td><%= Number(i.total_price).toFixed(2) %> د.ل</td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <div class="card-footer text-end"><strong>المجموع: <%= Number(order.total_amount).toFixed(2) %> د.ل</strong></div>
+    </div>
+    <% if (order.notes) { %><p class="text-muted mt-2">ملاحظات: <%= order.notes %></p><% } %>
+  </div>
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <h6>تحديث الحالة</h6>
+        <form method="post" action="/admin/orders/status/<%= order.id %>">
+          <select name="status" class="form-select mb-2">
+            <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>قيد الانتظار</option>
+            <option value="confirmed" <%= order.status === 'confirmed' ? 'selected' : '' %>>مؤكد</option>
+            <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>تم الشحن</option>
+            <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>تم التوصيل</option>
+            <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>ملغي</option>
+          </select>
+          <button type="submit" class="btn btn-primary w-100">حفظ</button>
+        </form>
+        <hr>
+        <p class="small text-muted mb-0">تاريخ: <%= new Date(order.created_at).toLocaleString('ar-LY') %></p>
+      </div>
+    </div>
+  </div>
+</div>
+<a href="/admin/orders" class="btn btn-outline-secondary mt-3">← العودة للطلبات</a>
+
+<%- include('../partials/scripts') %>

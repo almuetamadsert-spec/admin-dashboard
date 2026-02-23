@@ -1,0 +1,18 @@
+{
+  "name": "admin-dashboard",
+  "version": "1.0.0",
+  "description": "لوحة تحكم إدارة المنتجات والطلبات والعملاء والمبيعات",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "sql.js": "^1.11.0",
+    "bcryptjs": "^2.4.3",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "express-session": "^1.18.0",
+    "multer": "^1.4.5-lts.1"
+  }
+}

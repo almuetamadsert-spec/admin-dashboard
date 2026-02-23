@@ -1,0 +1,52 @@
+<%- include('../partials/head', { title: 'الرئيسية' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">لوحة التحكم</h4>
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card stat-card h-100">
+      <div class="card-body">
+        <h6 class="text-muted">المنتجات</h6>
+        <h3><%= productsCount %></h3>
+        <a href="/admin/products" class="small">عرض الكل</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card h-100">
+      <div class="card-body">
+        <h6 class="text-muted">الطلبات</h6>
+        <h3><%= ordersCount %></h3>
+        <a href="/admin/orders" class="small">عرض الكل</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card h-100">
+      <div class="card-body">
+        <h6 class="text-muted">العملاء</h6>
+        <h3><%= customersCount %></h3>
+        <a href="/admin/customers" class="small">عرض الكل</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card h-100">
+      <div class="card-body">
+        <h6 class="text-muted">مبيعات اليوم</h6>
+        <h3><%= Number(todaySales).toFixed(2) %> د.ل</h3>
+        <a href="/admin/sales" class="small">التقارير</a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">إجراءات سريعة</h5>
+    <a href="/admin/products/new" class="btn btn-primary me-2"><i class="bi bi-plus"></i> منتج جديد</a>
+    <a href="/admin/orders/new" class="btn btn-success me-2"><i class="bi bi-cart-plus"></i> طلب جديد</a>
+    <a href="/admin/customers" class="btn btn-outline-secondary">العملاء</a>
+  </div>
+</div>
+
+<%- include('../partials/scripts') %>

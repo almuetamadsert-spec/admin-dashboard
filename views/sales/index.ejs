@@ -1,0 +1,80 @@
+<%- include('../partials/head', { title: 'المبيعات' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">تقارير المبيعات</h4>
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card stat-card h-100">
+      <div class="card-body">
+        <h6 class="text-muted">مبيعات اليوم</h6>
+        <h3><%= Number(todayTotal).toFixed(2) %> د.ل</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card h-100">
+      <div class="card-body">
+        <h6 class="text-muted">مبيعات الشهر</h6>
+        <h3><%= Number(monthTotal).toFixed(2) %> د.ل</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card h-100">
+      <div class="card-body">
+        <h6 class="text-muted">مبيعات السنة</h6>
+        <h3><%= Number(yearTotal).toFixed(2) %> د.ل</h3>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">المبيعات اليومية (آخر 31 يوم)</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead><tr><th>التاريخ</th><th>عدد الطلبات</th><th>المبلغ</th></tr></thead>
+          <tbody>
+            <% daily.forEach(function(d) { %>
+            <tr><td><%= d.day %></td><td><%= d.count %></td><td><%= Number(d.total).toFixed(2) %> د.ل</td></tr>
+            <% }); %>
+            <% if (!daily.length) { %><tr><td colspan="3" class="text-center text-muted">لا توجد بيانات</td></tr><% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">المبيعات الشهرية</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead><tr><th>الشهر</th><th>عدد الطلبات</th><th>المبلغ</th></tr></thead>
+          <tbody>
+            <% monthly.forEach(function(m) { %>
+            <tr><td><%= m.month %></td><td><%= m.count %></td><td><%= Number(m.total).toFixed(2) %> د.ل</td></tr>
+            <% }); %>
+            <% if (!monthly.length) { %><tr><td colspan="3" class="text-center text-muted">لا توجد بيانات</td></tr><% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card mt-3">
+  <div class="card-header">المبيعات السنوية</div>
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead><tr><th>السنة</th><th>عدد الطلبات</th><th>المبلغ</th></tr></thead>
+      <tbody>
+        <% yearly.forEach(function(y) { %>
+        <tr><td><%= y.year %></td><td><%= y.count %></td><td><%= Number(y.total).toFixed(2) %> د.ل</td></tr>
+        <% }); %>
+        <% if (!yearly.length) { %><tr><td colspan="3" class="text-center text-muted">لا توجد بيانات</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/scripts') %>

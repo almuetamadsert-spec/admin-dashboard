@@ -1,0 +1,74 @@
+<%- include('../partials/head', { title: 'التصنيفات' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">التصنيفات</h4>
+<div class="card mb-3">
+  <div class="card-body">
+    <form id="addCategoryForm" class="row g-2">
+      <div class="col-md-4"><input type="text" id="name_ar" class="form-control" placeholder="الاسم (عربي) *" required></div>
+      <div class="col-md-4"><input type="text" id="name_en" class="form-control" placeholder="الاسم (إنجليزي)"></div>
+      <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">إضافة</button></div>
+    </form>
+  </div>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>الاسم (عربي)</th><th>الاسم (إنجليزي)</th><th></th></tr></thead>
+      <tbody id="categoriesTable">
+        <% categories.forEach(function(c) { %>
+        <tr data-id="<%= c.id %>">
+          <td><span class="cat-name-ar"><%= c.name_ar %></span></td>
+          <td><span class="cat-name-en"><%= c.name_en || '—' %></span></td>
+          <td>
+            <button type="button" class="btn btn-sm btn-outline-primary btn-edit">تعديل</button>
+            <button type="button" class="btn btn-sm btn-outline-danger btn-delete">حذف</button>
+          </td>
+        </tr>
+        <% }); %>
+        <% if (!categories.length) { %>
+        <tr><td colspan="3" class="text-center text-muted">لا توجد تصنيفات</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+document.getElementById('addCategoryForm').onsubmit = async function(e) {
+  e.preventDefault();
+  const name_ar = document.getElementById('name_ar').value.trim();
+  const name_en = document.getElementById('name_en').value.trim();
+  const res = await fetch('/admin/categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name_ar, name_en }) });
+  if (!res.ok) return alert('خطأ');
+  const { id } = await res.json();
+  const tbody = document.getElementById('categoriesTable');
+  const emptyRow = tbody.querySelector('tr td[colspan]');
+  if (emptyRow) emptyRow.closest('tr').remove();
+  const tr = document.createElement('tr');
+  tr.dataset.id = id;
+  tr.innerHTML = '<td><span class="cat-name-ar">' + name_ar + '</span></td><td><span class="cat-name-en">' + (name_en || '—') + '</span></td><td><button type="button" class="btn btn-sm btn-outline-primary btn-edit">تعديل</button> <button type="button" class="btn btn-sm btn-outline-danger btn-delete">حذف</button></td>';
+  tbody.appendChild(tr);
+  document.getElementById('name_ar').value = '';
+  document.getElementById('name_en').value = '';
+};
+document.getElementById('categoriesTable').addEventListener('click', async function(e) {
+  const tr = e.target.closest('tr[data-id]');
+  if (!tr) return;
+  const id = tr.dataset.id;
+  if (e.target.classList.contains('btn-delete')) {
+    if (!confirm('حذف التصنيف؟')) return;
+    await fetch('/admin/categories/' + id, { method: 'DELETE' });
+    tr.remove();
+  }
+  if (e.target.classList.contains('btn-edit')) {
+    const name_ar = prompt('الاسم (عربي):', tr.querySelector('.cat-name-ar').textContent);
+    if (name_ar === null) return;
+    const name_en = prompt('الاسم (إنجليزي):', tr.querySelector('.cat-name-en').textContent === '—' ? '' : tr.querySelector('.cat-name-en').textContent);
+    await fetch('/admin/categories/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name_ar: name_ar.trim(), name_en: (name_en || '').trim() }) });
+    tr.querySelector('.cat-name-ar').textContent = name_ar.trim();
+    tr.querySelector('.cat-name-en').textContent = (name_en && name_en.trim()) ? name_en.trim() : '—';
+  }
+});
+</script>
+<%- include('../partials/scripts') %>

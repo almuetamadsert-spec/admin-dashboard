@@ -22,33 +22,46 @@ app.use(session({
   cookie: { maxAge: 24 * 60 * 60 * 1000 }
 }));
 
+// قاعدة البيانات تُحمّل لاحقاً؛ التطبيق يبدأ الاستماع فوراً
+app.locals.db = null;
+
+app.use((req, res, next) => {
+  if (req.path === '/health') return res.type('text').send('ok');
+  if (req.path === '/') return res.redirect('/admin/login');
+  req.db = app.locals.db;
+  if (!req.db) return res.status(503).set('Content-Type', 'text/plain; charset=utf-8').send('جاري تحميل التطبيق...');
+  next();
+});
+
 const { requireAuth } = require('./middleware/auth');
 
-(async () => {
-  const db = await require('./db/init');
-  app.use((req, res, next) => { req.db = db; next(); });
+app.use('/admin', require('./routes/admin'));
+app.use('/admin/dashboard', requireAuth, require('./routes/dashboard'));
+app.use('/admin/products', requireAuth, require('./routes/products'));
+app.use('/admin/orders', requireAuth, require('./routes/orders'));
+app.use('/admin/customers', requireAuth, require('./routes/customers'));
+app.use('/admin/sales', requireAuth, require('./routes/sales'));
+app.use('/admin/categories', requireAuth, require('./routes/categories'));
 
-  app.use('/admin', require('./routes/admin'));
-  app.use('/admin/dashboard', requireAuth, require('./routes/dashboard'));
-  app.use('/admin/products', requireAuth, require('./routes/products'));
-  app.use('/admin/orders', requireAuth, require('./routes/orders'));
-  app.use('/admin/customers', requireAuth, require('./routes/customers'));
-  app.use('/admin/sales', requireAuth, require('./routes/sales'));
-  app.use('/admin/categories', requireAuth, require('./routes/categories'));
-
-  app.get('/admin', (req, res) => {
-    if (req.session && req.session.adminId) return res.redirect('/admin/dashboard');
-    res.redirect('/admin/login');
-  });
-
-  app.get('/', (req, res) => res.redirect('/admin/login'));
-  app.get('/health', (req, res) => res.type('text').send('ok'));
-
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`الخادم يعمل على المنفذ ${PORT} (0.0.0.0)`);
-    console.log('لوحة التحكم: /admin/login');
-  });
-})().catch((err) => {
-  console.error('خطأ عند بدء التشغيل:', err);
-  process.exit(1);
+app.get('/admin', (req, res) => {
+  if (req.session && req.session.adminId) return res.redirect('/admin/dashboard');
+  res.redirect('/admin/login');
 });
+
+// بدء الاستماع فوراً (قبل تحميل قاعدة البيانات)
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`الخادم يعمل على المنفذ ${PORT} (0.0.0.0)`);
+  console.log('لوحة التحكم: /admin/login');
+});
+
+// تحميل قاعدة البيانات في الخلفية
+require('./db/init')
+  .then((db) => {
+    app.locals.db = db;
+    console.log('قاعدة البيانات جاهزة');
+  })
+  .catch((err) => {
+    console.error('خطأ في تحميل قاعدة البيانات:', err);
+    console.error(err.stack);
+    // لا نوقف العملية؛ /health يبقى يعمل للتأكد من أن السيرفر يعمل
+  });

@@ -13,8 +13,14 @@ function toNamedParams(sql) {
 }
 
 async function initDb() {
+  // مسار ملف wasm يعمل محلياً وعلى السيرفر
+  let wasmDir = path.join(__dirname, '..', 'node_modules', 'sql.js', 'dist');
+  try {
+    const pkgDir = path.dirname(require.resolve('sql.js'));
+    if (fs.existsSync(path.join(pkgDir, 'dist', 'sql-wasm.wasm'))) wasmDir = path.join(pkgDir, 'dist');
+  } catch (e) { /* استخدم wasmDir الافتراضي */ }
   const SQL = await initSqlJs({
-    locateFile: (file) => path.join(__dirname, '..', 'node_modules', 'sql.js', 'dist', file)
+    locateFile: (file) => path.join(wasmDir, file)
   });
   let db;
   if (fs.existsSync(dbPath)) {

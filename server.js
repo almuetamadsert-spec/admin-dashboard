@@ -41,8 +41,14 @@ const { requireAuth } = require('./middleware/auth');
     res.redirect('/admin/login');
   });
 
-  app.listen(PORT, () => {
-    console.log(`الخادم يعمل على http://localhost:${PORT}`);
-    console.log('لوحة التحكم: http://localhost:' + PORT + '/admin/login');
+  app.get('/', (req, res) => res.redirect('/admin/login'));
+  app.get('/health', (req, res) => res.type('text').send('ok'));
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`الخادم يعمل على المنفذ ${PORT} (0.0.0.0)`);
+    console.log('لوحة التحكم: /admin/login');
   });
-})();
+})().catch((err) => {
+  console.error('خطأ عند بدء التشغيل:', err);
+  process.exit(1);
+});

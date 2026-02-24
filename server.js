@@ -25,8 +25,65 @@ app.use(session({
 // قاعدة البيانات تُحمّل لاحقاً؛ التطبيق يبدأ الاستماع فوراً
 app.locals.db = null;
 
+// فحص التوصيل — يعمل حتى قبل تحميل قاعدة البيانات
+app.get('/health', (req, res) => res.type('text').send('ok'));
+
+app.get('/api/status', (req, res) => {
+  const db = app.locals.db;
+  let dbStatus = 'جاري التحميل...';
+  let dbOk = false;
+  if (db) {
+    try {
+      db.prepare('SELECT 1').get();
+      dbStatus = 'متصل';
+      dbOk = true;
+    } catch (e) {
+      dbStatus = 'خطأ: ' + (e.message || 'غير متصل');
+    }
+  }
+  res.json({
+    ok: true,
+    server: 'يعمل',
+    database: dbStatus,
+    databaseOk: dbOk,
+    port: PORT,
+    node: process.version,
+    env: process.env.NODE_ENV || 'development'
+  });
+});
+
+app.get('/status', (req, res) => {
+  const db = app.locals.db;
+  let dbStatus = 'جاري التحميل...';
+  let dbOk = false;
+  if (db) {
+    try {
+      db.prepare('SELECT 1').get();
+      dbStatus = 'متصل ✓';
+      dbOk = true;
+    } catch (e) {
+      dbStatus = 'خطأ: ' + (e.message || 'غير متصل');
+    }
+  }
+  res.type('text/html').send(`
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head><meta charset="utf-8"><title>فحص التوصيل</title>
+<style>body{font-family:system-ui;max-width:500px;margin:2rem auto;padding:1rem;background:#f5f5f5;}
+h1{color:#333;} .box{background:#fff;padding:1rem;margin:0.5rem 0;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1);}
+.ok{color:#0a0;} .fail{color:#c00;} .wait{color:#888;}
+a{color:#06c;}</style></head>
+<body>
+<h1>فحص التوصيل</h1>
+<div class="box"><strong>السيرفر:</strong> <span class="ok">يعمل ✓</span></div>
+<div class="box"><strong>قاعدة البيانات:</strong> <span class="${dbOk ? 'ok' : (db ? 'fail' : 'wait')}">${dbStatus}</span></div>
+<div class="box"><strong>المنفذ:</strong> ${PORT} | <strong>Node:</strong> ${process.version}</div>
+<div class="box"><a href="/admin/login">لوحة التحكم ←</a></div>
+</body>
+</html>`);
+});
+
 app.use((req, res, next) => {
-  if (req.path === '/health') return res.type('text').send('ok');
   if (req.path === '/') return res.redirect('/admin/login');
   req.db = app.locals.db;
   if (!req.db) return res.status(503).set('Content-Type', 'text/plain; charset=utf-8').send('جاري تحميل التطبيق...');
@@ -42,6 +99,16 @@ app.use('/admin/orders', requireAuth, require('./routes/orders'));
 app.use('/admin/customers', requireAuth, require('./routes/customers'));
 app.use('/admin/sales', requireAuth, require('./routes/sales'));
 app.use('/admin/categories', requireAuth, require('./routes/categories'));
+app.use('/admin/settings', requireAuth, require('./routes/settings'));
+app.use('/admin/cities', requireAuth, require('./routes/cities'));
+app.use('/admin/activity', requireAuth, require('./routes/activity'));
+app.use('/admin/cms', requireAuth, require('./routes/cms'));
+app.use('/admin/coupons', requireAuth, require('./routes/coupons'));
+app.use('/admin/merchants', requireAuth, require('./routes/merchants'));
+app.use('/admin/inventory', requireAuth, require('./routes/inventory'));
+
+app.use('/api/cities', require('./routes/api/cities'));
+app.use('/api/cms', require('./routes/api/cms'));
 
 app.get('/admin', (req, res) => {
   if (req.session && req.session.adminId) return res.redirect('/admin/dashboard');

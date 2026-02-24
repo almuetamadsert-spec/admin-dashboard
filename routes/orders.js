@@ -31,7 +31,8 @@ router.get('/view/:id', (req, res) => {
   if (!order) return res.redirect('/admin/orders');
   const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(req.params.id);
   const customer = order.customer_id ? db.prepare('SELECT * FROM customers WHERE id = ?').get(order.customer_id) : null;
-  res.render('orders/view', { order, items, customer, adminUsername: req.session.adminUsername });
+  const merchants = db.prepare('SELECT m.*, c.name as city_name FROM merchants m LEFT JOIN cities c ON m.city_id = c.id WHERE m.is_active = 1 ORDER BY m.name').all();
+  res.render('orders/view', { order, items, customer, merchants, adminUsername: req.session.adminUsername });
 });
 
 router.post('/', (req, res) => {
@@ -92,6 +93,16 @@ router.post('/status/:id', (req, res) => {
     db.prepare('UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(status, req.params.id);
   }
   res.redirect('/admin/orders/view/' + req.params.id);
+});
+
+router.post('/transfer/:id', (req, res) => {
+  const db = req.db;
+  const merchantId = req.body.merchant_id || null;
+  const orderId = req.params.id;
+  db.prepare('UPDATE orders SET merchant_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(merchantId ? parseInt(merchantId, 10) : null, orderId);
+  const { logActivity } = require('../lib/settings');
+  logActivity(db, req.session.adminId, req.session.adminUsername, 'تحويل الطلب', 'طلب #' + orderId + ' → تاجر ' + merchantId);
+  res.redirect('/admin/orders/view/' + orderId);
 });
 
 module.exports = router;

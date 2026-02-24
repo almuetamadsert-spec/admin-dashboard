@@ -64,6 +64,8 @@ async function initDb() {
       image_paths TEXT,
       stock INTEGER DEFAULT 0,
       is_active INTEGER DEFAULT 1,
+      low_stock_alert INTEGER DEFAULT 0,
+      hide_when_out_of_stock INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (category_id) REFERENCES categories(id)
@@ -87,6 +89,8 @@ async function initDb() {
       status TEXT DEFAULT 'pending',
       total_amount REAL DEFAULT 0,
       notes TEXT,
+      city_id INTEGER,
+      merchant_id INTEGER,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (customer_id) REFERENCES customers(id)
@@ -106,6 +110,76 @@ async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
     CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
   `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS settings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      setting_key TEXT UNIQUE NOT NULL,
+      setting_value TEXT,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS cities (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      delivery_fee REAL NOT NULL DEFAULT 0,
+      is_active INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS activity_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      admin_id INTEGER,
+      admin_name TEXT,
+      action TEXT NOT NULL,
+      details TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (admin_id) REFERENCES admins(id)
+    );
+    CREATE TABLE IF NOT EXISTS cms_pages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      slug TEXT UNIQUE NOT NULL,
+      title_ar TEXT,
+      title_en TEXT,
+      content_ar TEXT,
+      content_en TEXT,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS coupons (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT UNIQUE NOT NULL,
+      discount_type TEXT NOT NULL DEFAULT 'percent',
+      discount_value REAL NOT NULL DEFAULT 0,
+      min_order REAL DEFAULT 0,
+      max_uses INTEGER DEFAULT 0,
+      used_count INTEGER DEFAULT 0,
+      expires_at DATETIME,
+      is_active INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS merchants (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      city_id INTEGER,
+      phone TEXT,
+      email TEXT,
+      is_active INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (city_id) REFERENCES cities(id)
+    );
+  `);
+
+  try {
+    const info = db.exec("PRAGMA table_info(orders)");
+    const cols = info[0] && info[0].values ? info[0].values.map(r => r[1]) : [];
+    if (!cols.includes('city_id')) db.run("ALTER TABLE orders ADD COLUMN city_id INTEGER");
+    if (!cols.includes('merchant_id')) db.run("ALTER TABLE orders ADD COLUMN merchant_id INTEGER");
+  } catch (e) { /* ignore */ }
+
+  try {
+    const pinfo = db.exec("PRAGMA table_info(products)");
+    const pcols = pinfo[0] && pinfo[0].values ? pinfo[0].values.map(r => r[1]) : [];
+    if (!pcols.includes('hide_when_out_of_stock')) db.run("ALTER TABLE products ADD COLUMN hide_when_out_of_stock INTEGER DEFAULT 0");
+    if (!pcols.includes('low_stock_alert')) db.run("ALTER TABLE products ADD COLUMN low_stock_alert INTEGER DEFAULT 0");
+  } catch (e) { /* ignore */ }
   save();
 
   const res = db.exec("SELECT id FROM admins LIMIT 1");

@@ -1,0 +1,14 @@
+<%- include('../partials/head', { title: 'المحتوى (من نحن، الخصوصية، الشروط)' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">إدارة المحتوى</h4>
+<div class="list-group">
+  <% pages.forEach(function(p) { %>
+  <a href="/admin/cms/edit/<%= p.slug %>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+    <span><%= p.title_ar %> / <%= p.title_en %></span>
+    <span class="badge bg-secondary"><%= p.updated_at ? new Date(p.updated_at).toLocaleDateString('ar-LY') : 'لم يُحدّث' %></span>
+  </a>
+  <% }); %>
+</div>
+
+<%- include('../partials/scripts') %>

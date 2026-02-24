@@ -1,0 +1,55 @@
+<%- include('../partials/head', { title: 'الإعدادات' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">الإعدادات</h4>
+<form method="post" action="/admin/settings" class="card p-4">
+  <h6 class="border-bottom pb-2 mb-3">مفتاح API للتطبيقات (Flutter / iOS / Android)</h6>
+  <div class="mb-3">
+    <label class="form-label">API Key</label>
+    <input type="text" name="api_key" class="form-control" value="<%= settings.api_key %>" placeholder="مفتاح ربط اللوحة بالتطبيقات">
+  </div>
+
+  <h6 class="border-bottom pb-2 mb-3 mt-4">OneSignal — الإشعارات</h6>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label">OneSignal App ID</label>
+      <input type="text" name="onesignal_app_id" class="form-control" value="<%= settings.onesignal_app_id %>">
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">REST API Key</label>
+      <input type="text" name="onesignal_rest_api_key" class="form-control" value="<%= settings.onesignal_rest_api_key %>">
+    </div>
+  </div>
+
+  <h6 class="border-bottom pb-2 mb-3 mt-4">الدخول الاجتماعي</h6>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Google Client ID</label>
+      <input type="text" name="google_client_id" class="form-control" value="<%= settings.google_client_id %>">
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Google Client Secret</label>
+      <input type="password" name="google_client_secret" class="form-control" value="<%= settings.google_client_secret %>" placeholder="اتركه فارغاً لعدم التغيير">
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Apple Service ID</label>
+      <input type="text" name="apple_service_id" class="form-control" value="<%= settings.apple_service_id %>">
+    </div>
+  </div>
+
+  <h6 class="border-bottom pb-2 mb-3 mt-4">العملة وسعر الصرف</h6>
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label class="form-label">العملة الافتراضية</label>
+      <input type="text" name="default_currency" class="form-control" value="<%= settings.default_currency || 'LYD' %>" placeholder="مثل LYD أو USD">
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">سعر الصرف (مثلاً 1 USD = ? د.ل)</label>
+      <input type="number" step="0.01" name="exchange_rate" class="form-control" value="<%= settings.exchange_rate %>" placeholder="مثال: 4.85">
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
+</form>
+
+<%- include('../partials/scripts') %>

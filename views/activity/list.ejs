@@ -1,0 +1,26 @@
+<%- include('../partials/head', { title: 'سجل العمليات' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">سجل العمليات</h4>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover table-sm mb-0">
+      <thead>
+        <tr><th>التاريخ</th><th>المسؤول</th><th>الإجراء</th><th>التفاصيل</th></tr>
+      </thead>
+      <tbody>
+        <% list.forEach(function(r) { %>
+        <tr>
+          <td><%= new Date(r.created_at).toLocaleString('ar-LY') %></td>
+          <td><%= r.admin_name || '—' %></td>
+          <td><%= r.action %></td>
+          <td><%= r.details || '—' %></td>
+        </tr>
+        <% }); %>
+        <% if (!list.length) { %><tr><td colspan="4" class="text-center text-muted">لا توجد سجلات</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/scripts') %>

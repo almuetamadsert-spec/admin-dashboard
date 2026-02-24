@@ -1,0 +1,22 @@
+<%- include('../partials/head', { title: page.title_ar }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4"><%= page.title_ar %></h4>
+<form method="post" action="/admin/cms/save/<%= page.slug %>" class="card p-4">
+  <div class="row mb-3">
+    <div class="col-md-6"><label class="form-label">العنوان (عربي)</label><input type="text" name="title_ar" class="form-control" value="<%= page.title_ar %>"></div>
+    <div class="col-md-6"><label class="form-label">العنوان (إنجليزي)</label><input type="text" name="title_en" class="form-control" value="<%= page.title_en %>"></div>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">المحتوى (عربي)</label>
+    <textarea name="content_ar" class="form-control" rows="8"><%= page.content_ar %></textarea>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">المحتوى (إنجليزي)</label>
+    <textarea name="content_en" class="form-control" rows="8"><%= page.content_en %></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary">حفظ</button>
+  <a href="/admin/cms" class="btn btn-outline-secondary">إلغاء</a>
+</form>
+
+<%- include('../partials/scripts') %>

@@ -1,0 +1,49 @@
+<%- include('../partials/head', { title: 'المخزون والتنبيهات' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">المخزون والتنبيهات</h4>
+
+<div class="card mb-3">
+  <div class="card-header bg-warning text-dark">منتجات قاربت على النفاد</div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>المنتج</th><th>التصنيف</th><th>الكمية</th><th>حد التنبيه</th><th></th></tr></thead>
+      <tbody>
+        <% lowStock.forEach(function(p) { %>
+        <tr>
+          <td><%= p.name_ar || p.name_en %></td>
+          <td><%= p.category_name || '—' %></td>
+          <td><%= p.stock %></td>
+          <td><%= p.low_stock_alert %></td>
+          <td><a href="/admin/products/edit/<%= p.id %>" class="btn btn-sm btn-outline-primary">تعديل</a></td>
+        </tr>
+        <% }); %>
+        <% if (!lowStock.length) { %><tr><td colspan="5" class="text-center text-muted">لا توجد منتجات تحت حد التنبيه</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header bg-danger text-white">منتجات نفدت (الكمية = 0)</div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>المنتج</th><th>التصنيف</th><th>إخفاء عند النفاد</th><th></th></tr></thead>
+      <tbody>
+        <% outOfStock.forEach(function(p) { %>
+        <tr>
+          <td><%= p.name_ar || p.name_en %></td>
+          <td><%= p.category_name || '—' %></td>
+          <td><%= p.hide_when_out_of_stock ? 'نعم' : 'لا' %></td>
+          <td><a href="/admin/products/edit/<%= p.id %>" class="btn btn-sm btn-outline-primary">تعديل</a></td>
+        </tr>
+        <% }); %>
+        <% if (!outOfStock.length) { %><tr><td colspan="4" class="text-center text-muted">لا توجد منتجات نفدت</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<p class="text-muted small mt-3">لتحديد حد التنبيه: عدّل المنتج وأضف قيمة في "حد التنبيه عند النفاد". لإخفاء المنتج عند وصول الكمية لـ 0: فعّل "إخفاء عند نفاد الكمية".</p>
+
+<%- include('../partials/scripts') %>

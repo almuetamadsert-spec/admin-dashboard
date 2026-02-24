@@ -1,0 +1,34 @@
+<%- include('../partials/head', { title: 'الكوبونات' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">الكوبونات والخصومات</h4>
+<div class="mb-3"><a href="/admin/coupons/new" class="btn btn-primary">كوبون جديد</a></div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>الكود</th><th>نوع الخصم</th><th>القيمة</th><th>الحد الأدنى</th><th>المستخدم</th><th>ينتهي</th><th>الحالة</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% coupons.forEach(function(c) { %>
+        <tr>
+          <td><strong><%= c.code %></strong></td>
+          <td><%= c.discount_type === 'percent' ? 'نسبة مئوية' : 'مبلغ ثابت' %></td>
+          <td><%= c.discount_type === 'percent' ? c.discount_value + '%' : c.discount_value + ' د.ل' %></td>
+          <td><%= Number(c.min_order) > 0 ? c.min_order + ' د.ل' : '—' %></td>
+          <td><%= c.used_count %> / <%= c.max_uses || '∞' %></td>
+          <td><%= c.expires_at ? new Date(c.expires_at).toLocaleDateString('ar-LY') : '—' %></td>
+          <td><%= c.is_active ? 'نشط' : 'معطل' %></td>
+          <td>
+            <a href="/admin/coupons/edit/<%= c.id %>" class="btn btn-sm btn-outline-primary">تعديل</a>
+            <form action="/admin/coupons/delete/<%= c.id %>" method="post" class="d-inline" onsubmit="return confirm('حذف الكوبون؟');"><button type="submit" class="btn btn-sm btn-outline-danger">حذف</button></form>
+          </td>
+        </tr>
+        <% }); %>
+        <% if (!coupons.length) { %><tr><td colspan="8" class="text-center text-muted">لا توجد كوبونات</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/scripts') %>

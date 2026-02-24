@@ -4,7 +4,9 @@
 
 ## التشغيل
 
-إذا سبق أن نفّذت `npm install` وفشل (بسبب better-sqlite3)، احذف المجلد `node_modules` ثم ثبّت من جديد:
+### على جهازك (محلي)
+
+إذا سبق أن نفّذت `npm install` وفشل، احذف `node_modules` ثم ثبّت من جديد:
 
 ```bash
 cd c:\Users\Prof\Desktop\nodjs
@@ -20,12 +22,17 @@ npm install
 npm start
 ```
 
-ثم افتح: **http://localhost:3000/admin/login**
+**لوحة التحكم (محلي فقط):** http://localhost:3000/admin/login
 
 - **اسم المستخدم:** `admin`
 - **كلمة المرور:** `admin123`
 
-غيّر كلمة المرور بعد أول دخول (من قاعدة البيانات أو بإضافة صفحة تغيير كلمة المرور).
+غيّر كلمة المرور بعد أول دخول.
+
+### بعد النشر على السيرفر
+
+بعد ربط المشروع بالبيئة (مثلاً LibyanSpider)، استخدم رابط بيئتك، مثل:
+**https://env-6069530.tip2.libyanspider.cloud/admin/login**
 
 ## المميزات
 

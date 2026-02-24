@@ -1,0 +1,47 @@
+<%- include('../partials/head', { title: coupon ? 'تعديل كوبون' : 'كوبون جديد' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4"><%= coupon ? 'تعديل الكوبون' : 'كوبون جديد' %></h4>
+<form method="post" action="<%= coupon ? '/admin/coupons/update/' + coupon.id : '/admin/coupons' %>" class="card p-4">
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label class="form-label">كود الكوبون</label>
+      <input type="text" name="code" class="form-control" value="<%= coupon ? coupon.code : '' %>" placeholder="مثال: LIBYA2025" required <%= coupon ? 'readonly' : '' %>>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">نوع الخصم</label>
+      <select name="discount_type" class="form-select">
+        <option value="percent" <%= coupon && coupon.discount_type === 'percent' ? 'selected' : '' %>>نسبة مئوية %</option>
+        <option value="fixed" <%= coupon && coupon.discount_type === 'fixed' ? 'selected' : '' %>>مبلغ ثابت</option>
+      </select>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">قيمة الخصم</label>
+      <input type="number" step="0.01" name="discount_value" class="form-control" value="<%= coupon ? coupon.discount_value : '' %>" required>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label class="form-label">الحد الأدنى للطلب (د.ل)</label>
+      <input type="number" step="0.01" name="min_order" class="form-control" value="<%= coupon ? coupon.min_order : 0 %>">
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">الحد الأقصى لعدد الاستخدامات (0 = غير محدود)</label>
+      <input type="number" name="max_uses" class="form-control" value="<%= coupon ? coupon.max_uses : 0 %>" min="0">
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">تاريخ الانتهاء</label>
+      <input type="datetime-local" name="expires_at" class="form-control" value="<%= coupon && coupon.expires_at ? new Date(coupon.expires_at).toISOString().slice(0,16) : '' %>">
+    </div>
+  </div>
+  <div class="mb-3">
+    <select name="is_active" class="form-select w-auto">
+      <option value="1" <%= coupon && coupon.is_active !== 0 ? 'selected' : '' %>>نشط</option>
+      <option value="0" <%= coupon && coupon.is_active === 0 ? 'selected' : '' %>>معطل</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary">حفظ</button>
+  <a href="/admin/coupons" class="btn btn-outline-secondary">إلغاء</a>
+</form>
+
+<%- include('../partials/scripts') %>

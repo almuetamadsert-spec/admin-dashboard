@@ -41,10 +41,12 @@ router.post('/', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'images'
   const price = parseFloat(body.price) || 0;
   const discount = parseFloat(body.discount_percent) || 0;
   const stock = parseInt(body.stock, 10) || 0;
+  const low_stock_alert = parseInt(body.low_stock_alert, 10) || 0;
+  const hide_when_out = body.hide_when_out_of_stock === '1' ? 1 : 0;
 
   db.prepare(`
-    INSERT INTO products (name_ar, name_en, short_description, long_description, price, discount_percent, company, category_id, image_path, image_paths, stock, is_active)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO products (name_ar, name_en, short_description, long_description, price, discount_percent, company, category_id, image_path, image_paths, stock, is_active, low_stock_alert, hide_when_out_of_stock)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     body.name_ar || '',
     body.name_en || '',
@@ -57,7 +59,9 @@ router.post('/', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'images'
     image_path,
     image_paths,
     stock,
-    body.is_active !== '0' ? 1 : 0
+    body.is_active !== '0' ? 1 : 0,
+    low_stock_alert,
+    hide_when_out
   );
   res.redirect('/admin/products');
 });
@@ -79,12 +83,15 @@ router.post('/edit/:id', upload.fields([{ name: 'image', maxCount: 1 }, { name: 
   const price = parseFloat(body.price) || 0;
   const discount = parseFloat(body.discount_percent) || 0;
   const stock = parseInt(body.stock, 10) || 0;
+  const low_stock_alert = parseInt(body.low_stock_alert, 10) || 0;
+  const hide_when_out = body.hide_when_out_of_stock === '1' ? 1 : 0;
 
   db.prepare(`
     UPDATE products SET
       name_ar = ?, name_en = ?, short_description = ?, long_description = ?,
       price = ?, discount_percent = ?, company = ?, category_id = ?,
       image_path = ?, image_paths = ?, stock = ?, is_active = ?,
+      low_stock_alert = ?, hide_when_out_of_stock = ?,
       updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `).run(
@@ -100,6 +107,8 @@ router.post('/edit/:id', upload.fields([{ name: 'image', maxCount: 1 }, { name: 
     image_paths,
     stock,
     body.is_active !== '0' ? 1 : 0,
+    low_stock_alert,
+    hide_when_out,
     id
   );
   res.redirect('/admin/products');

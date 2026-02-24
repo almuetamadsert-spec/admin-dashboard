@@ -1,8 +1,8 @@
-<%- include('../partials/head', { title: 'طلب جديد' }) %>
+<%- include('../partials/head', { title: order ? 'تعديل الطلب' : 'طلب جديد' }) %>
 <%- include('../partials/sidebar', { adminUsername }) %>
 
-<h4 class="mb-4">إنشاء طلب جديد</h4>
-<form method="post" action="/admin/orders" class="card p-4">
+<h4 class="mb-4"><%= order ? 'تعديل الطلب ' + order.order_number : 'إنشاء طلب جديد' %></h4>
+<form method="post" action="<%= order ? '/admin/orders/edit/' + order.id : '/admin/orders' %>" class="card p-4">
   <h6 class="mb-3">العميل</h6>
   <div class="row mb-3">
     <div class="col-md-6">
@@ -10,7 +10,7 @@
       <select name="customer_id" id="customerSelect" class="form-select">
         <option value="">— عميل جديد —</option>
         <% customers.forEach(function(c) { %>
-        <option value="<%= c.id %>" data-name="<%= c.name %>" data-phone="<%= c.phone || '' %>" data-email="<%= c.email || '' %>" data-address="<%= c.address || '' %>"><%= c.name %> - <%= c.phone || c.email %></option>
+        <option value="<%= c.id %>" data-name="<%= c.name %>" data-phone="<%= c.phone || '' %>" data-email="<%= c.email || '' %>" data-address="<%= c.address || '' %>" <%= order && order.customer_id == c.id ? 'selected' : '' %>><%= c.name %> - <%= c.phone || c.email %></option>
         <% }); %>
       </select>
     </div>
@@ -18,24 +18,57 @@
   <div class="row">
     <div class="col-md-6 mb-3">
       <label class="form-label">اسم العميل</label>
-      <input type="text" name="customer_name" id="customer_name" class="form-control">
+      <input type="text" name="customer_name" id="customer_name" class="form-control" value="<%= order ? (order.customer_name || '') : '' %>">
     </div>
     <div class="col-md-3 mb-3">
       <label class="form-label">الهاتف</label>
-      <input type="text" name="customer_phone" id="customer_phone" class="form-control">
+      <input type="text" name="customer_phone" id="customer_phone" class="form-control" value="<%= order ? (order.customer_phone || '') : '' %>">
     </div>
     <div class="col-md-3 mb-3">
       <label class="form-label">البريد</label>
-      <input type="email" name="customer_email" id="customer_email" class="form-control">
+      <input type="email" name="customer_email" id="customer_email" class="form-control" value="<%= order ? (order.customer_email || '') : '' %>">
     </div>
   </div>
   <div class="mb-3">
     <label class="form-label">العنوان</label>
-    <input type="text" name="customer_address" id="customer_address" class="form-control">
+    <input type="text" name="customer_address" id="customer_address" class="form-control" value="<%= order ? (order.customer_address || '') : '' %>">
   </div>
+  <% if (typeof cities !== 'undefined' && cities.length) { %>
+  <div class="mb-3">
+    <label class="form-label">مدينة التوصيل (لإرسال الإشعار للتجار في نفس المدينة)</label>
+    <select name="city_id" class="form-select">
+      <option value="">— اختر المدينة —</option>
+      <% cities.forEach(function(c) { %>
+      <option value="<%= c.id %>" <%= order && order.city_id == c.id ? 'selected' : '' %>><%= c.name %></option>
+      <% }); %>
+    </select>
+  </div>
+  <% } %>
   <hr>
   <h6 class="mb-3">المنتجات</h6>
   <div id="orderItems">
+    <% if (items && items.length) { %>
+      <% items.forEach(function(it) { %>
+    <div class="row align-items-end mb-2 item-row">
+      <div class="col-md-6">
+        <label class="form-label">المنتج</label>
+        <select name="product_id" class="form-select product-select">
+          <option value="">— اختر —</option>
+          <% products.forEach(function(p) { %>
+          <option value="<%= p.id %>" data-price="<%= (p.price * (1 - (p.discount_percent||0)/100)).toFixed(2) %>" <%= it.product_id == p.id ? 'selected' : '' %>><%= p.name_ar || p.name_en %> - <%= p.price %> د.ل</option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">الكمية</label>
+        <input type="number" name="quantity" class="form-control quantity" value="<%= it.quantity %>" min="1">
+      </div>
+      <div class="col-md-2">
+        <button type="button" class="btn btn-outline-danger btn-remove">حذف</button>
+      </div>
+    </div>
+      <% }); %>
+    <% } else { %>
     <div class="row align-items-end mb-2 item-row">
       <div class="col-md-6">
         <label class="form-label">المنتج</label>
@@ -54,26 +87,27 @@
         <button type="button" class="btn btn-outline-danger btn-remove">حذف</button>
       </div>
     </div>
+    <% } %>
   </div>
   <button type="button" id="addItem" class="btn btn-outline-primary btn-sm mb-3"><i class="bi bi-plus"></i> إضافة منتج</button>
   <div class="row">
     <div class="col-md-6 mb-3">
       <label class="form-label">الحالة</label>
       <select name="status" class="form-select">
-        <option value="pending">قيد الانتظار</option>
-        <option value="confirmed">مؤكد</option>
-        <option value="shipped">تم الشحن</option>
-        <option value="delivered">تم التوصيل</option>
-        <option value="cancelled">ملغي</option>
+        <option value="pending" <%= order && order.status === 'pending' ? 'selected' : '' %>>قيد الانتظار</option>
+        <option value="confirmed" <%= order && order.status === 'confirmed' ? 'selected' : '' %>>مؤكد</option>
+        <option value="shipped" <%= order && order.status === 'shipped' ? 'selected' : '' %>>تم الشحن</option>
+        <option value="delivered" <%= order && order.status === 'delivered' ? 'selected' : '' %>>تم التوصيل</option>
+        <option value="cancelled" <%= order && order.status === 'cancelled' ? 'selected' : '' %>>ملغي</option>
       </select>
     </div>
     <div class="col-md-6 mb-3">
       <label class="form-label">ملاحظات</label>
-      <input type="text" name="notes" class="form-control">
+      <input type="text" name="notes" class="form-control" value="<%= order ? (order.notes || '') : '' %>">
     </div>
   </div>
   <div class="d-flex gap-2">
-    <button type="submit" class="btn btn-primary">إنشاء الطلب</button>
+    <button type="submit" class="btn btn-primary"><%= order ? 'حفظ التعديلات' : 'إنشاء الطلب' %></button>
     <a href="/admin/orders" class="btn btn-outline-secondary">إلغاء</a>
   </div>
 </form>

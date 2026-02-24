@@ -1,0 +1,74 @@
+<%- include('../partials/head', { title: 'توثيق API' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">توثيق API للتطبيقات</h4>
+<p class="text-muted">استخدم هذه المسارات من تطبيق Flutter / iOS / Android مع المصادقة بالمفتاحين.</p>
+
+<div class="card mb-4">
+  <div class="card-header">المصادقة (مطلوبة لجميع الطلبات)</div>
+  <div class="card-body">
+    <p>أرسل أحد الخيارين:</p>
+    <ol>
+      <li><strong>هيدرين:</strong><br>
+        <code>X-Consumer-Key: ck_xxxx...</code><br>
+        <code>X-Consumer-Secret: cs_xxxx...</code>
+      </li>
+      <li><strong>أو Basic:</strong><br>
+        <code>Authorization: Basic base64(consumer_key:consumer_secret)</code>
+      </li>
+    </ol>
+    <p class="mb-0 small text-muted">المفاتيح تُنشأ من الإعدادات → مفاتيح API. استخدم مفتاحاً بصلاحية "قراءة وكتابة" لإنشاء الطلبات.</p>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header">قائمة المسارات</div>
+  <div class="table-responsive">
+    <table class="table table-sm mb-0">
+      <thead><tr><th>الطريقة</th><th>المسار</th><th>الوصف</th><th>الصلاحية</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET</code></td><td><code>/api/status</code></td><td>حالة السيرفر وقاعدة البيانات</td><td>بدون مفتاح</td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/cities</code></td><td>قائمة مدن التوصيل النشطة</td><td>قراءة</td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/cms/:slug</code></td><td>صفحة محتوى (about, privacy, terms)</td><td>قراءة</td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/orders</code></td><td>إنشاء طلب جديد (من التطبيق)</td><td>قراءة وكتابة</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header">أمثلة طلبات</div>
+  <div class="card-body">
+    <h6>1. جلب المدن</h6>
+    <pre class="bg-dark text-light p-3 rounded small"><code>GET <%= baseUrl %>/api/cities
+X-Consumer-Key: ck_xxxx
+X-Consumer-Secret: cs_xxxx</code></pre>
+    <p class="small text-muted">الاستجابة: <code>{ "ok": true, "cities": [ { "id": 1, "name": "طرابلس", "delivery_fee": 5 } ] }</code></p>
+
+    <h6 class="mt-4">2. إنشاء طلب</h6>
+    <pre class="bg-dark text-light p-3 rounded small"><code>POST <%= baseUrl %>/api/orders
+Content-Type: application/json
+X-Consumer-Key: ck_xxxx
+X-Consumer-Secret: cs_xxxx
+
+{
+  "city_id": 1,
+  "customer_name": "أحمد",
+  "customer_phone": "0912345678",
+  "customer_address": "طرابلس",
+  "items": [
+    { "product_id": 5, "quantity": 2 }
+  ]
+}</code></pre>
+    <p class="small text-muted">الاستجابة (201): <code>{ "ok": true, "order_id": 12, "order_number": "1005#", "total_amount": 150.5 }</code></p>
+
+    <h6 class="mt-4">3. جلب صفحة محتوى</h6>
+    <pre class="bg-dark text-light p-3 rounded small"><code>GET <%= baseUrl %>/api/cms/about
+X-Consumer-Key: ck_xxxx
+X-Consumer-Secret: cs_xxxx</code></pre>
+  </div>
+</div>
+
+<p class="text-muted small">لإنشاء مفاتيح API أو تعديلها: <a href="/admin/settings#api-keys">الإعدادات → مفاتيح API</a>.</p>
+
+<%- include('../partials/scripts') %>

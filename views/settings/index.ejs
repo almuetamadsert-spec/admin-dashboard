@@ -2,18 +2,95 @@
 <%- include('../partials/sidebar', { adminUsername }) %>
 
 <h4 class="mb-4">الإعدادات</h4>
-<form method="post" action="/admin/settings" class="card p-4">
-  <h6 class="border-bottom pb-2 mb-3">مفتاح API للتطبيقات (Flutter / iOS / Android)</h6>
-  <p class="text-muted small">هذا المفتاح يُولَّد من اللوحة. انسخه وضعه في تطبيق Flutter أو iOS أو Android (مثلاً في ملف الإعدادات أو متغيرات البيئة) لربط التطبيق بالسيرفر.</p>
-  <div class="mb-3 d-flex gap-2 align-items-center flex-wrap">
-    <input type="text" name="api_key" id="apiKeyInput" class="form-control font-monospace" value="<%= settings.api_key %>" style="max-width: 400px;" readonly>
-    <button type="button" class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('apiKeyInput').value); this.textContent='تم النسخ!'; setTimeout(()=>this.textContent='نسخ', 1500)">نسخ</button>
-    <form method="post" action="/admin/settings/generate-api-key" class="d-inline" onsubmit="return confirm('توليد مفتاح جديد سيبطل المفتاح الحالي. التطبيقات التي تستخدمه يجب تحديثها. متابعة؟');">
-      <button type="submit" class="btn btn-outline-warning">توليد مفتاح جديد</button>
-    </form>
-  </div>
 
-  <h6 class="border-bottom pb-2 mb-3 mt-4">OneSignal — الإشعارات</h6>
+<div class="card p-4 mb-4" id="api-keys">
+  <h6 class="border-bottom pb-2 mb-3">مفاتيح API للتطبيقات (Consumer Key + Consumer Secret)</h6>
+  <p class="text-muted small">أنشئ مفاتيح بأسماء (مثل: تطبيق أندرويد، تطبيق آيفون). كل مفتاح له Consumer Key و Consumer Secret وصلاحية: قراءة فقط أو قراءة وكتابة. استخدم الهيدرين <code>X-Consumer-Key</code> و <code>X-Consumer-Secret</code> في طلبات API.</p>
+
+  <% if (typeof newApiKey !== 'undefined' && newApiKey) { %>
+  <div class="alert alert-success mb-3">
+    <strong>تم إنشاء المفتاح.</strong> انسخ Consumer Secret الآن — لن يُعرض مرة أخرى.<br>
+    <span class="font-monospace">Consumer Key: <strong><%= newApiKey.consumer_key %></strong></span>
+    <button type="button" class="btn btn-sm btn-outline-dark ms-2" onclick="navigator.clipboard.writeText('<%= newApiKey.consumer_key %>'); this.textContent='تم النسخ'">نسخ</button><br>
+    <span class="font-monospace">Consumer Secret: <strong><%= newApiKey.consumer_secret %></strong></span>
+    <button type="button" class="btn btn-sm btn-outline-dark ms-2" onclick="navigator.clipboard.writeText('<%= newApiKey.consumer_secret %>'); this.textContent='تم النسخ'">نسخ</button>
+  </div>
+  <% } %>
+  <% if (typeof regeneratedSecret !== 'undefined' && regeneratedSecret) { %>
+  <div class="alert alert-info mb-3">
+    <strong>تم تجديد Consumer Secret.</strong> انسخه الآن — لن يُعرض مرة أخرى.<br>
+    <span class="font-monospace">Consumer Secret: <strong><%= regeneratedSecret %></strong></span>
+    <button type="button" class="btn btn-sm btn-outline-dark ms-2" onclick="navigator.clipboard.writeText('<%= regeneratedSecret %>'); this.textContent='تم النسخ'">نسخ</button>
+  </div>
+  <% } %>
+
+  <form method="post" action="/admin/settings/api-keys" class="row g-2 align-items-end mb-4">
+    <div class="col-md-4">
+      <label class="form-label">اسم المفتاح</label>
+      <input type="text" name="name" class="form-control" placeholder="مثل: تطبيق أندرويد" required>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">الصلاحية</label>
+      <select name="permission" class="form-select">
+        <option value="read_only">قراءة فقط</option>
+        <option value="read_write">قراءة وكتابة</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary">إنشاء مفتاح جديد</button>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-sm table-bordered">
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>Consumer Key</th>
+          <th>Consumer Secret</th>
+          <th>الصلاحية</th>
+          <th>الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!apiKeys || apiKeys.length === 0) { %>
+        <tr><td colspan="5" class="text-muted">لا توجد مفاتيح. أنشئ مفتاحاً من النموذج أعلاه.</td></tr>
+        <% } else { %>
+        <% apiKeys.forEach(function(k) {
+          const showSecret = (typeof newApiKey !== 'undefined' && newApiKey && newApiKey.consumer_key === k.consumer_key) || (typeof regeneratedKeyId !== 'undefined' && regeneratedKeyId == k.id);
+          const secretDisplay = showSecret ? k.consumer_secret : ('••••••••' + (k.consumer_secret ? k.consumer_secret.slice(-4) : ''));
+        %>
+        <tr>
+          <td><%= k.name %></td>
+          <td><code class="small"><%= k.consumer_key %></code></td>
+          <td><code class="small"><%= secretDisplay %></code></td>
+          <td><%= k.permission === 'read_write' ? 'قراءة وكتابة' : 'قراءة فقط' %></td>
+          <td class="text-nowrap">
+            <form method="post" action="/admin/settings/api-keys/edit/<%= k.id %>" class="d-inline-block me-1">
+              <input type="text" name="name" class="form-control form-control-sm d-inline-block" style="width:100px" value="<%= k.name %>" placeholder="الاسم" title="الاسم">
+              <select name="permission" class="form-select form-select-sm d-inline-block" style="width:110px">
+                <option value="read_only" <%= k.permission === 'read_only' ? 'selected' : '' %>>قراءة فقط</option>
+                <option value="read_write" <%= k.permission === 'read_write' ? 'selected' : '' %>>قراءة وكتابة</option>
+              </select>
+              <button type="submit" class="btn btn-sm btn-outline-secondary">تعديل</button>
+            </form>
+            <form method="post" action="/admin/settings/api-keys/regenerate-secret/<%= k.id %>" class="d-inline-block me-1" onsubmit="return confirm('تجديد الـ Secret سيبطل المفتاح الحالي في التطبيقات. متابعة؟');">
+              <button type="submit" class="btn btn-sm btn-outline-warning">تجديد Secret</button>
+            </form>
+            <form method="post" action="/admin/settings/api-keys/delete/<%= k.id %>" class="d-inline-block" onsubmit="return confirm('حذف هذا المفتاح؟');">
+              <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<form method="post" action="/admin/settings" class="card p-4">
+  <h6 class="border-bottom pb-2 mb-3">OneSignal — الإشعارات</h6>
   <div class="row">
     <div class="col-md-6 mb-3">
       <label class="form-label">OneSignal App ID</label>

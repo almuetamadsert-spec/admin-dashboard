@@ -1,9 +1,9 @@
-<%- include('../partials/head', { title: 'المبيعات' }) %>
+<%- include('../partials/head', { title: 'المبيعات والتقارير' }) %>
 <%- include('../partials/sidebar', { adminUsername }) %>
 
 <h4 class="mb-4">تقارير المبيعات</h4>
 <div class="row g-3 mb-4">
-  <div class="col-md-4">
+  <div class="col-md-2">
     <div class="card stat-card h-100">
       <div class="card-body">
         <h6 class="text-muted">مبيعات اليوم</h6>
@@ -11,7 +11,16 @@
       </div>
     </div>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-2">
+    <div class="card stat-card h-100">
+      <div class="card-body">
+        <h6 class="text-muted">مبيعات الأسبوع</h6>
+        <h3><%= Number(weekTotal).toFixed(2) %> د.ل</h3>
+        <small><%= weekCount %> طلب</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
     <div class="card stat-card h-100">
       <div class="card-body">
         <h6 class="text-muted">مبيعات الشهر</h6>
@@ -19,7 +28,7 @@
       </div>
     </div>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-2">
     <div class="card stat-card h-100">
       <div class="card-body">
         <h6 class="text-muted">مبيعات السنة</h6>
@@ -28,6 +37,42 @@
     </div>
   </div>
 </div>
+
+<div class="row mb-3">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">عدد الطلبات حسب الحالة</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead><tr><th>الحالة</th><th>العدد</th></tr></thead>
+          <tbody>
+            <% (ordersByStatus || []).forEach(function(r) { %>
+            <tr><td><%= STATUS_LABELS[r.status] || r.status %></td><td><%= r.count %></td></tr>
+            <% }); %>
+            <% if (!ordersByStatus || !ordersByStatus.length) { %><tr><td colspan="2" class="text-center text-muted">لا توجد بيانات</td></tr><% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">أكثر المنتجات مبيعاً (15 الأوائل)</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead><tr><th>المنتج</th><th>الكمية</th><th>المبيعات</th></tr></thead>
+          <tbody>
+            <% (topProducts || []).forEach(function(p) { %>
+            <tr><td><%= p.product_name %></td><td><%= p.total_qty %></td><td><%= Number(p.total_sales).toFixed(2) %> د.ل</td></tr>
+            <% }); %>
+            <% if (!topProducts || !topProducts.length) { %><tr><td colspan="3" class="text-center text-muted">لا توجد بيانات</td></tr><% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="row">
   <div class="col-md-6">
     <div class="card">

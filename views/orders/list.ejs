@@ -2,10 +2,46 @@
 <%- include('../partials/sidebar', { adminUsername }) %>
 
 <h4 class="mb-4">الطلبات</h4>
-<div class="mb-3">
+<div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
   <a href="/admin/orders/new" class="btn btn-primary"><i class="bi bi-plus"></i> إنشاء طلب</a>
+  <a href="/admin/orders/export<%= queryString ? '?' + queryString : '' %>" class="btn btn-outline-success"><i class="bi bi-download"></i> تصدير CSV</a>
 </div>
+
+<form method="get" action="/admin/orders" class="card p-3 mb-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-2">
+      <label class="form-label small">بحث (رقم الطلب / الهاتف / العميل)</label>
+      <input type="text" name="q" class="form-control form-control-sm" value="<%= filters && filters.q ? filters.q : '' %>" placeholder="بحث...">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small">الحالة</label>
+      <select name="status" class="form-select form-select-sm">
+        <option value="">— الكل —</option>
+        <option value="pending" <%= filters && filters.status === 'pending' ? 'selected' : '' %>>قيد الانتظار</option>
+        <option value="confirmed" <%= filters && filters.status === 'confirmed' ? 'selected' : '' %>>مؤكد</option>
+        <option value="shipped" <%= filters && filters.status === 'shipped' ? 'selected' : '' %>>تم الشحن</option>
+        <option value="delivered" <%= filters && filters.status === 'delivered' ? 'selected' : '' %>>تم التوصيل</option>
+        <option value="cancelled" <%= filters && filters.status === 'cancelled' ? 'selected' : '' %>>ملغي</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small">من تاريخ</label>
+      <input type="date" name="date_from" class="form-control form-control-sm" value="<%= filters && filters.date_from ? filters.date_from : '' %>">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small">إلى تاريخ</label>
+      <input type="date" name="date_to" class="form-control form-control-sm" value="<%= filters && filters.date_to ? filters.date_to : '' %>">
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary btn-sm w-100">بحث</button>
+    </div>
+  </div>
+</form>
+
 <div class="card">
+  <div class="card-body py-2 small text-muted">
+    عرض <%= orders.length %> من <%= total %> طلب — الصفحة <%= page %> من <%= totalPages %>
+  </div>
   <div class="table-responsive">
     <table class="table table-hover mb-0">
       <thead>
@@ -23,14 +59,20 @@
         <% orders.forEach(function(o) { %>
         <tr>
           <td><%= o.order_number %></td>
-          <td><%= o.customer_name || '—' %></td>
-          <td><%= o.customer_phone || '—' %></td>
+          <td><%= o.display_name || '—' %></td>
+          <td><%= o.display_phone || '—' %></td>
           <td><%= Number(o.total_amount).toFixed(2) %> د.ل</td>
           <td>
-            <span class="badge bg-<%= o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'danger' : 'warning' %>"><%= o.status %></span>
+            <span class="badge bg-<%= o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'danger' : 'warning' %>"><%= STATUS_LABELS[o.status] || o.status %></span>
           </td>
           <td><%= new Date(o.created_at).toLocaleDateString('ar-LY') %></td>
-          <td><a href="/admin/orders/view/<%= o.id %>" class="btn btn-sm btn-outline-primary">عرض</a></td>
+          <td class="text-nowrap">
+            <a href="/admin/orders/view/<%= o.id %>" class="btn btn-sm btn-outline-primary">عرض</a>
+            <a href="/admin/orders/edit/<%= o.id %>" class="btn btn-sm btn-outline-secondary">تعديل</a>
+            <form method="post" action="/admin/orders/delete/<%= o.id %>" class="d-inline" onsubmit="return confirm('حذف هذا الطلب؟');">
+              <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
+            </form>
+          </td>
         </tr>
         <% }); %>
         <% if (!orders.length) { %>
@@ -39,6 +81,21 @@
       </tbody>
     </table>
   </div>
+  <% if (totalPages > 1) { %>
+  <div class="card-footer py-2">
+    <nav>
+      <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
+        <li class="page-item <%= page <= 1 ? 'disabled' : '' %>">
+          <% if (page <= 1) { %><span class="page-link">السابق</span><% } else { %><a class="page-link" href="?<%= queryString ? queryString + '&' : '' %>page=<%= page - 1 %>">السابق</a><% } %>
+        </li>
+        <li class="page-item disabled"><span class="page-link">ص <%= page %> من <%= totalPages %></span></li>
+        <li class="page-item <%= page >= totalPages ? 'disabled' : '' %>">
+          <% if (page >= totalPages) { %><span class="page-link">التالي</span><% } else { %><a class="page-link" href="?<%= queryString ? queryString + '&' : '' %>page=<%= page + 1 %>">التالي</a><% } %>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  <% } %>
 </div>
 
 <%- include('../partials/scripts') %>

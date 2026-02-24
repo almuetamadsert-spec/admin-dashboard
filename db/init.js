@@ -165,6 +165,15 @@ async function initDb() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (city_id) REFERENCES cities(id)
     );
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      consumer_key TEXT UNIQUE NOT NULL,
+      consumer_secret TEXT NOT NULL,
+      permission TEXT NOT NULL DEFAULT 'read_only',
+      is_active INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   try {
@@ -172,6 +181,12 @@ async function initDb() {
     const cols = info[0] && info[0].values ? info[0].values.map(r => r[1]) : [];
     if (!cols.includes('city_id')) db.run("ALTER TABLE orders ADD COLUMN city_id INTEGER");
     if (!cols.includes('merchant_id')) db.run("ALTER TABLE orders ADD COLUMN merchant_id INTEGER");
+  } catch (e) { /* ignore */ }
+
+  try {
+    const minfo = db.exec("PRAGMA table_info(merchants)");
+    const mcols = minfo[0] && minfo[0].values ? minfo[0].values.map(r => r[1]) : [];
+    if (!mcols.includes('onesignal_player_id')) db.run("ALTER TABLE merchants ADD COLUMN onesignal_player_id TEXT");
   } catch (e) { /* ignore */ }
 
   try {

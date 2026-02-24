@@ -16,17 +16,17 @@ router.get('/', (req, res) => {
 
 router.post('/', (req, res) => {
   const db = req.db;
-  const { name, city_id, phone, email, is_active } = req.body || {};
+  const { name, city_id, phone, email, is_active, onesignal_player_id } = req.body || {};
   if (!name) return res.redirect('/admin/merchants');
-  db.prepare('INSERT INTO merchants (name, city_id, phone, email, is_active) VALUES (?, ?, ?, ?, ?)').run(name.trim(), city_id || null, phone || '', email || '', is_active !== '0' ? 1 : 0);
+  db.prepare('INSERT INTO merchants (name, city_id, phone, email, is_active, onesignal_player_id) VALUES (?, ?, ?, ?, ?, ?)').run(name.trim(), city_id || null, phone || '', email || '', is_active !== '0' ? 1 : 0, (onesignal_player_id || '').trim() || null);
   logActivity(db, req.session.adminId, req.session.adminUsername, 'إضافة تاجر', name.trim());
   res.redirect('/admin/merchants');
 });
 
 router.post('/edit/:id', (req, res) => {
   const db = req.db;
-  const { name, city_id, phone, email, is_active } = req.body || {};
-  db.prepare('UPDATE merchants SET name = ?, city_id = ?, phone = ?, email = ?, is_active = ? WHERE id = ?').run(name || '', city_id || null, phone || '', email || '', is_active !== '0' ? 1 : 0, req.params.id);
+  const { name, city_id, phone, email, is_active, onesignal_player_id } = req.body || {};
+  db.prepare('UPDATE merchants SET name = ?, city_id = ?, phone = ?, email = ?, is_active = ?, onesignal_player_id = ? WHERE id = ?').run(name || '', city_id || null, phone || '', email || '', is_active !== '0' ? 1 : 0, (onesignal_player_id || '').trim() || null, req.params.id);
   logActivity(db, req.session.adminId, req.session.adminUsername, 'تعديل تاجر', name);
   res.redirect('/admin/merchants');
 });

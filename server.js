@@ -106,9 +106,12 @@ app.use('/admin/cms', requireAuth, require('./routes/cms'));
 app.use('/admin/coupons', requireAuth, require('./routes/coupons'));
 app.use('/admin/merchants', requireAuth, require('./routes/merchants'));
 app.use('/admin/inventory', requireAuth, require('./routes/inventory'));
+app.use('/admin/api-docs', requireAuth, require('./routes/api-docs'));
 
-app.use('/api/cities', require('./routes/api/cities'));
-app.use('/api/cms', require('./routes/api/cms'));
+app.use('/api/cities', require('./middleware/apiAuth').requireApiKey, require('./routes/api/cities'));
+app.use('/api/cms', require('./middleware/apiAuth').requireApiKey, require('./routes/api/cms'));
+const apiAuth = require('./middleware/apiAuth');
+app.use('/api/orders', apiAuth.requireApiKey, apiAuth.requireWrite, require('./routes/api/orders'));
 
 app.get('/admin', (req, res) => {
   if (req.session && req.session.adminId) return res.redirect('/admin/dashboard');

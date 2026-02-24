@@ -4,9 +4,13 @@
 <h4 class="mb-4">الإعدادات</h4>
 <form method="post" action="/admin/settings" class="card p-4">
   <h6 class="border-bottom pb-2 mb-3">مفتاح API للتطبيقات (Flutter / iOS / Android)</h6>
-  <div class="mb-3">
-    <label class="form-label">API Key</label>
-    <input type="text" name="api_key" class="form-control" value="<%= settings.api_key %>" placeholder="مفتاح ربط اللوحة بالتطبيقات">
+  <p class="text-muted small">هذا المفتاح يُولَّد من اللوحة. انسخه وضعه في تطبيق Flutter أو iOS أو Android (مثلاً في ملف الإعدادات أو متغيرات البيئة) لربط التطبيق بالسيرفر.</p>
+  <div class="mb-3 d-flex gap-2 align-items-center flex-wrap">
+    <input type="text" name="api_key" id="apiKeyInput" class="form-control font-monospace" value="<%= settings.api_key %>" style="max-width: 400px;" readonly>
+    <button type="button" class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('apiKeyInput').value); this.textContent='تم النسخ!'; setTimeout(()=>this.textContent='نسخ', 1500)">نسخ</button>
+    <form method="post" action="/admin/settings/generate-api-key" class="d-inline" onsubmit="return confirm('توليد مفتاح جديد سيبطل المفتاح الحالي. التطبيقات التي تستخدمه يجب تحديثها. متابعة؟');">
+      <button type="submit" class="btn btn-outline-warning">توليد مفتاح جديد</button>
+    </form>
   </div>
 
   <h6 class="border-bottom pb-2 mb-3 mt-4">OneSignal — الإشعارات</h6>

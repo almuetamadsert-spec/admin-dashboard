@@ -181,12 +181,14 @@ async function initDb() {
     const cols = info[0] && info[0].values ? info[0].values.map(r => r[1]) : [];
     if (!cols.includes('city_id')) db.run("ALTER TABLE orders ADD COLUMN city_id INTEGER");
     if (!cols.includes('merchant_id')) db.run("ALTER TABLE orders ADD COLUMN merchant_id INTEGER");
+    if (!cols.includes('customer_phone_alt')) db.run("ALTER TABLE orders ADD COLUMN customer_phone_alt TEXT");
   } catch (e) { /* ignore */ }
 
   try {
     const minfo = db.exec("PRAGMA table_info(merchants)");
     const mcols = minfo[0] && minfo[0].values ? minfo[0].values.map(r => r[1]) : [];
     if (!mcols.includes('onesignal_player_id')) db.run("ALTER TABLE merchants ADD COLUMN onesignal_player_id TEXT");
+    if (!mcols.includes('store_name')) db.run("ALTER TABLE merchants ADD COLUMN store_name TEXT");
   } catch (e) { /* ignore */ }
 
   try {
@@ -210,6 +212,13 @@ async function initDb() {
     console.log('تم إنشاء حساب الأدمن: admin / admin123');
   }
 
+  function rowToLower(obj) {
+    if (obj == null || typeof obj !== 'object') return obj;
+    const out = {};
+    for (const k of Object.keys(obj)) out[k.toLowerCase()] = obj[k];
+    return out;
+  }
+
   const wrapper = {
     exec(sql) {
       db.exec(sql);
@@ -223,13 +232,13 @@ async function initDb() {
           stmt.bind(params);
           const out = stmt.step() ? stmt.getAsObject() : undefined;
           stmt.free();
-          return out;
+          return out ? rowToLower(out) : out;
         },
         all(...params) {
           const stmt = db.prepare(named);
           stmt.bind(params);
           const rows = [];
-          while (stmt.step()) rows.push(stmt.getAsObject());
+          while (stmt.step()) rows.push(rowToLower(stmt.getAsObject()));
           stmt.free();
           return rows;
         },

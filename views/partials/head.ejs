@@ -7,14 +7,132 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    body { min-height: 100vh; background: #f4f6f9; }
-    .sidebar { background: #1e293b; min-height: 100vh; width: 260px; }
-    .sidebar .nav-link { color: #94a3b8; padding: 0.75rem 1rem; }
-    .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background: rgba(255,255,255,0.1); }
-    .sidebar .nav-link i { margin-left: 0.5rem; }
-    .card { border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-    .stat-card { border-right: 4px solid #3b82f6; }
-    .table th { font-weight: 600; color: #475569; }
+    :root {
+      --sidebar-width: 260px;
+      --sidebar-bg: #1e293b;
+      --sidebar-text: #94a3b8;
+      --sidebar-hover: rgba(255,255,255,0.08);
+      --sidebar-active: #3b82f6;
+      --main-bg: #f1f5f9;
+      --card-bg: #fff;
+      --card-radius: 12px;
+      --card-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.08);
+      --border-color: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+    }
+    body { min-height: 100vh; background: var(--main-bg); font-family: 'Segoe UI', Tahoma, sans-serif; color: var(--text-primary); }
+    /* Sidebar */
+    .sidebar {
+      background: var(--sidebar-bg);
+      min-height: 100vh;
+      width: var(--sidebar-width);
+      box-shadow: 2px 0 12px rgba(0,0,0,0.06);
+    }
+    .sidebar .nav-link {
+      color: var(--sidebar-text);
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      margin: 0 0.5rem;
+      transition: all 0.2s;
+    }
+    .sidebar .nav-link i { margin-left: 0.5rem; opacity: 0.9; }
+    .sidebar .nav-link:hover { color: #fff; background: var(--sidebar-hover); }
+    .sidebar .nav-link.active { color: #fff; background: var(--sidebar-active); }
+    .sidebar .brand { padding: 1.25rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .sidebar .brand h5 { font-weight: 600; font-size: 1.1rem; }
+    .sidebar .brand small { font-size: 0.8rem; color: var(--sidebar-text); }
+    /* Main content */
+    .main-content {
+      margin-right: var(--sidebar-width);
+      padding: 1.5rem;
+      min-height: 100vh;
+    }
+    .page-title {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+    }
+    /* Cards - unified */
+    .card {
+      border: none;
+      border-radius: var(--card-radius);
+      box-shadow: var(--card-shadow);
+      background: var(--card-bg);
+      transition: box-shadow 0.2s;
+    }
+    .card:hover { box-shadow: var(--card-shadow-hover); }
+    .card-header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.9rem 1.25rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      border-radius: var(--card-radius) var(--card-radius) 0 0;
+    }
+    .card-body { padding: 1.25rem; }
+    .card-footer {
+      background: #f8fafc;
+      border-top: 1px solid var(--border-color);
+      padding: 0.75rem 1.25rem;
+      border-radius: 0 0 var(--card-radius) var(--card-radius);
+    }
+    /* Stat cards (dashboard) */
+    .stat-card {
+      border-right: 4px solid var(--accent);
+      border-radius: var(--card-radius);
+    }
+    .stat-card .card-body { padding: 1rem 1.25rem; }
+    .stat-card h6 { font-size: 0.8rem; color: var(--text-secondary); text-transform: none; margin-bottom: 0.35rem; }
+    .stat-card h3 { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+    /* Tables - unified */
+    .table { color: var(--text-primary); }
+    .table thead th {
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: none;
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.85rem 1rem;
+      background: #f8fafc;
+    }
+    .table tbody td { padding: 0.85rem 1rem; vertical-align: middle; border-color: var(--border-color); }
+    .table tbody tr:hover { background: #f8fafc; }
+    .table-responsive { border-radius: 0 0 var(--card-radius) var(--card-radius); overflow: hidden; }
+    /* Forms */
+    .form-control, .form-select {
+      border-radius: 8px;
+      border-color: var(--border-color);
+      padding: 0.5rem 0.75rem;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+    .form-label { font-weight: 500; color: var(--text-primary); margin-bottom: 0.35rem; }
+    /* Buttons */
+    .btn {
+      border-radius: 8px;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+    }
+    .btn-primary { background: var(--accent); border-color: var(--accent); }
+    .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.875rem; }
+    /* Badges */
+    .badge { font-weight: 500; padding: 0.35em 0.65em; border-radius: 6px; }
+    /* Alerts / empty state */
+    .alert { border-radius: var(--card-radius); border: none; }
+    .text-muted { color: var(--text-secondary) !important; }
+    /* Content sections */
+    .content-card .card-body h6 { font-weight: 600; margin-bottom: 0.75rem; color: var(--text-primary); }
+    .main-content > h4.mb-4 { font-size: 1.35rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1.25rem; padding-bottom: 0.5rem; }
   </style>
 </head>
 <body>

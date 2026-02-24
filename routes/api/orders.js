@@ -25,6 +25,7 @@ router.post('/', (req, res) => {
   const customerPhone = (body.customer_phone || '').trim();
   const customerAddress = (body.customer_address || '').trim();
   const customerEmail = (body.customer_email || '').trim();
+  const customerPhoneAlt = (body.customer_phone_alt || '').trim();
   const notes = (body.notes || '').trim();
 
   if (!cityId || !Number.isFinite(cityId)) {
@@ -63,9 +64,9 @@ router.post('/', (req, res) => {
 
   const orderNumber = getNextOrderNumber(db);
   const r = db.prepare(`
-    INSERT INTO orders (order_number, customer_name, customer_phone, customer_email, customer_address, city_id, status, total_amount, notes)
-    VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?)
-  `).run(orderNumber, customerName, customerPhone, customerEmail, customerAddress, cityId, totalAmount, notes);
+    INSERT INTO orders (order_number, customer_name, customer_phone, customer_phone_alt, customer_email, customer_address, city_id, status, total_amount, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
+  `).run(orderNumber, customerName, customerPhone, customerPhoneAlt || null, customerEmail, customerAddress, cityId, totalAmount, notes);
 
   const orderId = r.lastInsertRowid;
   const insertItem = db.prepare(`

@@ -2,10 +2,12 @@
 <%- include('../partials/sidebar', { adminUsername }) %>
 
 <h4 class="mb-4">إدارة التجار (توجيه الطلبات)</h4>
+<p class="text-muted small mb-3">توجيه الإشعارات بناءً على إيميل التاجر.</p>
 <div class="card mb-3">
   <div class="card-body">
     <form method="post" action="/admin/merchants" class="row g-2">
-      <div class="col-md-3"><input type="text" name="name" class="form-control" placeholder="اسم التاجر" required></div>
+      <div class="col-md-2"><input type="text" name="name" class="form-control" placeholder="اسم التاجر" required></div>
+      <div class="col-md-2"><input type="text" name="store_name" class="form-control" placeholder="اسم المتجر"></div>
       <div class="col-md-2">
         <select name="city_id" class="form-select">
           <option value="">— المدينة —</option>
@@ -13,10 +15,9 @@
         </select>
       </div>
       <div class="col-md-2"><input type="text" name="phone" class="form-control" placeholder="الهاتف"></div>
-      <div class="col-md-2"><input type="email" name="email" class="form-control" placeholder="البريد"></div>
-      <div class="col-md-2"><input type="text" name="onesignal_player_id" class="form-control" placeholder="OneSignal Subscription ID (للإشعارات)"></div>
+      <div class="col-md-2"><input type="email" name="email" class="form-control" placeholder="البريد (للإشعارات)"></div>
       <div class="col-md-1"><select name="is_active" class="form-select"><option value="1">نشط</option><option value="0">معطل</option></select></div>
-      <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">إضافة</button></div>
+      <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">إضافة</button></div>
     </form>
   </div>
 </div>
@@ -24,16 +25,16 @@
   <div class="table-responsive">
     <table class="table table-hover mb-0">
       <thead>
-        <tr><th>التاجر</th><th>المدينة</th><th>الهاتف</th><th>البريد</th><th>إشعارات</th><th>الحالة</th><th></th></tr>
+        <tr><th>التاجر</th><th>اسم المتجر</th><th>المدينة</th><th>الهاتف</th><th>البريد</th><th>الحالة</th><th></th></tr>
       </thead>
       <tbody>
         <% merchants.forEach(function(m) { %>
         <tr>
           <td><%= m.name %></td>
+          <td><%= m.store_name || '—' %></td>
           <td><%= m.city_name || '—' %></td>
           <td><%= m.phone || '—' %></td>
           <td><%= m.email || '—' %></td>
-          <td><%= m.onesignal_player_id ? '✓' : '—' %></td>
           <td><%= m.is_active ? 'نشط' : 'معطل' %></td>
           <td>
             <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#edit<%= m.id %>">تعديل</button>
@@ -46,12 +47,12 @@
               <form method="post" action="/admin/merchants/edit/<%= m.id %>">
                 <div class="modal-header"><h5 class="modal-title">تعديل التاجر</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
-                  <div class="mb-2"><input type="text" name="name" class="form-control" value="<%= m.name %>" required></div>
-                  <div class="mb-2"><select name="city_id" class="form-select"><option value="">— المدينة —</option><% cities.forEach(function(c) { %><option value="<%= c.id %>" <%= m.city_id == c.id ? 'selected' : '' %>><%= c.name %></option><% }); %></select></div>
-                  <div class="mb-2"><input type="text" name="phone" class="form-control" value="<%= m.phone || '' %>" placeholder="الهاتف"></div>
-                  <div class="mb-2"><input type="email" name="email" class="form-control" value="<%= m.email || '' %>" placeholder="البريد"></div>
-                  <div class="mb-2"><input type="text" name="onesignal_player_id" class="form-control" value="<%= m.onesignal_player_id || '' %>" placeholder="OneSignal Subscription ID (للإشعارات التلقائية)"></div>
-                  <div class="mb-2"><select name="is_active" class="form-select"><option value="1" <%= m.is_active ? 'selected' : '' %>>نشط</option><option value="0" <%= !m.is_active ? 'selected' : '' %>>معطل</option></select></div>
+                  <div class="mb-2"><label class="form-label small">اسم التاجر</label><input type="text" name="name" class="form-control" value="<%= m.name %>" required></div>
+                  <div class="mb-2"><label class="form-label small">اسم المتجر</label><input type="text" name="store_name" class="form-control" value="<%= m.store_name || '' %>" placeholder="اسم المتجر"></div>
+                  <div class="mb-2"><label class="form-label small">المدينة</label><select name="city_id" class="form-select"><option value="">— المدينة —</option><% cities.forEach(function(c) { %><option value="<%= c.id %>" <%= m.city_id == c.id ? 'selected' : '' %>><%= c.name %></option><% }); %></select></div>
+                  <div class="mb-2"><label class="form-label small">الهاتف</label><input type="text" name="phone" class="form-control" value="<%= m.phone || '' %>" placeholder="الهاتف"></div>
+                  <div class="mb-2"><label class="form-label small">البريد (للإشعارات)</label><input type="email" name="email" class="form-control" value="<%= m.email || '' %>" placeholder="البريد"></div>
+                  <div class="mb-2"><label class="form-label small">الحالة</label><select name="is_active" class="form-select"><option value="1" <%= m.is_active ? 'selected' : '' %>>نشط</option><option value="0" <%= !m.is_active ? 'selected' : '' %>>معطل</option></select></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button><button type="submit" class="btn btn-primary">حفظ</button></div>
               </form>

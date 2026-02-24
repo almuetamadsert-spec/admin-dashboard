@@ -6,11 +6,25 @@
   <div class="col-md-8">
     <div class="card mb-3">
       <div class="card-body">
-        <h6>العميل</h6>
-        <p class="mb-0"><%= order.customer_name || '—' %> | <%= order.customer_phone || '—' %> | <%= order.customer_email || '—' %></p>
-        <% if (order.customer_address) { %><p class="text-muted small mb-0"><%= order.customer_address %></p><% } %>
+        <h6>بيانات العميل</h6>
+        <p class="mb-1"><strong>الاسم:</strong> <%= order.customer_name || '—' %></p>
+        <p class="mb-1"><strong>رقم الهاتف:</strong> <%= order.customer_phone || '—' %></p>
+        <p class="mb-1"><strong>رقم هاتف اخر:</strong> <%= (order.customer_phone_alt || order.CUSTOMER_PHONE_ALT || '') || '—' %></p>
+        <p class="mb-1"><strong>الايميل:</strong> <%= order.customer_email || '—' %></p>
+        <p class="mb-1"><strong>المدينة:</strong> <%= (typeof cityName !== 'undefined' && cityName) ? cityName : (order.city_name || '—') %></p>
+        <p class="mb-0"><strong>العنوان:</strong> <%= order.customer_address || '—' %></p>
       </div>
     </div>
+    <% if (typeof merchant !== 'undefined' && merchant) { %>
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6>التاجر المستهدف</h6>
+        <p class="mb-1"><strong>الاسم:</strong> <%= merchant.name || '—' %></p>
+        <p class="mb-1"><strong>اسم المتجر:</strong> <%= merchant.store_name || '—' %></p>
+        <p class="mb-0"><strong>الإيميل:</strong> <%= merchant.email || '—' %></p>
+      </div>
+    </div>
+    <% } %>
     <div class="card">
       <div class="card-header">المنتجات</div>
       <table class="table mb-0">
@@ -18,7 +32,10 @@
         <tbody>
           <% items.forEach(function(i) { %>
           <tr>
-            <td><%= i.product_name %></td>
+            <td>
+              <% var imgSrc = i.image_url || (i.image_path ? ('/uploads/' + (i.image_path + '').replace(/\\/g, '/').replace(/^\/+/, '')) : ''); if (imgSrc) { %><img src="<%= imgSrc %>" alt="" class="rounded me-2" style="width:48px;height:48px;object-fit:cover"><% } %>
+              <%= i.product_name %>
+            </td>
             <td><%= i.quantity %></td>
             <td><%= Number(i.unit_price).toFixed(2) %> د.ل</td>
             <td><%= Number(i.total_price).toFixed(2) %> د.ل</td>
@@ -45,7 +62,7 @@
           <button type="submit" class="btn btn-primary w-100">حفظ</button>
         </form>
         <hr>
-        <p class="small text-muted mb-0">تاريخ: <%= new Date(order.created_at).toLocaleString('ar-LY') %></p>
+        <p class="small text-muted mb-0">تاريخ: <% var _d = new Date(order.created_at); var _dd = String(_d.getDate()).padStart(2,'0'); var _mm = String(_d.getMonth()+1).padStart(2,'0'); var _yy = _d.getFullYear(); var _hh = String(_d.getHours()).padStart(2,'0'); var _min = String(_d.getMinutes()).padStart(2,'0'); %><%= _dd %>/<%= _mm %>/<%= _yy %> <%= _hh %>:<%= _min %></p>
       </div>
     </div>
   </div>

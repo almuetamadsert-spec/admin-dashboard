@@ -4,3 +4,4 @@ uploads/*
 *.db
 .env
 .DS_Store
+test-api-keys.json

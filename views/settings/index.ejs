@@ -72,6 +72,27 @@
 
     <!-- جدول المفاتيح المحفوظة -->
     <h6 class="text-secondary mb-2">المفاتيح المحفوظة</h6>
+
+    <!-- تحقق من مفتاح (للتأكد أن ما في الملف يطابق اللوحة) -->
+    <div class="alert alert-light border mb-3">
+      <h6 class="mb-2"><i class="bi bi-shield-check text-success"></i> تحقق من المفتاح</h6>
+      <p class="small text-muted mb-2">الصق Consumer Key و Consumer Secret من ملف test-api-keys.json للتأكد أنهما مطابقان لما في قاعدة البيانات.</p>
+      <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label small">Consumer Key</label>
+          <input type="text" class="form-control form-control-sm font-monospace" id="verifyCk" placeholder="ck_...">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small">Consumer Secret</label>
+          <input type="password" class="form-control form-control-sm font-monospace" id="verifyCs" placeholder="cs_...">
+        </div>
+        <div class="col-md-3">
+          <button type="button" class="btn btn-sm btn-outline-success w-100" id="btnVerifyKey"><i class="bi bi-check2-circle me-1"></i> تحقق</button>
+        </div>
+      </div>
+      <div id="verifyResult" class="mt-2 small"></div>
+    </div>
+
     <div class="table-responsive">
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
@@ -193,5 +214,24 @@ function copyToClipboard(inputId, btn) {
     alert('النسخ غير متاح. انسخ من الحقل يدوياً.');
   }
 }
+document.getElementById('btnVerifyKey').onclick = function() {
+  var ck = document.getElementById('verifyCk').value.trim();
+  var cs = document.getElementById('verifyCs').value.trim();
+  var resultEl = document.getElementById('verifyResult');
+  resultEl.innerHTML = '<span class="text-muted">جاري التحقق...</span>';
+  fetch('/admin/settings/api-keys/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'consumerKey=' + encodeURIComponent(ck) + '&consumerSecret=' + encodeURIComponent(cs)
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.ok) {
+      resultEl.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> ' + data.message + '</span>';
+    } else {
+      resultEl.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> ' + (data.message || 'فشل التحقق') + '</span>';
+    }
+  }).catch(function() {
+    resultEl.innerHTML = '<span class="text-danger">خطأ في الاتصال</span>';
+  });
+};
 </script>
 <%- include('../partials/scripts') %>

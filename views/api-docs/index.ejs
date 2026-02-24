@@ -29,6 +29,7 @@
       <tbody>
         <tr><td><code>GET</code></td><td><code>/api/status</code></td><td>حالة السيرفر وقاعدة البيانات</td><td>بدون مفتاح</td></tr>
         <tr><td><code>GET</code></td><td><code>/api/cities</code></td><td>قائمة مدن التوصيل النشطة</td><td>قراءة</td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/products</code></td><td>قائمة المنتجات النشطة</td><td>قراءة</td></tr>
         <tr><td><code>GET</code></td><td><code>/api/cms/:slug</code></td><td>صفحة محتوى (about, privacy, terms)</td><td>قراءة</td></tr>
         <tr><td><code>POST</code></td><td><code>/api/orders</code></td><td>إنشاء طلب جديد (من التطبيق)</td><td>قراءة وكتابة</td></tr>
       </tbody>
@@ -70,5 +71,6 @@ X-Consumer-Secret: cs_xxxx</code></pre>
 </div>
 
 <p class="text-muted small">لإنشاء مفاتيح API أو تعديلها: <a href="/admin/settings#api-keys">الإعدادات → مفاتيح API</a>.</p>
+<p class="text-muted small">لاختبار الطلبات من المتصفح: <a href="/store/" target="_blank">متجر تجريبي <i class="bi bi-box-arrow-up-right"></i></a>.</p>
 
 <%- include('../partials/scripts') %>

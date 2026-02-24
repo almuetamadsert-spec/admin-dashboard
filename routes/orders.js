@@ -58,9 +58,11 @@ router.get('/', (req, res) => {
   const orders = db.prepare(`
     SELECT o.*,
       COALESCE(o.customer_name, c.name) as display_name,
-      COALESCE(o.customer_phone, c.phone) as display_phone
+      COALESCE(o.customer_phone, c.phone) as display_phone,
+      ct.name as city_name
     FROM orders o
     LEFT JOIN customers c ON o.customer_id = c.id
+    LEFT JOIN cities ct ON o.city_id = ct.id
     WHERE ${where}
     ORDER BY o.created_at DESC
     LIMIT ? OFFSET ?
@@ -90,19 +92,22 @@ router.get('/export', (req, res) => {
   const orders = db.prepare(`
     SELECT o.*,
       COALESCE(o.customer_name, c.name) as display_name,
-      COALESCE(o.customer_phone, c.phone) as display_phone
+      COALESCE(o.customer_phone, c.phone) as display_phone,
+      ct.name as city_name
     FROM orders o
     LEFT JOIN customers c ON o.customer_id = c.id
+    LEFT JOIN cities ct ON o.city_id = ct.id
     WHERE ${where}
     ORDER BY o.created_at DESC
   `).all(...params);
 
   const BOM = '\uFEFF';
-  const header = 'رقم الطلب;العميل;الهاتف;المبلغ;الحالة;التاريخ';
+  const header = 'رقم الطلب;العميل;الهاتف;المدينة;المبلغ;الحالة;التاريخ';
   const rows = orders.map(o => [
     o.order_number,
     (o.display_name || '').replace(/;/g, ','),
     (o.display_phone || '').replace(/;/g, ','),
+    (o.city_name || '').replace(/;/g, ','),
     Number(o.total_amount).toFixed(2),
     STATUS_LABELS[o.status] || o.status,
     new Date(o.created_at).toLocaleDateString('ar-LY')
@@ -118,16 +123,96 @@ router.get('/new', (req, res) => {
   const customers = db.prepare('SELECT * FROM customers ORDER BY name').all();
   const products = db.prepare('SELECT id, name_ar, name_en, price, discount_percent FROM products WHERE is_active = 1').all();
   const cities = db.prepare('SELECT id, name FROM cities WHERE is_active = 1 ORDER BY name').all();
-  res.render('orders/form', { order: null, items: [], customers, products, cities, adminUsername: req.session.adminUsername });
+  const merchants = db.prepare('SELECT id, name, store_name, email FROM merchants WHERE is_active = 1 ORDER BY name').all();
+  res.render('orders/form', { order: null, items: [], customers, products, cities, merchants, adminUsername: req.session.adminUsername });
 });
+
+function rowKeysToLower(row) {
+  if (!row || typeof row !== 'object') return row;
+  const out = {};
+  for (const k of Object.keys(row)) out[k.toLowerCase()] = row[k];
+  return out;
+}
+
+function getCol(row, ...keys) {
+  if (!row) return null;
+  for (const k of keys) {
+    if (row[k] != null && row[k] !== '') return row[k];
+    const lower = k.toLowerCase();
+    if (row[lower] != null && row[lower] !== '') return row[lower];
+    const upper = k.toUpperCase();
+    if (row[upper] != null && row[upper] !== '') return row[upper];
+  }
+  return null;
+}
+
+function getColAnyCase(row, keyName) {
+  if (!row || typeof row !== 'object') return null;
+  const want = keyName.toLowerCase();
+  for (const k of Object.keys(row)) {
+    if (k.toLowerCase() === want) {
+      const v = row[k];
+      if (v == null) return null;
+      return typeof v === 'string' ? v.trim() : v;
+    }
+  }
+  return null;
+}
+
+function getAnyColContaining(row, part) {
+  if (!row || typeof row !== 'object') return null;
+  const p = String(part).toLowerCase();
+  for (const k of Object.keys(row)) {
+    if (k.toLowerCase().indexOf(p) !== -1) {
+      const v = row[k];
+      if (v != null && String(v).trim() !== '') return String(v).trim();
+    }
+  }
+  return null;
+}
 
 router.get('/view/:id', (req, res) => {
   const db = req.db;
-  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
-  if (!order) return res.redirect('/admin/orders');
-  const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(req.params.id);
-  const customer = order.customer_id ? db.prepare('SELECT * FROM customers WHERE id = ?').get(order.customer_id) : null;
-  res.render('orders/view', { order, items, customer, adminUsername: req.session.adminUsername });
+  const orderId = req.params.id;
+  const orderWithCity = db.prepare(`
+    SELECT o.*, c.name as city_name
+    FROM orders o
+    LEFT JOIN cities c ON o.city_id = c.id
+    WHERE o.id = ?
+  `).get(orderId);
+  if (!orderWithCity) return res.redirect('/admin/orders');
+  const order = orderWithCity;
+  const cityName = (order.city_name != null && String(order.city_name).trim() !== '') ? String(order.city_name).trim() : null;
+  const customer = order.customer_id != null ? db.prepare('SELECT * FROM customers WHERE id = ?').get(order.customer_id) : null;
+  const itemsWithImage = db.prepare(`
+    SELECT oi.id, oi.order_id, oi.product_id, oi.product_name, oi.quantity, oi.unit_price, oi.total_price, p.image_path
+    FROM order_items oi
+    LEFT JOIN products p ON oi.product_id = p.id
+    WHERE oi.order_id = ?
+  `).all(orderId);
+  const orderItemsWithImages = itemsWithImage.map(row => {
+    const imgPath = (row.image_path != null && String(row.image_path).trim() !== '') ? String(row.image_path).trim() : null;
+    const pathClean = imgPath ? imgPath.replace(/\\/g, '/').replace(/^\/+/, '') : null;
+    const image_url = pathClean ? '/uploads/' + pathClean : null;
+    return {
+      product_id: row.product_id,
+      product_name: row.product_name,
+      quantity: row.quantity,
+      unit_price: row.unit_price,
+      total_price: row.total_price,
+      image_path: pathClean,
+      image_url: image_url
+    };
+  });
+  const merchant = order.merchant_id != null ? db.prepare('SELECT id, name, store_name, email FROM merchants WHERE id = ?').get(order.merchant_id) : null;
+  res.render('orders/view', {
+    order,
+    items: orderItemsWithImages,
+    customer,
+    merchant,
+    cityName: cityName ?? null,
+    adminUsername: req.session.adminUsername
+  });
 });
 
 router.post('/', (req, res) => {
@@ -139,6 +224,7 @@ router.post('/', (req, res) => {
   const customerPhone = body.customer_phone || '';
   const customerEmail = body.customer_email || '';
   const customerAddress = body.customer_address || '';
+  const customerPhoneAlt = body.customer_phone_alt || '';
   const notes = body.notes || '';
   const status = body.status || 'pending';
 
@@ -157,10 +243,11 @@ router.post('/', (req, res) => {
     }
   }
 
+  const merchantId = body.merchant_id ? parseInt(body.merchant_id, 10) : null;
   const r = db.prepare(`
-    INSERT INTO orders (order_number, customer_id, customer_name, customer_phone, customer_email, customer_address, city_id, status, total_amount, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(orderNumber, customerId, customerName, customerPhone, customerEmail, customerAddress, body.city_id ? parseInt(body.city_id, 10) : null, status, totalAmount, notes);
+    INSERT INTO orders (order_number, customer_id, customer_name, customer_phone, customer_phone_alt, customer_email, customer_address, city_id, merchant_id, status, total_amount, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(orderNumber, customerId, customerName, customerPhone, customerPhoneAlt, customerEmail, customerAddress, body.city_id ? parseInt(body.city_id, 10) : null, merchantId, status, totalAmount, notes);
 
   const orderId = r.lastInsertRowid;
   const insertItem = db.prepare(`
@@ -180,7 +267,8 @@ router.post('/', (req, res) => {
 
   const { notifyMerchantsNewOrder } = require('../lib/onesignal');
   notifyMerchantsNewOrder(db, orderNumber, totalAmount, {
-    cityId: body.city_id ? parseInt(body.city_id, 10) : undefined,
+    merchantId: merchantId || undefined,
+    cityId: !merchantId && body.city_id ? parseInt(body.city_id, 10) : undefined,
     customerName: customerName || undefined,
     customerPhone: customerPhone || undefined
   }).catch(() => {});
@@ -196,7 +284,8 @@ router.get('/edit/:id', (req, res) => {
   const customers = db.prepare('SELECT * FROM customers ORDER BY name').all();
   const products = db.prepare('SELECT id, name_ar, name_en, price, discount_percent FROM products WHERE is_active = 1').all();
   const cities = db.prepare('SELECT id, name FROM cities WHERE is_active = 1 ORDER BY name').all();
-  res.render('orders/form', { order, items, customers, products, cities, adminUsername: req.session.adminUsername });
+  const merchants = db.prepare('SELECT id, name, store_name, email FROM merchants WHERE is_active = 1 ORDER BY name').all();
+  res.render('orders/form', { order, items, customers, products, cities, merchants, adminUsername: req.session.adminUsername });
 });
 
 router.post('/edit/:id', (req, res) => {
@@ -210,6 +299,7 @@ router.post('/edit/:id', (req, res) => {
   const customerPhone = body.customer_phone || '';
   const customerEmail = body.customer_email || '';
   const customerAddress = body.customer_address || '';
+  const customerPhoneAlt = body.customer_phone_alt || '';
   const notes = body.notes || '';
   const status = body.status || 'pending';
 
@@ -228,10 +318,11 @@ router.post('/edit/:id', (req, res) => {
     }
   }
 
+  const merchantId = body.merchant_id ? parseInt(body.merchant_id, 10) : null;
   db.prepare(`
-    UPDATE orders SET customer_id = ?, customer_name = ?, customer_phone = ?, customer_email = ?, customer_address = ?,
-      city_id = ?, status = ?, total_amount = ?, notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
-  `).run(customerId, customerName, customerPhone, customerEmail, customerAddress, body.city_id ? parseInt(body.city_id, 10) : null, status, totalAmount, notes, orderId);
+    UPDATE orders SET customer_id = ?, customer_name = ?, customer_phone = ?, customer_phone_alt = ?, customer_email = ?, customer_address = ?,
+      city_id = ?, merchant_id = ?, status = ?, total_amount = ?, notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+  `).run(customerId, customerName, customerPhone, customerPhoneAlt, customerEmail, customerAddress, body.city_id ? parseInt(body.city_id, 10) : null, merchantId, status, totalAmount, notes, orderId);
 
   db.prepare('DELETE FROM order_items WHERE order_id = ?').run(orderId);
   const insertItem = db.prepare(`
@@ -248,6 +339,31 @@ router.post('/edit/:id', (req, res) => {
     }
   }
   logActivity(db, req.session.adminId, req.session.adminUsername, 'تعديل الطلب', 'طلب ' + order.order_number);
+  res.redirect('/admin/orders');
+});
+
+router.post('/bulk-delete', (req, res) => {
+  const db = req.db;
+  const raw = req.body.ids;
+  const ids = typeof raw === 'string' ? raw.split(',').map(s => s.trim()).filter(Boolean) : (Array.isArray(raw) ? raw : (raw ? [raw] : []));
+  ids.forEach(id => {
+    db.prepare('DELETE FROM order_items WHERE order_id = ?').run(id);
+    db.prepare('DELETE FROM orders WHERE id = ?').run(id);
+  });
+  if (ids.length) logActivity(db, req.session.adminId, req.session.adminUsername, 'حذف طلبات', ids.length + ' طلب');
+  res.redirect('/admin/orders');
+});
+
+router.post('/bulk-status', (req, res) => {
+  const db = req.db;
+  const status = req.body.status;
+  const raw = req.body.ids;
+  const ids = typeof raw === 'string' ? raw.split(',').map(s => s.trim()).filter(Boolean) : (Array.isArray(raw) ? raw : (raw ? [raw] : []));
+  if (['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'].includes(status)) {
+    ids.forEach(id => {
+      db.prepare('UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(status, id);
+    });
+  }
   res.redirect('/admin/orders');
 });
 

@@ -25,6 +25,10 @@
       <input type="text" name="customer_phone" id="customer_phone" class="form-control" value="<%= order ? (order.customer_phone || '') : '' %>">
     </div>
     <div class="col-md-3 mb-3">
+      <label class="form-label">رقم هاتف اخر</label>
+      <input type="text" name="customer_phone_alt" id="customer_phone_alt" class="form-control" value="<%= order && order.customer_phone_alt ? order.customer_phone_alt : '' %>" placeholder="اختياري">
+    </div>
+    <div class="col-md-6 mb-3">
       <label class="form-label">البريد</label>
       <input type="email" name="customer_email" id="customer_email" class="form-control" value="<%= order ? (order.customer_email || '') : '' %>">
     </div>
@@ -35,11 +39,22 @@
   </div>
   <% if (typeof cities !== 'undefined' && cities.length) { %>
   <div class="mb-3">
-    <label class="form-label">مدينة التوصيل (لإرسال الإشعار للتجار في نفس المدينة)</label>
+    <label class="form-label">مدينة التوصيل</label>
     <select name="city_id" class="form-select">
       <option value="">— اختر المدينة —</option>
       <% cities.forEach(function(c) { %>
       <option value="<%= c.id %>" <%= order && order.city_id == c.id ? 'selected' : '' %>><%= c.name %></option>
+      <% }); %>
+    </select>
+  </div>
+  <% } %>
+  <% if (typeof merchants !== 'undefined' && merchants.length) { %>
+  <div class="mb-3">
+    <label class="form-label">استهداف التاجر (بالاسم أو الإيميل أو اسم المتجر)</label>
+    <select name="merchant_id" class="form-select">
+      <option value="">— لا تاجر —</option>
+      <% merchants.forEach(function(m) { %>
+      <option value="<%= m.id %>" <%= order && order.merchant_id == m.id ? 'selected' : '' %>><%= (m.name || '') %> — <%= (m.store_name || '') %> — <%= (m.email || '') %></option>
       <% }); %>
     </select>
   </div>

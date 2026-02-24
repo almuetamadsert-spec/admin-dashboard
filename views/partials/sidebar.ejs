@@ -1,11 +1,11 @@
 <div class="d-flex">
-  <nav class="sidebar position-fixed top-0 start-0 bottom-0">
-    <div class="p-3 border-bottom border-secondary">
+  <nav class="sidebar position-fixed top-0 start-0 bottom-0 z-1">
+    <div class="brand">
       <h5 class="text-white mb-0">لوحة التحكم</h5>
-      <small class="text-secondary"><%= adminUsername %></small>
+      <small><%= adminUsername %></small>
     </div>
-    <ul class="nav flex-column pt-2">
-      <li><a class="nav-link" href="/admin/dashboard"><i class="bi bi-grid"></i> الرئيسية</a></li>
+    <ul class="nav flex-column pt-2 pb-3">
+      <li><a class="nav-link" href="/admin/dashboard"><i class="bi bi-grid-1x2"></i> الرئيسية</a></li>
       <li><a class="nav-link" href="/admin/settings"><i class="bi bi-gear"></i> الإعدادات</a></li>
       <li><a class="nav-link" href="/admin/api-docs"><i class="bi bi-code-slash"></i> توثيق API</a></li>
       <li><a class="nav-link" href="/admin/products"><i class="bi bi-box-seam"></i> المنتجات</a></li>
@@ -19,7 +19,7 @@
       <li><a class="nav-link" href="/admin/cms"><i class="bi bi-file-text"></i> المحتوى (من نحن/الخصوصية)</a></li>
       <li><a class="nav-link" href="/admin/activity"><i class="bi bi-journal-text"></i> سجل العمليات</a></li>
       <li><a class="nav-link" href="/admin/sales"><i class="bi bi-graph-up"></i> المبيعات</a></li>
-      <li><a class="nav-link" href="/admin/logout"><i class="bi bi-box-arrow-right"></i> خروج</a></li>
+      <li class="mt-auto pt-2"><a class="nav-link" href="/admin/logout"><i class="bi bi-box-arrow-right"></i> خروج</a></li>
     </ul>
   </nav>
-  <main class="flex-grow-1" style="margin-right: 260px; padding: 1.5rem;">
+  <main class="flex-grow-1 main-content">

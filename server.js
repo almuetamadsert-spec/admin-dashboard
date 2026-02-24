@@ -15,6 +15,15 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// السماح لطلبات المتجر التجريبي من نفس المصدر أو أي مصدر (للاختبار)
+app.use('/api', function(req, res, next) {
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Consumer-Key, X-Consumer-Secret, Authorization');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
   resave: false,
@@ -27,6 +36,8 @@ app.locals.db = null;
 
 // فحص التوصيل — يعمل حتى قبل تحميل قاعدة البيانات
 app.get('/health', (req, res) => res.type('text').send('ok'));
+
+app.get('/store', (req, res) => res.redirect('/store/'));
 
 app.get('/api/status', (req, res) => {
   const db = app.locals.db;
@@ -90,9 +101,42 @@ app.use((req, res, next) => {
   next();
 });
 
+// تشخيص المفتاح (بدون مصادقة): يوضح ما يراه السيرفر وهل يوجد تطابق في قاعدة البيانات
+app.get('/api/debug-key-check', (req, res) => {
+  const db = req.db;
+  if (!db) return res.status(503).json({ ok: false, message: 'قاعدة البيانات غير جاهزة' });
+  const key = String(req.headers['x-consumer-key'] || '').trim();
+  const secret = String(req.headers['x-consumer-secret'] || '').trim();
+  let dbHasKey = false;
+  let dbFullMatch = false;
+  try {
+    const byKey = db.prepare('SELECT id FROM api_keys WHERE consumer_key = ? LIMIT 1').get(key);
+    dbHasKey = !!byKey;
+    if (key && secret) {
+      const row = db.prepare('SELECT id FROM api_keys WHERE consumer_key = ? AND consumer_secret = ? AND is_active = 1').get(key, secret);
+      dbFullMatch = !!row;
+    }
+  } catch (e) {
+    return res.json({ ok: false, error: e.message });
+  }
+  res.json({
+    ok: true,
+    keyLength: key.length,
+    secretLength: secret.length,
+    keyPrefix: key ? key.substring(0, 8) + '...' : '',
+    dbHasThisKey: dbHasKey,
+    dbFullMatch,
+    hint: !key || !secret ? 'أرسل الهيدرين X-Consumer-Key و X-Consumer-Secret' : dbFullMatch ? 'المفتاح صحيح' : (dbHasKey ? 'المفتاح موجود لكن السر غير مطابق (جرّب تجديد السر ثم انسخ السر الجديد)' : 'هذا المفتاح غير موجود في قاعدة البيانات')
+  });
+});
+
 const { requireAuth } = require('./middleware/auth');
 
-app.use('/admin', require('./routes/admin'));
+// مسارات لوحة التحكم المحددة أولاً (قبل المسار العام /admin) حتى تعمل كل الروابط بشكل صحيح
+app.get('/admin', (req, res) => {
+  if (req.session && req.session.adminId) return res.redirect('/admin/dashboard');
+  res.redirect('/admin/login');
+});
 app.use('/admin/dashboard', requireAuth, require('./routes/dashboard'));
 app.use('/admin/products', requireAuth, require('./routes/products'));
 app.use('/admin/orders', requireAuth, require('./routes/orders'));
@@ -107,16 +151,13 @@ app.use('/admin/coupons', requireAuth, require('./routes/coupons'));
 app.use('/admin/merchants', requireAuth, require('./routes/merchants'));
 app.use('/admin/inventory', requireAuth, require('./routes/inventory'));
 app.use('/admin/api-docs', requireAuth, require('./routes/api-docs'));
+app.use('/admin', require('./routes/admin'));
 
 app.use('/api/cities', require('./middleware/apiAuth').requireApiKey, require('./routes/api/cities'));
 app.use('/api/cms', require('./middleware/apiAuth').requireApiKey, require('./routes/api/cms'));
+app.use('/api/products', require('./middleware/apiAuth').requireApiKey, require('./routes/api/products'));
 const apiAuth = require('./middleware/apiAuth');
 app.use('/api/orders', apiAuth.requireApiKey, apiAuth.requireWrite, require('./routes/api/orders'));
-
-app.get('/admin', (req, res) => {
-  if (req.session && req.session.adminId) return res.redirect('/admin/dashboard');
-  res.redirect('/admin/login');
-});
 
 // بدء الاستماع فوراً (قبل تحميل قاعدة البيانات)
 app.listen(PORT, '0.0.0.0', () => {

@@ -11,7 +11,17 @@ const KEYS = [
   'google_client_secret',
   'apple_service_id',
   'default_currency',
-  'exchange_rate'
+  'exchange_rate',
+  'social_facebook_url',
+  'social_instagram_url',
+  'social_whatsapp_url',
+  'social_tiktok_url',
+  'social_youtube_url',
+  'social_twitter_url',
+  'social_telegram_url',
+  'social_icon_shape',
+  'social_icon_bg_color',
+  'social_icon_symbol_color'
 ];
 
 function generateConsumerKey() {
@@ -21,11 +31,11 @@ function generateConsumerSecret() {
   return ('cs_' + crypto.randomBytes(32).toString('hex')).trim();
 }
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const db = req.db;
-  const settings = getSettings(db);
+  const settings = await getSettings(db);
   KEYS.forEach(k => { if (!(k in settings)) settings[k] = ''; });
-  const apiKeys = db.prepare('SELECT id, name, consumer_key, consumer_secret, permission, is_active, created_at FROM api_keys ORDER BY created_at DESC').all();
+  const apiKeys = await db.prepare('SELECT id, name, consumer_key, consumer_secret, permission, is_active, created_at FROM api_keys ORDER BY created_at DESC').all();
   const newApiKey = req.session._newApiKey || null;
   const regeneratedSecret = req.session._regeneratedSecret || null;
   const regeneratedKeyId = req.session._regeneratedKeyId || null;
@@ -35,49 +45,49 @@ router.get('/', (req, res) => {
   res.render('settings/index', { settings, apiKeys, newApiKey, regeneratedSecret, regeneratedKeyId, adminUsername: req.session.adminUsername });
 });
 
-router.post('/api-keys', (req, res) => {
+router.post('/api-keys', async (req, res) => {
   const db = req.db;
   const { name, permission } = req.body || {};
   if (!name || !name.trim()) return res.redirect('/admin/settings');
   const consumer_key = generateConsumerKey();
   const consumer_secret = generateConsumerSecret();
-  db.prepare('INSERT INTO api_keys (name, consumer_key, consumer_secret, permission) VALUES (?, ?, ?, ?)').run(name.trim(), String(consumer_key).trim(), String(consumer_secret).trim(), permission === 'read_write' ? 'read_write' : 'read_only');
-  logActivity(db, req.session.adminId, req.session.adminUsername, 'إنشاء مفتاح API', name.trim() + ' — ' + permission);
+  await db.prepare('INSERT INTO api_keys (name, consumer_key, consumer_secret, permission) VALUES (?, ?, ?, ?)').run(name.trim(), String(consumer_key).trim(), String(consumer_secret).trim(), permission === 'read_write' ? 'read_write' : 'read_only');
+  await logActivity(db, req.session.adminId, req.session.adminUsername, 'إنشاء مفتاح API', name.trim() + ' — ' + permission);
   req.session._newApiKey = { consumer_key, consumer_secret };
   res.redirect('/admin/settings#api-keys');
 });
 
-router.post('/api-keys/edit/:id', (req, res) => {
+router.post('/api-keys/edit/:id', async (req, res) => {
   const db = req.db;
   const { name, permission } = req.body || {};
   const id = req.params.id;
-  db.prepare('UPDATE api_keys SET name = ?, permission = ? WHERE id = ?').run(name || '', permission === 'read_write' ? 'read_write' : 'read_only', id);
-  logActivity(db, req.session.adminId, req.session.adminUsername, 'تعديل مفتاح API', name);
+  await db.prepare('UPDATE api_keys SET name = ?, permission = ? WHERE id = ?').run(name || '', permission === 'read_write' ? 'read_write' : 'read_only', id);
+  await logActivity(db, req.session.adminId, req.session.adminUsername, 'تعديل مفتاح API', name);
   res.redirect('/admin/settings#api-keys');
 });
 
-router.post('/api-keys/regenerate-secret/:id', (req, res) => {
+router.post('/api-keys/regenerate-secret/:id', async (req, res) => {
   const db = req.db;
   const id = req.params.id;
   const newSecret = generateConsumerSecret();
-  db.prepare('UPDATE api_keys SET consumer_secret = ? WHERE id = ?').run(String(newSecret).trim(), id);
-  const row = db.prepare('SELECT name FROM api_keys WHERE id = ?').get(id);
-  logActivity(db, req.session.adminId, req.session.adminUsername, 'تجديد Consumer Secret', row ? row.name : '');
+  await db.prepare('UPDATE api_keys SET consumer_secret = ? WHERE id = ?').run(String(newSecret).trim(), id);
+  const row = await db.prepare('SELECT name FROM api_keys WHERE id = ?').get(id);
+  await logActivity(db, req.session.adminId, req.session.adminUsername, 'تجديد Consumer Secret', row ? row.name : '');
   req.session._regeneratedSecret = newSecret;
   req.session._regeneratedKeyId = id;
   res.redirect('/admin/settings#api-keys');
 });
 
-router.post('/api-keys/delete/:id', (req, res) => {
+router.post('/api-keys/delete/:id', async (req, res) => {
   const db = req.db;
   const id = req.params.id;
-  const row = db.prepare('SELECT name FROM api_keys WHERE id = ?').get(id);
-  db.prepare('DELETE FROM api_keys WHERE id = ?').run(id);
-  if (row) logActivity(db, req.session.adminId, req.session.adminUsername, 'حذف مفتاح API', row.name);
+  const row = await db.prepare('SELECT name FROM api_keys WHERE id = ?').get(id);
+  await db.prepare('DELETE FROM api_keys WHERE id = ?').run(id);
+  if (row) await logActivity(db, req.session.adminId, req.session.adminUsername, 'حذف مفتاح API', row.name);
   res.redirect('/admin/settings#api-keys');
 });
 
-router.post('/api-keys/verify', (req, res) => {
+router.post('/api-keys/verify', async (req, res) => {
   const db = req.db;
   const consumerKey = String(req.body.consumerKey || req.body.consumer_key || '').trim();
   const consumerSecret = String(req.body.consumerSecret || req.body.consumer_secret || '').trim();
@@ -85,7 +95,7 @@ router.post('/api-keys/verify', (req, res) => {
     return res.json({ ok: false, message: 'أدخل Consumer Key و Consumer Secret' });
   }
   try {
-    const row = db.prepare('SELECT id, name, permission, is_active FROM api_keys WHERE consumer_key = ? AND consumer_secret = ?').get(consumerKey, consumerSecret);
+    const row = await db.prepare('SELECT id, name, permission, is_active FROM api_keys WHERE consumer_key = ? AND consumer_secret = ?').get(consumerKey, consumerSecret);
     if (!row) {
       return res.json({ ok: false, message: 'المفتاح أو السر غير صحيح. انسخهما من هذه الصفحة بعد إنشاء المفتاح أو تجديد السر.' });
     }
@@ -98,11 +108,11 @@ router.post('/api-keys/verify', (req, res) => {
   }
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const db = req.db;
   const body = req.body || {};
-  KEYS.forEach(k => setSetting(db, k, body[k]));
-  logActivity(db, req.session.adminId, req.session.adminUsername, 'تحديث الإعدادات', 'تم حفظ إعدادات اللوحة');
+  for (const k of KEYS) await setSetting(db, k, body[k]);
+  await logActivity(db, req.session.adminId, req.session.adminUsername, 'تحديث الإعدادات', 'تم حفظ إعدادات اللوحة');
   res.redirect('/admin/settings');
 });
 

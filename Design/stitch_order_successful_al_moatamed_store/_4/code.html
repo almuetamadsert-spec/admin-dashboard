@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>التصنيفات - متجر المعتمد</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Noto+Sans+Arabic:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Noto Sans Arabic", "Manrope", "sans-serif"],
+                        "body": ["Noto Sans Arabic", "Manrope", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans Arabic', 'Manrope', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased min-h-screen flex flex-col">
+<div class="relative flex flex-col flex-1 w-full max-w-md mx-auto bg-white dark:bg-[#1a2632] shadow-xl overflow-hidden min-h-screen">
+<!-- Header -->
+<div class="sticky top-0 z-10 bg-white dark:bg-[#1a2632] border-b border-slate-100 dark:border-slate-800">
+<div class="flex items-center justify-between p-4 pb-2">
+<button class="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-[24px]">arrow_forward</span>
+</button>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">التصنيفات</h2>
+</div>
+<!-- Search Bar -->
+<div class="px-4 pb-4 pt-2">
+<label class="flex flex-col w-full h-12">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full shadow-sm">
+<div class="text-slate-500 dark:text-slate-400 flex border-none bg-slate-100 dark:bg-slate-800 items-center justify-center pr-4 rounded-r-xl border-l-0">
+<span class="material-symbols-outlined text-[24px]">search</span>
+</div>
+<input class="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-slate-100 focus:outline-0 focus:ring-2 focus:ring-primary/50 border-none bg-slate-100 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 h-full placeholder:text-slate-500 dark:placeholder:text-slate-400 px-4 rounded-r-none border-r-0 pl-2 text-base font-normal leading-normal transition-all" placeholder="ابحث عن منتج، ماركة..." value=""/>
+</div>
+</label>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto pb-24 scrollbar-hide">
+<!-- Section 1: Product Categories -->
+<div class="pt-6">
+<div class="flex items-center justify-between px-4 pb-3">
+<h2 class="text-slate-900 dark:text-slate-100 tracking-tight text-[22px] font-bold leading-tight">تصنيفات المنتجات</h2>
+<a class="text-primary text-sm font-medium hover:underline" href="#">عرض الكل</a>
+</div>
+<div class="grid grid-cols-2 gap-4 px-4">
+<!-- Category Card 1 -->
+<a class="group flex flex-col gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-primary/30 transition-all shadow-sm hover:shadow-md" href="#">
+<div class="w-full aspect-[4/3] rounded-xl bg-slate-200 dark:bg-slate-700 overflow-hidden relative">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" data-alt="Modern wireless headphones on a clean background" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBA1biBE1JfIR8lpZM_0StHJNoOEu7lrTk8ErvAMixHT8dh1cHLHwORKFA3AjcFcDaKtcI5inKhVickiz-y65awYm_bWYt9EXc1NaXIndnaBzMT5uQK_wVbzrXhUnxgog0BQAD6zmh9Kty0I1Cn2_j_TqsA_G3Hxtxi8q0QOvj2HPQbEn6SAkdtVp4QlQXLz3n0HFgS9KKW3jdg8-xmI5Sk_M3mnZ_diG_Rk54XcDX2dmmQ9jGY8-8etlyXQDZEFwDEVIATFUwjonA");'></div>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold leading-normal group-hover:text-primary transition-colors">سماعات</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-normal leading-normal">Headphones</p>
+</div>
+</a>
+<!-- Category Card 2 -->
+<a class="group flex flex-col gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-primary/30 transition-all shadow-sm hover:shadow-md" href="#">
+<div class="w-full aspect-[4/3] rounded-xl bg-slate-200 dark:bg-slate-700 overflow-hidden relative">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" data-alt="White wall charger and cable" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDYNsPeO7XZqY3K0g-1Of77ul2U_otBxhnzxmf7yfLr86jfUYeYjgTuU9ZPw6C2-G4WAagXtEtegc5ynUB-U76Pqr7jHnZbqdRqSylmRgJ9Hn0GSIkTnxkKpnfB4Fyg_8zHMlCaCxD-oRf4JedylMihLjcYmRsaLaDeJGzzFSSlI8l6JeKHdvp_79FIKRt7ZxplRVypPP6zCdI4Zx1yf8kJEvA3TP_75QKzncbItU00ASjd3RqkqgSq2Fz-VlUBSyWUdOrGJTGXUCI");'></div>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold leading-normal group-hover:text-primary transition-colors">شواحن</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-normal leading-normal">Chargers</p>
+</div>
+</a>
+<!-- Category Card 3 -->
+<a class="group flex flex-col gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-primary/30 transition-all shadow-sm hover:shadow-md" href="#">
+<div class="w-full aspect-[4/3] rounded-xl bg-slate-200 dark:bg-slate-700 overflow-hidden relative">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" data-alt="Smartphone screen protector application" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBrMt9O6EGOVcewSeNKQrvU4VGjda76-Pshpb1kWpXjK-unON4BP8snH8-8rLruS3EEold5PLPxVovM_cF-L4sL6yvHUNUPozGrsPpOBVckMyH33OJUW8k8m0_D0PLKeQBjr8uxwMLadmcE5KDBsRWn0Om3HCROInUXzwd94T1oT3JWYUu_2PP4ZBoOEEWwtz_y6Yz22Fb4SYeuZEc1ZguyjI_tb3h_ud7Gkwgja6n8HTHjZyVbk0kmgDLzj5UbJA8KKrIqt92ZxH8");'></div>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold leading-normal group-hover:text-primary transition-colors">حماية وشاشات</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-normal leading-normal">Protection</p>
+</div>
+</a>
+<!-- Category Card 4 -->
+<a class="group flex flex-col gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-primary/30 transition-all shadow-sm hover:shadow-md" href="#">
+<div class="w-full aspect-[4/3] rounded-xl bg-slate-200 dark:bg-slate-700 overflow-hidden relative">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" data-alt="Colorful phone cases collection" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCSALDVjop-18hvqcWkxgqsMdPLphaK5kNSCb4GZ95OQYcfVwp8h9oaaTEwCPeTLLa-sailxbEC3Og-tZZYqRlmFMz7bLA5UUF0TTiN3u2_TzFc-jmeclgzkp8XhlTAgnkAcbjuSmiCycnX_sRJcwylKSLjiqRLP9t2kAvmhWWn9wRasOg1UjJfAUzb9tgOP4PcMui6cfP9GgXeRPXBMSE6L6iH3yhdNpxrEux5lvqQvdZw8w-2KUwc6cpE4cIvkKoFVV-DFCbbuq4");'></div>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold leading-normal group-hover:text-primary transition-colors">كفرات وحافظات</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-normal leading-normal">Cases &amp; Covers</p>
+</div>
+</a>
+<!-- Category Card 5 -->
+<a class="group flex flex-col gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-primary/30 transition-all shadow-sm hover:shadow-md" href="#">
+<div class="w-full aspect-[4/3] rounded-xl bg-slate-200 dark:bg-slate-700 overflow-hidden relative">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" data-alt="Smart watch on wrist" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCkOG9XD0ofjoT7m_g3QrGzOZ1Y4ry8fqNqJVr2w6BAIk_kZC5LRW6tjCYLWxxRqngLSeSmeulimm86IfKajQz0e6dCv2CTCA56zUX2v-Ql4WhEegP3ymloxoac9KJziOcHFu3AWgc-G_3CuC8sz67wyvIFQ8VyVC-k0s67noR7pUaDeKLuCvocm9vn9hDVyJt4a1xqlHRSyDRCJS7VLWp782q2j1FeKimCc5HzRtDOwnSLdN4xRn_pnwWdakIwcVTslkKlXTHDHfA");'></div>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold leading-normal group-hover:text-primary transition-colors">ساعات ذكية</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-normal leading-normal">Smart Watches</p>
+</div>
+</a>
+<!-- Category Card 6 -->
+<a class="group flex flex-col gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-primary/30 transition-all shadow-sm hover:shadow-md" href="#">
+<div class="w-full aspect-[4/3] rounded-xl bg-slate-200 dark:bg-slate-700 overflow-hidden relative">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" data-alt="Laptop and tech accessories on desk" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAeiMUVdG5GbiY9H2eap53sMrHGF8duylQYOB8bvVzqisC3kalUDrB2aacP1sF3PGg9dydpd9mKeHY8QCOs3Q4L-pk1MNnHlIh352pnimOREmt7j-2LoiFlWZfVCVr-S32G_dkCgwntV7kZdU1FRY1HBqF-cUmBw2TMHG6j5tLrNQ5EOn2P_FNKHxFmjc6lioI2oTyRndtZVQ0OoHwjyHh0LRK51ZVCegbZGsl8bcha1WMP0ghc1xHC7XXOGerpxG-AWoYlu7whvAE");'></div>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold leading-normal group-hover:text-primary transition-colors">اكسسوارات لابتوب</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-normal leading-normal">Laptop Acc.</p>
+</div>
+</a>
+</div>
+</div>
+<!-- Section 2: Shop by Brand -->
+<div class="pt-8 pb-4">
+<div class="flex items-center justify-between px-4 pb-3">
+<h2 class="text-slate-900 dark:text-slate-100 tracking-tight text-[22px] font-bold leading-tight">حسب الماركة</h2>
+<a class="text-primary text-sm font-medium hover:underline" href="#">عرض الكل</a>
+</div>
+<div class="grid grid-cols-3 gap-3 px-4">
+<!-- Brand 1: Apple -->
+<a class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-primary/30 transition-all hover:bg-white dark:hover:bg-slate-700 shadow-sm" href="#">
+<div class="w-10 h-10 flex items-center justify-center text-slate-900 dark:text-white mb-2">
+<svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.3-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.55-.83.99-1.93.9-2.96-.82.04-1.97.57-2.6 1.31-.56.63-1.07 1.7-1.02 2.76.92.07 2.12-.28 2.72-1.11z"></path></svg>
+</div>
+<span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Apple</span>
+</a>
+<!-- Brand 2: Anker -->
+<a class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-primary/30 transition-all hover:bg-white dark:hover:bg-slate-700 shadow-sm" href="#">
+<div class="w-10 h-10 flex items-center justify-center mb-2">
+<!-- Simple text rep for Anker logo style -->
+<span class="text-xl font-black text-slate-900 dark:text-white tracking-tighter">ANKER</span>
+</div>
+<span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Anker</span>
+</a>
+<!-- Brand 3: Samsung -->
+<a class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-primary/30 transition-all hover:bg-white dark:hover:bg-slate-700 shadow-sm" href="#">
+<div class="w-10 h-10 flex items-center justify-center text-[#1428a0] dark:text-[#3d5afe] mb-2 transform -rotate-12">
+<span class="text-base font-bold tracking-widest bg-slate-200/50 px-1 rounded">SAMSUNG</span>
+</div>
+<span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Samsung</span>
+</a>
+<!-- Brand 4: LinkTech -->
+<a class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-primary/30 transition-all hover:bg-white dark:hover:bg-slate-700 shadow-sm" href="#">
+<div class="w-10 h-10 flex items-center justify-center mb-2 text-red-600 font-bold text-xl">
+                            LT
+                        </div>
+<span class="text-xs font-semibold text-slate-700 dark:text-slate-300">LinkTech</span>
+</a>
+<!-- Brand 5: Baseus -->
+<a class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-primary/30 transition-all hover:bg-white dark:hover:bg-slate-700 shadow-sm" href="#">
+<div class="w-10 h-10 flex items-center justify-center mb-2 text-yellow-500 font-bold italic text-lg">
+                           B
+                       </div>
+<span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Baseus</span>
+</a>
+<!-- Brand 6: Joyroom -->
+<a class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-primary/30 transition-all hover:bg-white dark:hover:bg-slate-700 shadow-sm" href="#">
+<div class="w-10 h-10 flex items-center justify-center mb-2 text-primary font-bold text-lg">
+                            JR
+                        </div>
+<span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Joyroom</span>
+</a>
+</div>
+</div>
+<div class="h-6"></div>
+</div>
+<!-- Bottom Navigation Bar -->
+<div class="sticky bottom-0 z-20 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-[#1a2632] px-4 pb-4 pt-2 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+<div class="flex gap-2 justify-between">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors group" href="#">
+<div class="flex h-8 items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[24px]">home</span>
+</div>
+<p class="text-xs font-medium leading-normal">الرئيسية</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary dark:text-primary" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[24px] font-variation-settings-FILL">grid_view</span>
+</div>
+<p class="text-xs font-bold leading-normal">التصنيفات</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors group" href="#">
+<div class="relative flex h-8 items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[24px]">shopping_cart</span>
+<span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">2</span>
+</div>
+<p class="text-xs font-medium leading-normal">السلة</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors group" href="#">
+<div class="flex h-8 items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[24px]">person</span>
+</div>
+<p class="text-xs font-medium leading-normal">حسابي</p>
+</a>
+</div>
+</div>
+</div>
+</body></html>

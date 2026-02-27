@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>تتبع الطلب - متجر المعتمد</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Noto+Sans+Arabic:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        display: ['"Manrope"', '"Noto Sans Arabic"', "sans-serif"],
+                        sans: ['"Manrope"', '"Noto Sans Arabic"', "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        full: "9999px",
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col antialiased selection:bg-primary/20 selection:text-primary">
+<div class="relative flex flex-col w-full max-w-md mx-auto min-h-screen bg-white dark:bg-[#1a2632] shadow-xl overflow-hidden">
+<!-- Header -->
+<div class="flex items-center justify-between px-5 py-4 bg-white dark:bg-[#1a2632] sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800">
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined text-[24px]">arrow_forward</span>
+</button>
+<h1 class="text-lg font-bold text-center flex-1 text-slate-900 dark:text-slate-100">تتبع الطلب</h1>
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-primary font-bold text-sm">
+                مساعدة
+            </button>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto pb-24">
+<!-- Order Summary Card -->
+<div class="p-5">
+<div class="bg-primary/5 dark:bg-primary/10 rounded-2xl p-5 border border-primary/10">
+<div class="flex justify-between items-center mb-4">
+<div class="flex flex-col">
+<span class="text-slate-500 dark:text-slate-400 text-xs font-medium mb-1">رقم الطلب</span>
+<span class="text-slate-900 dark:text-slate-100 font-bold text-lg font-mono">#482910</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-slate-500 dark:text-slate-400 text-xs font-medium mb-1">الوقت المتوقع</span>
+<span class="text-primary font-bold text-lg">3-5 أيام عمل</span>
+</div>
+</div>
+<!-- Progress Bar (Visual Summary) -->
+<div class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden flex">
+<div class="h-full bg-primary w-1/2"></div>
+</div>
+<div class="flex justify-between mt-2 text-[10px] text-slate-400 font-medium">
+<span>تم الطلب</span>
+<span>قيد التوصيل</span>
+<span>تم التسليم</span>
+</div>
+</div>
+</div>
+<!-- Timeline Section -->
+<div class="px-5">
+<h3 class="text-slate-900 dark:text-slate-100 font-bold text-base mb-6 px-1">حالة الشحنة</h3>
+<div class="relative pl-4 pr-2">
+<!-- Vertical Line Background -->
+<div class="absolute top-2 bottom-10 right-[19px] w-[2px] bg-slate-100 dark:bg-slate-800 h-full -z-10"></div>
+<!-- Step 1: Received -->
+<div class="flex gap-4 mb-8 relative group">
+<div class="flex flex-col items-center">
+<div class="relative z-10 flex items-center justify-center w-10 h-10 rounded-full bg-green-500 text-white shadow-[0_0_0_4px_rgba(34,197,94,0.1)]">
+<span class="material-symbols-outlined text-[20px]">check</span>
+</div>
+<div class="w-[2px] h-full bg-green-500 absolute top-10 -z-0"></div>
+</div>
+<div class="flex-1 pt-1 pb-4">
+<div class="flex justify-between items-start">
+<h4 class="text-slate-900 dark:text-slate-100 font-bold text-sm">تم استلام طلبك</h4>
+<span class="text-slate-400 text-xs font-mono">10:30 ص</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs mt-1 leading-relaxed">لقد تلقينا طلبك بنجاح وجاري مراجعته من قبل فريقنا.</p>
+</div>
+</div>
+<!-- Step 2: Processing (Active) -->
+<div class="flex gap-4 mb-8 relative group">
+<div class="flex flex-col items-center">
+<div class="relative z-10 flex items-center justify-center w-10 h-10 rounded-full bg-primary text-white shadow-[0_0_0_4px_rgba(19,127,236,0.2)]">
+<span class="material-symbols-outlined text-[20px] animate-pulse">cached</span>
+</div>
+<div class="w-[2px] h-full bg-slate-200 dark:bg-slate-700 absolute top-10 -z-0"></div>
+</div>
+<div class="flex-1 pt-1 pb-4">
+<div class="flex justify-between items-start">
+<h4 class="text-primary font-bold text-sm">تتم معالجة الطلب</h4>
+<span class="text-slate-400 text-xs font-mono">11:45 ص</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs mt-1 leading-relaxed">يقوم فريقنا بتجهيز المنتجات وتغليفها بعناية.</p>
+</div>
+</div>
+<!-- Step 3: Contacting -->
+<div class="flex gap-4 mb-8 relative group opacity-50">
+<div class="flex flex-col items-center">
+<div class="relative z-10 flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-[20px]">call</span>
+</div>
+<div class="w-[2px] h-full bg-slate-200 dark:bg-slate-700 absolute top-10 -z-0"></div>
+</div>
+<div class="flex-1 pt-1 pb-4">
+<div class="flex justify-between items-start">
+<h4 class="text-slate-800 dark:text-slate-200 font-medium text-sm">سيتم التواصل معك</h4>
+<span class="text-slate-400 text-xs">--:--</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs mt-1 leading-relaxed">سيتصل بك مندوب التوصيل لتأكيد الموقع والوقت.</p>
+</div>
+</div>
+<!-- Step 4: Delivered -->
+<div class="flex gap-4 relative group opacity-50">
+<div class="flex flex-col items-center">
+<div class="relative z-10 flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-[20px]">home_pin</span>
+</div>
+</div>
+<div class="flex-1 pt-1 pb-4">
+<div class="flex justify-between items-start">
+<h4 class="text-slate-800 dark:text-slate-200 font-medium text-sm">تم التسليم بنجاح</h4>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs mt-1 leading-relaxed">استمتع بمنتجاتك الجديدة!</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Product Items -->
+<div class="p-5 mt-2">
+<h3 class="text-slate-900 dark:text-slate-100 font-bold text-base mb-4 px-1">المنتجات في الطلب</h3>
+<div class="bg-white dark:bg-[#1f2d3b] rounded-2xl p-3 shadow-sm border border-slate-100 dark:border-slate-800 flex gap-4 items-center">
+<div class="w-20 h-20 shrink-0 bg-slate-50 dark:bg-slate-800 rounded-xl overflow-hidden relative">
+<div class="w-full h-full bg-center bg-cover" data-alt="سماعة رأس سوداء عالية الجودة" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCAb1-zGPbOmoJQJxB39V2GXjvPhFt-zY0PDF_dMNqj_od-LO9Oa_ijgd4fxS6pevK8g3zUY-A_XIZRWldWsBWz8VP6moDQwIdGS6hZ6JLQ7dr8wtK1bVb9uIS7XUScePD9Y3kAZ8FAKbhT6Eu4KnOGPt4TjhaCE-bLE_pwvRyxWPzGcEvOJE-Qp5OKBXc70iYB3n6zIgypdOWxXb2P6EnwRaCwqdCE8RfVcaw2B9ZWs0wXcaXPpGJ4qlV2mgavhOpdpC8MjS6PHXc');"></div>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-slate-900 dark:text-slate-100 font-bold text-sm truncate mb-1">سماعة رأس بلوتوث لاسلكية</h4>
+<p class="text-slate-500 dark:text-slate-400 text-xs mb-3">اللون: أسود | الكمية: 1</p>
+<div class="flex items-center justify-between">
+<span class="text-primary font-bold text-sm">120 د.ل</span>
+<button class="text-xs font-medium text-slate-500 bg-slate-100 dark:bg-slate-700 dark:text-slate-300 px-3 py-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">عرض</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Need Help CTA -->
+<div class="px-5 pb-8">
+<div class="flex items-center justify-between p-4 bg-primary/5 dark:bg-primary/10 rounded-xl border border-primary/10">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined">support_agent</span>
+</div>
+<div class="flex flex-col">
+<span class="text-slate-900 dark:text-slate-100 font-bold text-sm">تحتاج مساعدة؟</span>
+<span class="text-slate-500 dark:text-slate-400 text-xs">تواصل مع خدمة العملاء</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 transform rotate-180">chevron_left</span>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar -->
+<div class="bg-white dark:bg-[#1a2632] border-t border-slate-100 dark:border-slate-800 px-6 py-3 pb-6 flex justify-between items-end absolute bottom-0 w-full z-20">
+<a class="flex flex-col items-center gap-1 group w-1/4" href="#">
+<span class="material-symbols-outlined text-[24px] text-slate-400 group-hover:text-primary transition-colors">home</span>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary transition-colors">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center gap-1 group w-1/4" href="#">
+<span class="material-symbols-outlined text-[24px] text-slate-400 group-hover:text-primary transition-colors">grid_view</span>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary transition-colors">الأقسام</span>
+</a>
+<a class="flex flex-col items-center gap-1 group w-1/4" href="#">
+<div class="relative">
+<span class="material-symbols-outlined text-[24px] text-slate-400 group-hover:text-primary transition-colors">shopping_bag</span>
+<span class="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white text-[9px] font-bold flex items-center justify-center rounded-full">2</span>
+</div>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary transition-colors">السلة</span>
+</a>
+<a class="flex flex-col items-center gap-1 group w-1/4" href="#">
+<span class="material-symbols-outlined text-[24px] text-slate-900 dark:text-white">person</span>
+<span class="text-[10px] font-bold text-slate-900 dark:text-white">حسابي</span>
+</a>
+</div>
+</div>
+</body></html>

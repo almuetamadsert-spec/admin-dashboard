@@ -1,0 +1,186 @@
+<%- include('../partials/head', { title: isEdit ? 'تعديل التاجر' : 'إضافة تاجر جديد' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<div class="main-content">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h4 class="page-title mb-0"><%= isEdit ? 'تعديل التاجر' : 'إضافة تاجر جديد' %></h4>
+    <a href="/admin/merchants" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-right"></i> رجوع للقائمة
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <i class="bi bi-person-plus me-2"></i>
+      <%= isEdit ? 'بيانات التاجر' : 'بيانات التاجر الجديد' %>
+    </div>
+    <div class="card-body">
+      <form method="post" action="<%= isEdit ? '/admin/merchants/edit/' + merchant.id : '/admin/merchants' %>" class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">اسم المالك <span class="text-danger">*</span></label>
+          <input type="text" name="name" class="form-control" placeholder="اسم صاحب المتجر" required
+                 value="<%= merchant ? (merchant.name || '') : '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">اسم المتجر (الفرع)</label>
+          <input type="text" name="store_name" class="form-control" placeholder="اسم المتجر أو الفرع"
+                 value="<%= merchant ? (merchant.store_name || '') : '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">المدينة</label>
+          <select name="city_id" class="form-select">
+            <option value="">— اختر المدينة —</option>
+            <% cities.forEach(function(c) { %>
+            <option value="<%= c.id %>" <%= merchant && merchant.city_id == c.id ? 'selected' : '' %>><%= c.name %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">الهاتف</label>
+          <input type="text" name="phone" class="form-control" placeholder="رقم الهاتف"
+                 value="<%= merchant ? (merchant.phone || '') : '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">البريد الإلكتروني (للإشعارات)</label>
+          <input type="email" name="email" class="form-control" placeholder="example@email.com"
+                 value="<%= merchant ? (merchant.email || '') : '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">لون البطاقة</label>
+          <select name="card_color" class="form-select">
+            <% (cardColors || []).forEach(function(c) { %>
+            <option value="<%= c.value %>" <%= ((merchant ? (merchant.card_color || '') : '') === c.value) ? 'selected' : '' %>><%= c.label %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">حد الطلبات</label>
+          <input type="number" name="order_limit" class="form-control" min="0" placeholder="20"
+                 value="<%= merchant ? (merchant.order_limit != null ? merchant.order_limit : 20) : 20 %>">
+          <small class="text-muted">الحد الأقصى للطلبات (مثلاً يومي أو حسب إعدادك).</small>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">الحالة</label>
+          <select name="is_active" class="form-select">
+            <option value="1" <%= !merchant || merchant.is_active ? 'selected' : '' %>>نشط</option>
+            <option value="0" <%= merchant && !merchant.is_active ? 'selected' : '' %>>معطل</option>
+          </select>
+        </div>
+        <div class="col-12 mt-4">
+          <hr>
+          <h6 class="fw-semibold text-dark mb-1">النسبة والعمولة</h6>
+          <p class="commission-hint text-muted small mb-3">المنطق: لكل شريحة «من السعر» → «إلى السعر» (فارغ أو 0 = فما فوق). النسبة % تُطبّق على إجمالي الطلب؛ العمولة الثابتة (د.ل) تُضاف. هذه الشرائح لهذا التاجر فقط وتُستخدم في كشف الإيرادات.</p>
+          <% 
+            // تأمين قيم افتراضية في حال لم تُمرَّر المتغيرات من المسار
+            var _rateTiers = (typeof rateTiers !== 'undefined' && rateTiers) ? rateTiers : [];
+            var _fixedTiers = (typeof fixedTiers !== 'undefined' && fixedTiers) ? fixedTiers : [];
+          %>
+          <div class="commission-tiers-block mb-3">
+            <div class="commission-tiers-caption fw-semibold text-secondary small mb-2">النسبة % (حسب النطاق السعري)</div>
+            <div class="commission-tier-headers d-flex flex-wrap gap-2 align-items-center mb-1 px-1 small text-muted">
+              <span class="commission-tier-input" style="min-width:90px;max-width:130px">من السعر</span>
+              <span class="commission-tier-input" style="min-width:90px;max-width:130px">إلى السعر (0=فما فوق)</span>
+              <span class="commission-tier-input" style="min-width:90px;max-width:130px">النسبة %</span>
+              <span style="width:32px"></span>
+            </div>
+            <div id="rate-tiers-container" class="commission-rows">
+              <% (_rateTiers || []).forEach(function(t) { %>
+              <div class="commission-tier-row d-flex flex-wrap gap-2 align-items-center mb-2">
+                <input type="number" name="rate_from" value="<%= (t.from != null) ? t.from : 0 %>" placeholder="من السعر" title="بداية النطاق السعري" min="0" step="0.01" class="form-control commission-tier-input">
+                <input type="number" name="rate_to" value="<%= (t.to != null && t.to > 0) ? t.to : '' %>" placeholder="إلى (0=فما فوق)" title="نهاية النطاق. فارغ أو 0 = فما فوق" min="0" step="0.01" class="form-control commission-tier-input">
+                <input type="number" name="rate_pct" value="<%= (t.rate != null) ? t.rate : '' %>" placeholder="النسبة %" title="نسبة العمولة المئوية" min="0" max="100" step="0.01" class="form-control commission-tier-input">
+                <button type="button" class="btn btn-outline-danger btn-sm commission-tier-remove" title="حذف الشريحة">×</button>
+              </div>
+              <% }); %>
+            </div>
+            <button type="button" id="add-rate-tier" class="btn btn-sm btn-outline-primary mt-1">+ إضافة شريحة نسبة</button>
+          </div>
+          <div class="commission-tiers-block">
+            <div class="commission-tiers-caption fw-semibold text-secondary small mb-2">عمولة ثابتة (د.ل) حسب النطاق السعري</div>
+            <div class="commission-tier-headers d-flex flex-wrap gap-2 align-items-center mb-1 px-1 small text-muted">
+              <span class="commission-tier-input" style="min-width:90px;max-width:130px">من السعر</span>
+              <span class="commission-tier-input" style="min-width:90px;max-width:130px">إلى السعر (0=فما فوق)</span>
+              <span class="commission-tier-input" style="min-width:90px;max-width:130px">عمولة د.ل</span>
+              <span style="width:32px"></span>
+            </div>
+            <div id="fixed-tiers-container" class="commission-rows">
+              <% (_fixedTiers || []).forEach(function(t) { %>
+              <div class="commission-tier-row d-flex flex-wrap gap-2 align-items-center mb-2">
+                <input type="number" name="fixed_from" value="<%= (t.from != null) ? t.from : 0 %>" placeholder="من السعر" title="بداية النطاق السعري" min="0" step="0.01" class="form-control commission-tier-input">
+                <input type="number" name="fixed_to" value="<%= (t.to != null && t.to > 0) ? t.to : '' %>" placeholder="إلى (0=فما فوق)" title="نهاية النطاق. فارغ أو 0 = فما فوق" min="0" step="0.01" class="form-control commission-tier-input">
+                <input type="number" name="fixed_val" value="<%= (t.fixed != null) ? t.fixed : '' %>" placeholder="عمولة د.ل" title="العمولة الثابتة بالدينار" min="0" step="0.01" class="form-control commission-tier-input">
+                <button type="button" class="btn btn-outline-danger btn-sm commission-tier-remove" title="حذف الشريحة">×</button>
+              </div>
+              <% }); %>
+            </div>
+            <button type="button" id="add-fixed-tier" class="btn btn-sm btn-outline-primary mt-1">+ إضافة شريحة عمولة ثابتة</button>
+          </div>
+        </div>
+        <div class="col-12 pt-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check2 me-1"></i> <%= isEdit ? 'حفظ التعديلات' : 'إضافة التاجر' %>
+          </button>
+          <a href="/admin/merchants" class="btn btn-outline-secondary ms-2">إلغاء</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  .commission-hint { font-size: 12px; line-height: 1.5; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
+  .commission-tiers-block { padding: 12px 14px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; }
+  .commission-tiers-caption { color: #475569; }
+  .commission-tier-input { min-width: 90px; max-width: 130px; }
+  .commission-tier-row .commission-tier-remove { width: 32px; flex-shrink: 0; font-size: 1.2rem; line-height: 1; padding: 0.25rem 0.5rem; }
+  #rate-tiers-container .commission-tier-row:only-child .commission-tier-remove,
+  #fixed-tiers-container .commission-tier-row:only-child .commission-tier-remove { display: none; }
+</style>
+<%- include('../partials/scripts') %>
+<script>
+(function() {
+  var rateContainer = document.getElementById('rate-tiers-container');
+  var fixedContainer = document.getElementById('fixed-tiers-container');
+  function makeRateRow() {
+    var row = document.createElement('div');
+    row.className = 'commission-tier-row d-flex flex-wrap gap-2 align-items-center mb-2';
+    row.innerHTML = '<input type="number" name="rate_from" placeholder="من السعر" title="بداية النطاق السعري" min="0" step="0.01" class="form-control commission-tier-input">' +
+      '<input type="number" name="rate_to" placeholder="إلى (0=فما فوق)" title="نهاية النطاق" min="0" step="0.01" class="form-control commission-tier-input">' +
+      '<input type="number" name="rate_pct" placeholder="النسبة %" title="نسبة العمولة المئوية" min="0" max="100" step="0.01" class="form-control commission-tier-input">' +
+      '<button type="button" class="btn btn-outline-danger btn-sm commission-tier-remove" title="حذف الشريحة">×</button>';
+    return row;
+  }
+  function makeFixedRow() {
+    var row = document.createElement('div');
+    row.className = 'commission-tier-row d-flex flex-wrap gap-2 align-items-center mb-2';
+    row.innerHTML = '<input type="number" name="fixed_from" placeholder="من السعر" title="بداية النطاق السعري" min="0" step="0.01" class="form-control commission-tier-input">' +
+      '<input type="number" name="fixed_to" placeholder="إلى (0=فما فوق)" title="نهاية النطاق" min="0" step="0.01" class="form-control commission-tier-input">' +
+      '<input type="number" name="fixed_val" placeholder="عمولة د.ل" title="العمولة الثابتة بالدينار" min="0" step="0.01" class="form-control commission-tier-input">' +
+      '<button type="button" class="btn btn-outline-danger btn-sm commission-tier-remove" title="حذف الشريحة">×</button>';
+    return row;
+  }
+  function bindRemove(container) {
+    if (!container) return;
+    container.querySelectorAll('.commission-tier-remove').forEach(function(btn) {
+      btn.onclick = function() {
+        var row = this.closest('.commission-tier-row');
+        if (container.querySelectorAll('.commission-tier-row').length > 1) row.remove();
+      };
+    });
+  }
+  if (rateContainer) {
+    document.getElementById('add-rate-tier').onclick = function() {
+      rateContainer.appendChild(makeRateRow());
+      bindRemove(rateContainer);
+    };
+    bindRemove(rateContainer);
+  }
+  if (fixedContainer) {
+    document.getElementById('add-fixed-tier').onclick = function() {
+      fixedContainer.appendChild(makeFixedRow());
+      bindRemove(fixedContainer);
+    };
+    bindRemove(fixedContainer);
+  }
+})();
+</script>

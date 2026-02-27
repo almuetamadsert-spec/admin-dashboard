@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>إنشاء حساب جديد - المعتمد</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Noto+Sans+Arabic:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "Noto Sans Arabic", "sans-serif"],
+                        "sans": ["Manrope", "Noto Sans Arabic", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans Arabic', 'Manrope', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-0 md:p-4">
+<!-- Mobile Container -->
+<div class="relative flex h-full min-h-screen w-full max-w-md flex-col bg-white dark:bg-slate-900 overflow-x-hidden md:h-[844px] md:min-h-[auto] md:rounded-3xl shadow-xl border-slate-100 dark:border-slate-800 md:border">
+<!-- Header -->
+<div class="flex items-center p-4 pb-2 justify-between">
+<button class="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">إنشاء حساب جديد</h2>
+</div>
+<!-- Hero Content -->
+<div class="flex flex-col items-center pt-4 pb-6 px-6">
+<div class="size-20 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary text-4xl">person_add</span>
+</div>
+<h1 class="text-slate-900 dark:text-slate-100 tracking-tight text-[28px] font-bold leading-tight text-center mb-2">أهلاً بك في المعتمد</h1>
+<p class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal text-center">سجل حساب جديد للبدء في التسوق والتمتع بأفضل العروض التقنية</p>
+</div>
+<!-- Form Fields -->
+<div class="flex flex-col gap-5 px-6 pb-24 flex-1 overflow-y-auto">
+<!-- Full Name -->
+<label class="flex flex-col gap-1.5">
+<span class="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-normal">الاسم الكامل</span>
+<div class="relative flex items-center">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/20 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:border-primary h-14 placeholder:text-slate-400 p-[15px] text-base font-normal leading-normal pl-10 transition-all" placeholder="أدخل اسمك الثلاثي" type="text"/>
+<span class="material-symbols-outlined absolute left-4 text-slate-400 pointer-events-none">person</span>
+</div>
+</label>
+<!-- Phone Number -->
+<label class="flex flex-col gap-1.5">
+<span class="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-normal">رقم الهاتف</span>
+<div class="flex w-full items-stretch rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
+<input class="form-input flex-1 w-full min-w-0 resize-none border-none bg-transparent h-14 text-slate-900 dark:text-white placeholder:text-slate-400 p-[15px] focus:ring-0 text-base font-normal leading-normal text-left dir-ltr" dir="ltr" placeholder="9X XXXXXXX" type="tel"/>
+<div class="flex items-center justify-center px-4 border-r border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900/50">
+<span class="text-slate-900 dark:text-slate-100 font-medium dir-ltr">+218</span>
+<!-- Simple flag representation or icon -->
+<span class="mr-2 text-lg">🇱🇾</span>
+</div>
+</div>
+</label>
+<!-- Email -->
+<label class="flex flex-col gap-1.5">
+<span class="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-normal">البريد الإلكتروني</span>
+<div class="relative flex items-center">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/20 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:border-primary h-14 placeholder:text-slate-400 p-[15px] text-base font-normal leading-normal pl-10 transition-all" placeholder="example@mail.com" type="email"/>
+<span class="material-symbols-outlined absolute left-4 text-slate-400 pointer-events-none">mail</span>
+</div>
+</label>
+<!-- Password -->
+<label class="flex flex-col gap-1.5">
+<span class="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-normal">كلمة المرور</span>
+<div class="relative flex items-center">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/20 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:border-primary h-14 placeholder:text-slate-400 p-[15px] text-base font-normal leading-normal pl-10 transition-all" placeholder="••••••••" type="password"/>
+<span class="material-symbols-outlined absolute left-4 text-slate-400 cursor-pointer hover:text-primary">visibility_off</span>
+</div>
+</label>
+<!-- Terms Checkbox -->
+<label class="flex items-start gap-3 mt-2 cursor-pointer group">
+<div class="relative flex items-center pt-0.5">
+<input class="peer size-5 appearance-none rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 checked:bg-primary checked:border-primary focus:ring-2 focus:ring-primary/20 transition-all" type="checkbox"/>
+<span class="material-symbols-outlined absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[16px] text-white opacity-0 peer-checked:opacity-100 pointer-events-none mt-0.5">check</span>
+</div>
+<span class="text-slate-600 dark:text-slate-400 text-sm leading-tight group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">
+                    أوافق على <a class="text-primary font-semibold hover:underline" href="#">الشروط والأحكام</a> و <a class="text-primary font-semibold hover:underline" href="#">سياسة الخصوصية</a>
+</span>
+</label>
+</div>
+<!-- Bottom Action -->
+<div class="absolute bottom-0 w-full bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 p-4">
+<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-blue-600 transition-all shadow-lg shadow-primary/20 active:scale-[0.98]">
+<span class="truncate">تسجيل حساب جديد</span>
+</button>
+<div class="text-center mt-4">
+<p class="text-slate-500 dark:text-slate-400 text-sm">لديك حساب بالفعل؟ <a class="text-primary font-bold hover:underline" href="#">سجل دخولك</a></p>
+</div>
+</div>
+</div>
+</body></html>

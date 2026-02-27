@@ -1,0 +1,230 @@
+<%- include('../partials/head', { title: 'واجهة المتجر — إعلانات السلايدر' }) %>
+  <%- include('../partials/sidebar', { adminUsername }) %>
+
+    <h4 class="mb-4">واجهة المتجر — إعلانات السلايدر</h4>
+    <p class="text-muted small mb-4">الصور تظهر في أعلى تطبيق المتجر (هاتف/تابلت). أبعاد مناسبة: عرض 1200×400 تقريباً أو
+      نسبة 3:1.</p>
+
+    <% if (locals.query && query.error==='no_image' ) { %>
+      <div class="alert alert-warning">اختر صورة عند الإضافة.</div>
+      <% } %>
+
+        <!-- إعداد وقت تحرك الصور وشكل شبكة البطاقات -->
+        <div class="card mb-4" style="position:relative; z-index: 2; overflow: visible;">
+          <div class="card-body" style="overflow: visible;">
+            <h6 class="card-title mb-3"><i class="bi bi-gear"></i> تصميم بطاقة المنتج</h6>
+            <form method="post" action="/admin/store-ui/settings" class="row g-3 align-items-end">
+              <input type="hidden" name="interval" value="<%= interval %>">
+              <div class="col-auto">
+                <label class="form-label small">شكل شبكة بطاقات المنتجات</label>
+                <select name="product_layout" class="form-select" style="width:auto">
+                  <option value="grid_2" <%=(locals.productLayout || 'grid_2' )==='grid_2' ? 'selected' : '' %>>صفان
+                    أفقي (2 بطاقات)</option>
+                  <option value="grid_3" <%=(locals.productLayout || 'grid_2' )==='grid_3' ? 'selected' : '' %>>3 بطاقات
+                    أفقية</option>
+                  <option value="slider" <%=(locals.productLayout || 'grid_2' )==='slider' ? 'selected' : '' %>>سلايدر
+                    أفقي</option>
+                </select>
+              </div>
+              <div class="w-100"></div>
+              <div class="col-12 mt-2">
+                <h6 class="small text-muted mb-2">تعديل بطاقة المنتج</h6>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">لون خلفية البطاقة</label>
+                <input type="color" name="product_card_bg" class="form-control form-control-color"
+                  value="<%= (locals.cardBg || '#ffffff') %>" title="اختر لون الخلفية">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">زوايا البطاقة</label>
+                <select name="product_card_radius" class="form-select">
+                  <% cornerStyles.forEach(function(s) { %>
+                    <option value="<%= s.value %>" <%=(locals.cardRadius || 'rounded' )===s.value ? 'selected' : '' %>>
+                      <%= s.label %>
+                    </option>
+                    <% }); %>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check mt-3">
+                  <input class="form-check-input" type="checkbox" name="product_card_show_add_to_cart" value="1"
+                    id="cardShowAdd" <%=locals.showAddToCart ? 'checked' : '' %>>
+                  <label class="form-check-label small" for="cardShowAdd">إظهار زر إضافة للسلة</label>
+                </div>
+                <div class="form-check mt-2">
+                  <input class="form-check-input" type="checkbox" name="product_card_show_buy_now" value="1"
+                    id="cardShowBuyNow" <%=locals.showBuyNow ? 'checked' : '' %>>
+                  <label class="form-check-label small" for="cardShowBuyNow">إظهار زر اشتري الآن</label>
+                </div>
+              </div>
+              <div class="w-100"></div>
+              <div class="col-md-3">
+                <label class="form-label small">مكان البراند (الشركة)</label>
+                <select name="card_brand_position" class="form-select" style="min-width:120px">
+                  <option value="left" <%=(locals.cardBrandPos || 'left' )==='left' ? 'selected' : '' %>>يسار</option>
+                  <option value="right" <%=(locals.cardBrandPos || 'left' )==='right' ? 'selected' : '' %>>يمين</option>
+                  <option value="top" <%=(locals.cardBrandPos || 'left' )==='top' ? 'selected' : '' %>>فوق</option>
+                  <option value="bottom" <%=(locals.cardBrandPos || 'left' )==='bottom' ? 'selected' : '' %>>تحت
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">محاذاة اسم المنتج</label>
+                <select name="card_name_align" class="form-select" style="min-width:120px">
+                  <option value="left" <%=(locals.cardNameAlign || 'right' )==='left' ? 'selected' : '' %>>يسار</option>
+                  <option value="center" <%=(locals.cardNameAlign || 'right' )==='center' ? 'selected' : '' %>>وسط
+                  </option>
+                  <option value="right" <%=(locals.cardNameAlign || 'right' )==='right' ? 'selected' : '' %>>يمين
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">محاذاة السعر</label>
+                <select name="card_price_align" class="form-select" style="min-width:120px">
+                  <option value="left" <%=(locals.cardPriceAlign || 'right' )==='left' ? 'selected' : '' %>>يسار
+                  </option>
+                  <option value="center" <%=(locals.cardPriceAlign || 'right' )==='center' ? 'selected' : '' %>>وسط
+                  </option>
+                  <option value="right" <%=(locals.cardPriceAlign || 'right' )==='right' ? 'selected' : '' %>>يمين
+                  </option>
+                </select>
+              </div>
+              <div class="w-100"></div>
+              <div class="col-md-3">
+                <label class="form-label small">شكل زر أضف إلى السلة</label>
+                <select name="card_add_btn_style" class="form-select" style="min-width:180px">
+                  <option value="small_rounded" <%=(locals.cardAddBtnStyle || 'small_rounded' )==='small_rounded'
+                    ? 'selected' : '' %>>زر صغير زوايا دائرية</option>
+                  <option value="full_rounded" <%=(locals.cardAddBtnStyle || 'small_rounded' )==='full_rounded'
+                    ? 'selected' : '' %>>زر كامل دائري</option>
+                  <option value="sharp" <%=(locals.cardAddBtnStyle || 'small_rounded' )==='sharp' ? 'selected' : '' %>
+                    >زر زوايا حادة</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">موقع الزر في البطاقة</label>
+                <select name="card_add_btn_position" class="form-select">
+                  <option value="left" <%=(locals.cardAddBtnPosition || 'right' )==='left' ? 'selected' : '' %>>يسار
+                  </option>
+                  <option value="right" <%=(locals.cardAddBtnPosition || 'right' )==='right' ? 'selected' : '' %>>يمين
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">لون زر أضف إلى السلة</label>
+                <input type="color" name="card_add_btn_color" class="form-control form-control-color"
+                  value="<%= (locals.cardAddBtnColor || '#06A3E7') %>" title="لون الزر">
+              </div>
+              <div class="col-auto mt-4">
+                <button type="submit" class="btn btn-primary">حفظ</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- تصميم بطاقة المنتج للتاجر (تطبيق التاجر) -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h6 class="card-title mb-3"><i class="bi bi-palette"></i> تصميم بطاقة المنتج للتاجر</h6>
+            <p class="text-muted small mb-3">إعدادات شكل بطاقة المنتج في تطبيق التاجر (تبويب المخزون وغيرها).</p>
+            <form method="post" action="/admin/store-ui/settings" class="row g-3 align-items-end">
+              <div class="col-md-3">
+                <label class="form-label small">لون خلفية البطاقة</label>
+                <input type="color" name="merchant_product_card_bg" class="form-control form-control-color"
+                  value="<%= (locals.merchantCardBg || '#ffffff') %>" title="لون خلفية بطاقة المنتج للتاجر">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">شكل البطاقة (الزوايا)</label>
+                <select name="merchant_product_card_radius" class="form-select">
+                  <% cornerStyles.forEach(function(s) { %>
+                    <option value="<%= s.value %>" <%=(locals.merchantCardRadius || 'rounded' )===s.value ? 'selected'
+                      : '' %>><%= s.label %>
+                    </option>
+                    <% }); %>
+                </select>
+              </div>
+              <div class="col-auto">
+                <button type="submit" class="btn btn-primary">حفظ</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- إضافة شريحة جديدة -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h6 class="card-title mb-3"><i class="bi bi-plus-circle"></i> إضافة صورة إعلان</h6>
+            <form method="post" action="/admin/store-ui/settings" class="row g-3 align-items-end mb-4">
+              <div class="col-auto">
+                <label class="form-label small">وقت تحرك صور السلايدر (ثانية، 2–60)</label>
+                <input type="number" name="interval" class="form-control" style="width:100px" min="2" max="60"
+                  value="<%= interval %>" required>
+              </div>
+              <div class="col-auto">
+                <button type="submit" class="btn btn-outline-primary">حفظ</button>
+              </div>
+            </form>
+            <form method="post" action="/admin/store-ui/slide" enctype="multipart/form-data"
+              class="row g-3 align-items-end">
+              <div class="col-md-4">
+                <label class="form-label small">الصورة</label>
+                <input type="file" name="image" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp"
+                  required>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">شكل الزوايا</label>
+                <select name="corner_style" class="form-select">
+                  <% cornerStyles.forEach(function(s) { %>
+                    <option value="<%= s.value %>">
+                      <%= s.label %>
+                    </option>
+                    <% }); %>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <button type="submit" class="btn btn-success w-100">إضافة</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- قائمة الشرائح -->
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span>شرائح الإعلانات (<%= slides.length %>)</span>
+          </div>
+          <div class="card-body">
+            <% if (slides.length===0) { %>
+              <p class="text-muted mb-0">لا توجد شرائح. أضف صورة أعلاه.</p>
+              <% } else { %>
+                <div class="row g-3">
+                  <% slides.forEach(function(s, idx) { %>
+                    <div class="col-md-6 col-lg-4">
+                      <div class="card h-100">
+                        <img src="/uploads/<%= s.image_path %>" class="card-img-top" alt="شريحة <%= s.id %>"
+                          style="height:140px;object-fit:cover;border-radius:var(--radius, 8px)">
+                        <div class="card-body py-2">
+                          <p class="small mb-1"><strong>الزوايا:</strong>
+                            <%= (cornerStyles.find(function(c){ return c.value===s.corner_style; }) || { label:
+                              s.corner_style }).label %>
+                          </p>
+                          <p class="small text-muted mb-2">الترتيب: <%= idx + 1 %>
+                          </p>
+                          <div class="d-flex gap-1">
+                            <a href="/admin/store-ui/slide/edit/<%= s.id %>"
+                              class="btn btn-sm btn-outline-primary">تعديل</a>
+                            <form action="/admin/store-ui/slide/delete/<%= s.id %>" method="post" class="d-inline"
+                              onsubmit="return confirm('حذف هذه الشريحة؟');">
+                              <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <% }); %>
+                </div>
+                <% } %>
+          </div>
+        </div>
+
+        <%- include('../partials/scripts') %>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>السلة وإتمام الطلب - متجر المعتمد</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#137fec",
+                "background-light": "#f6f7f8",
+                "background-dark": "#101922",
+              },
+              fontFamily: {
+                "display": ["Tajawal", "sans-serif"]
+              },
+              borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden">
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-xl">
+<div class="sticky top-0 z-10 flex items-center justify-between bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md p-4 pb-2 border-b border-slate-200 dark:border-slate-800">
+<button class="flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-900 dark:text-slate-100 transform rotate-180">arrow_back</span>
+</button>
+<h2 class="text-lg font-bold leading-tight flex-1 text-center">سلة المشتريات</h2>
+<button class="flex h-10 items-center justify-end px-2 text-primary font-bold text-sm hover:underline">
+                مسح
+            </button>
+</div>
+<div class="flex-1 overflow-y-auto pb-32">
+<div class="flex flex-col gap-4 p-4">
+<div class="flex gap-4 bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800">
+<div class="bg-center bg-no-repeat bg-cover rounded-md size-[80px] shrink-0 bg-slate-100 dark:bg-slate-800" data-alt="White Apple AirPods Pro case on surface" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA-tGx_5h4IZeA3MrMfmpzmF-HqxXvnQ_iG6KXKMQReXyCk8Lt9_ju5r5Zdw6ewQ-wa417HuDDPrVHnJyzdeWI5Lh9o6DVDP6bZtcAw1hhz9xx5Oh0uGcrl8AXgsGl_sUHMCxRD4Kgs1CQgNSJFEO9HDNMJmiwrkM3TEicjsxdNws6I8s1r-9CUtUnPawdkAcRY5vvTJZDtBu1dJmMI9Vf2fCAbTIPfWVcmZzyu1mxUMw9zArdRHLwvKYVh-18e0ebIWX7PG3qfpKs");'></div>
+<div class="flex flex-1 flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<p class="text-base font-bold leading-tight line-clamp-2 pl-2">حافظة سماعات آبل برو</p>
+<button class="text-slate-400 hover:text-red-500 transition-colors mr-auto p-1">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1">سيليكون - أسود</p>
+</div>
+<div class="flex justify-between items-end mt-2">
+<p class="text-primary font-bold text-lg">15.00 د.ل</p>
+<div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-md h-8 px-1">
+<button class="w-8 h-full flex items-center justify-center text-slate-500 hover:text-primary"><span class="material-symbols-outlined text-[16px]">remove</span></button>
+<span class="text-sm font-semibold w-6 text-center">1</span>
+<button class="w-8 h-full flex items-center justify-center text-slate-500 hover:text-primary"><span class="material-symbols-outlined text-[16px]">add</span></button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex gap-4 bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800">
+<div class="bg-center bg-no-repeat bg-cover rounded-md size-[80px] shrink-0 bg-slate-100 dark:bg-slate-800" data-alt="White fast charger adapter plug" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAI0CmrvcRiBgGutEkQcu_0YViJ3lD6d8lkdcCe_kO9bxRPAHk9F8380ppxEZFvKc2TzLtxFTH5N0P30xHUy4bqDlW-E3tm3U3gREJOKmMADLs8zBIX9__FnWkM7nTnuw1vouEyt_-7WucCpU0hlpZ5afhAjh5Php4C0fLGRrf4xK82GUr3pe97HADlA8tQzMJGu35t4lbQQI9HDH-M8MRDm1LcgVX1Itz1tcoyJJYLKWat6tVv2C73OErHd1TgV3TvVdNJJ56ffww");'></div>
+<div class="flex flex-1 flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<p class="text-base font-bold leading-tight line-clamp-2 pl-2">شاحن سريع USB-C</p>
+<button class="text-slate-400 hover:text-red-500 transition-colors mr-auto p-1">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1">محول 20 واط</p>
+</div>
+<div class="flex justify-between items-end mt-2">
+<p class="text-primary font-bold text-lg">25.00 د.ل</p>
+<div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-md h-8 px-1">
+<button class="w-8 h-full flex items-center justify-center text-slate-500 hover:text-primary"><span class="material-symbols-outlined text-[16px]">remove</span></button>
+<span class="text-sm font-semibold w-6 text-center">1</span>
+<button class="w-8 h-full flex items-center justify-center text-slate-500 hover:text-primary"><span class="material-symbols-outlined text-[16px]">add</span></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="px-4 pt-2">
+<h3 class="text-xl font-bold leading-tight mb-4 flex items-center gap-2">
+<span class="bg-primary/10 text-primary p-1.5 rounded-md">
+<span class="material-symbols-outlined text-[20px]">local_shipping</span>
+</span>
+                    تفاصيل الشحن
+                </h3>
+<div class="flex flex-col gap-4 bg-white dark:bg-slate-900 p-5 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800">
+<label class="flex flex-col gap-1.5">
+<span class="text-sm font-medium text-slate-700 dark:text-slate-300">الاسم بالكامل</span>
+<div class="relative">
+<input class="form-input w-full rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-base h-12 px-4 pl-10 focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-slate-400 transition-all text-right" placeholder="أدخل اسمك هنا" type="text"/>
+<span class="material-symbols-outlined absolute left-4 top-3.5 text-slate-400 pointer-events-none text-[20px]">person</span>
+</div>
+</label>
+<label class="flex flex-col gap-1.5">
+<span class="text-sm font-medium text-slate-700 dark:text-slate-300">رقم الهاتف</span>
+<div class="relative">
+<input class="form-input w-full rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-base h-12 px-4 pl-10 focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-slate-400 transition-all text-right dir-rtl" placeholder="09X XXX XXXX" type="tel"/>
+<span class="material-symbols-outlined absolute left-4 top-3.5 text-slate-400 pointer-events-none text-[20px]">phone</span>
+</div>
+</label>
+<label class="flex flex-col gap-1.5">
+<span class="text-sm font-medium text-slate-700 dark:text-slate-300">المدينة</span>
+<div class="relative">
+<select class="form-select w-full rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-base h-12 px-4 pl-10 focus:ring-2 focus:ring-primary/20 focus:border-primary text-slate-900 dark:text-white transition-all appearance-none text-right">
+<option disabled="" selected="" value="">اختر مدينتك</option>
+<option value="tripoli">طرابلس</option>
+<option value="benghazi">بنغازي</option>
+<option value="misrata">مصراتة</option>
+<option value="zawiya">الزاوية</option>
+<option value="sebha">سبها</option>
+</select>
+<span class="material-symbols-outlined absolute left-4 top-3.5 text-slate-400 pointer-events-none text-[20px]">expand_more</span>
+</div>
+</label>
+</div>
+</div>
+<div class="px-4 py-6">
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-center text-sm text-slate-500 dark:text-slate-400">
+<span>المجموع الفرعي</span>
+<span>40.00 د.ل</span>
+</div>
+<div class="flex justify-between items-center text-sm text-slate-500 dark:text-slate-400">
+<span>رسوم التوصيل</span>
+<span>5.00 د.ل</span>
+</div>
+<div class="h-px bg-slate-200 dark:bg-slate-800 my-1"></div>
+<div class="flex justify-between items-center">
+<span class="text-lg font-bold text-slate-900 dark:text-white">إجمالي الفاتورة</span>
+<span class="text-xl font-bold text-primary">45.00 د.ل</span>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 pb-8 max-w-md mx-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] right-0">
+<button class="w-full bg-primary hover:bg-blue-600 text-white font-bold h-14 rounded-lg flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-lg shadow-primary/30">
+<span>تأكيد الطلب</span>
+<span class="material-symbols-outlined rotate-180">arrow_forward</span>
+</button>
+</div>
+</div>
+
+</body></html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>لوحة تحكم التاجر - المعتمد</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Tajawal", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.75rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+          min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto bg-white dark:bg-slate-950 shadow-2xl">
+<div class="flex items-center p-4 pb-2 justify-between sticky top-0 z-20 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md">
+<div class="flex items-center gap-3">
+<button class="text-slate-900 dark:text-slate-100 flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-[24px]">menu</span>
+</button>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">لوحة التاجر</h2>
+<div class="flex items-center justify-end gap-2">
+<button class="flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative">
+<span class="material-symbols-outlined text-[24px] text-slate-900 dark:text-white">notifications</span>
+<span class="absolute top-2 left-2 h-2 w-2 rounded-full bg-red-500 border border-white dark:border-slate-950"></span>
+</button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto pb-24">
+<div class="flex p-4 flex-col gap-4">
+<div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800">
+<div class="relative">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-16 w-16 ring-2 ring-primary/20" data-alt="Store front logo placeholder" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBYgGzUZqsaCjYUVcru4inWYs4srDEPpwBRixzT7AkfhU7Ebfi0vQYEn5l5qotnsDPk0tIFq1zuCyVJByCiIn3rhnL-tp_VjD6-cXYV-zRoVbY0zd1U4m-WTFMu7VH_IsL0vJTcUNQCL0Hb-cQ8gLTOatEXQnwWbXndz_A3dv47LIZ5llvyFwZ2YSopz8MhtsCaRus8_RidIAaIzuf_mSfY2EBqW_d6i3aP2LgeyQX3FnVeTLY5ZSmtUvXWFJZW0fVvxDsCX_pkAJY");'>
+</div>
+<div class="absolute bottom-0 left-0 bg-green-500 h-4 w-4 rounded-full border-2 border-white dark:border-slate-900"></div>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-slate-900 dark:text-white text-lg font-bold leading-tight">أهلاً بك، متجر طرابلس المعتمد</p>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-primary text-[16px]">verified</span>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">تاجر معتمد</p>
+</div>
+</div>
+</div>
+</div>
+<div class="px-4">
+<div class="flex flex-col gap-3 p-5 rounded-lg bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 text-white shadow-lg">
+<div class="flex gap-6 justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-300">inventory_2</span>
+<p class="text-slate-100 text-base font-semibold leading-normal">سعة الطلبات اليومية</p>
+</div>
+<p class="text-white text-lg font-bold leading-normal tracking-wide">15<span class="text-slate-400 text-sm font-normal">/20</span></p>
+</div>
+<div class="relative w-full h-3 bg-slate-700/50 rounded-full overflow-hidden">
+<div class="absolute top-0 right-0 h-full bg-primary rounded-full transition-all duration-500 ease-out" style="width: 75%;"></div>
+</div>
+<div class="flex justify-between items-center mt-1">
+<p class="text-slate-300 text-xs font-medium">طلب مرتفع اليوم</p>
+<p class="text-primary-300 text-xs font-bold">5 خانات متبقية</p>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap gap-3 p-4">
+<div class="flex min-w-[140px] flex-1 flex-col gap-3 rounded-lg p-5 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800">
+<div class="flex items-center justify-between">
+<div class="bg-white dark:bg-blue-900/30 p-2 rounded-lg text-primary">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<span class="text-green-600 dark:text-green-400 text-xs font-bold bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">+12%</span>
+</div>
+<div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium leading-normal">إجمالي مبيعات اليوم</p>
+<p class="text-slate-900 dark:text-white text-2xl font-bold leading-tight mt-1">2,450 <span class="text-sm font-normal text-slate-500">د.ل</span></p>
+</div>
+</div>
+<div class="flex min-w-[140px] flex-1 flex-col gap-3 rounded-lg p-5 bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800">
+<div class="flex items-center justify-between">
+<div class="bg-white dark:bg-orange-900/30 p-2 rounded-lg text-orange-600">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+<span class="text-orange-600 dark:text-orange-400 text-xs font-bold bg-orange-100 dark:bg-orange-900/30 px-2 py-1 rounded-full">قيد الانتظار</span>
+</div>
+<div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium leading-normal">العمولة المستحقة</p>
+<p class="text-slate-900 dark:text-white text-2xl font-bold leading-tight mt-1">150 <span class="text-sm font-normal text-slate-500">د.ل</span></p>
+</div>
+</div>
+</div>
+<div class="px-4 pb-2">
+<div class="flex w-full bg-slate-100 dark:bg-slate-900 rounded-lg p-1">
+<button class="flex-1 py-2 px-3 rounded-md bg-white dark:bg-slate-800 shadow-sm text-slate-900 dark:text-white text-sm font-bold text-center transition-all relative overflow-hidden group">
+<span class="relative z-10 flex items-center justify-center gap-2">
+                            طلبات جديدة
+                            <span class="bg-primary text-white text-[10px] px-1.5 py-0.5 rounded-full">3</span>
+</span>
+<span class="absolute inset-0 bg-primary/5 animate-pulse"></span>
+<span class="absolute bottom-0 right-0 w-full h-0.5 bg-primary"></span>
+</button>
+<button class="flex-1 py-2 px-3 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-sm font-medium text-center transition-colors">
+                        قيد التنفيذ
+                </button>
+<button class="flex-1 py-2 px-3 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-sm font-medium text-center transition-colors">
+                        المكتملة
+                </button>
+</div>
+</div>
+<div class="flex flex-col gap-4 p-4">
+<div class="flex items-center justify-between">
+<h3 class="text-slate-900 dark:text-white font-bold text-lg">الطلبات الواردة</h3>
+<button class="text-primary text-sm font-semibold hover:underline">عرض الكل</button>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-lg p-4 shadow-sm border border-slate-100 dark:border-slate-800 flex gap-4 items-start">
+<div class="h-12 w-12 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">headphones</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="text-slate-900 dark:text-white font-bold text-base">Sony WH-1000XM5</h4>
+<p class="text-slate-500 dark:text-slate-400 text-sm">طلب #29381 • منذ دقيقتين</p>
+</div>
+<span class="text-slate-900 dark:text-white font-bold text-sm">1,200 د.ل</span>
+</div>
+<div class="flex gap-2 mt-3">
+<button class="flex-1 bg-primary hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold transition-colors">قبول</button>
+<button class="px-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-lg p-4 shadow-sm border border-slate-100 dark:border-slate-800 flex gap-4 items-start">
+<div class="h-12 w-12 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">smartphone</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="text-slate-900 dark:text-white font-bold text-base">غلاف iPhone 15 Pro</h4>
+<p class="text-slate-500 dark:text-slate-400 text-sm">طلب #29380 • منذ 15 دقيقة</p>
+</div>
+<span class="text-slate-900 dark:text-white font-bold text-sm">85 د.ل</span>
+</div>
+<div class="flex gap-2 mt-3">
+<button class="flex-1 bg-primary hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold transition-colors">قبول</button>
+<button class="px-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-lg p-4 shadow-sm border border-slate-100 dark:border-slate-800 flex gap-4 items-start">
+<div class="h-12 w-12 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">watch</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="text-slate-900 dark:text-white font-bold text-base">سوار Apple Watch</h4>
+<p class="text-slate-500 dark:text-slate-400 text-sm">طلب #29379 • منذ 22 دقيقة</p>
+</div>
+<span class="text-slate-900 dark:text-white font-bold text-sm">45 د.ل</span>
+</div>
+<div class="flex gap-2 mt-3">
+<button class="flex-1 bg-primary hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold transition-colors">قبول</button>
+<button class="px-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="h-6"></div>
+</div>
+<div class="flex gap-2 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 pb-4 pt-2 absolute bottom-0 w-full">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 rounded-full text-primary" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[24px] filled">monitoring</span>
+</div>
+<p class="text-xs font-bold leading-normal tracking-[0.015em]">الرئيسية</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">inventory</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">المخزون</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">finance</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">الأرباح</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">person</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">الملف</p>
+</a>
+</div>
+</div>
+
+</body></html>

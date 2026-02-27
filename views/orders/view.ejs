@@ -1,72 +1,119 @@
 <%- include('../partials/head', { title: 'تفاصيل الطلب' }) %>
-<%- include('../partials/sidebar', { adminUsername }) %>
+  <%- include('../partials/sidebar', { adminUsername }) %>
 
-<h4 class="mb-4">طلب #<%= order.order_number %></h4>
-<div class="row">
-  <div class="col-md-8">
-    <div class="card mb-3">
-      <div class="card-body">
-        <h6>بيانات العميل</h6>
-        <p class="mb-1"><strong>الاسم:</strong> <%= order.customer_name || '—' %></p>
-        <p class="mb-1"><strong>رقم الهاتف:</strong> <%= order.customer_phone || '—' %></p>
-        <p class="mb-1"><strong>رقم هاتف اخر:</strong> <%= (order.customer_phone_alt || order.CUSTOMER_PHONE_ALT || '') || '—' %></p>
-        <p class="mb-1"><strong>الايميل:</strong> <%= order.customer_email || '—' %></p>
-        <p class="mb-1"><strong>المدينة:</strong> <%= (typeof cityName !== 'undefined' && cityName) ? cityName : (order.city_name || '—') %></p>
-        <p class="mb-0"><strong>العنوان:</strong> <%= order.customer_address || '—' %></p>
+    <h4 class="mb-4">طلب #<%= order.order_number %>
+    </h4>
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card mb-3">
+          <div class="card-body">
+            <h6>بيانات العميل</h6>
+            <p class="mb-1"><strong>الاسم:</strong>
+              <%= order.customer_name || '—' %>
+            </p>
+            <p class="mb-1"><strong>رقم الهاتف:</strong>
+              <%= order.customer_phone || '—' %>
+            </p>
+            <p class="mb-1"><strong>رقم هاتف اخر:</strong>
+              <%= (order.customer_phone_alt || order.CUSTOMER_PHONE_ALT || '' ) || '—' %>
+            </p>
+            <p class="mb-1"><strong>الايميل:</strong>
+              <%= order.customer_email || '—' %>
+            </p>
+            <p class="mb-1"><strong>المدينة:</strong>
+              <%= (typeof cityName !=='undefined' && cityName) ? cityName : (order.city_name || '—' ) %>
+            </p>
+            <p class="mb-0"><strong>العنوان:</strong>
+              <%= order.customer_address || '—' %>
+            </p>
+          </div>
+        </div>
+        <% if (typeof merchant !=='undefined' && merchant) { %>
+          <div class="card mb-3">
+            <div class="card-body">
+              <h6>التاجر المستهدف</h6>
+              <p class="mb-1"><strong>الاسم:</strong>
+                <%= merchant.name || '—' %>
+              </p>
+              <p class="mb-1"><strong>اسم المتجر:</strong>
+                <%= merchant.store_name || '—' %>
+              </p>
+              <p class="mb-0"><strong>الإيميل:</strong>
+                <%= merchant.email || '—' %>
+              </p>
+            </div>
+          </div>
+          <% } %>
+            <div class="card">
+              <div class="card-header">المنتجات</div>
+              <table class="table mb-0">
+                <thead>
+                  <tr>
+                    <th>المنتج</th>
+                    <th>الكمية</th>
+                    <th>السعر</th>
+                    <th>الإجمالي</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% items.forEach(function(i) { %>
+                    <tr>
+                      <td>
+                        <% var imgSrc=i.image_url || (i.image_path ? ('/uploads/' + (i.image_path + ''
+                          ).replace(/\\/g, '/' ).replace(/^\/+/, '' )) : '' ); if (imgSrc) { %><img src="<%= imgSrc %>"
+                            alt="" class="rounded me-2" style="width:48px;height:48px;object-fit:cover">
+                          <% } %>
+                            <%= i.product_name %>
+                      </td>
+                      <td>
+                        <%= i.quantity %>
+                      </td>
+                      <td>
+                        <%= Number(i.unit_price).toFixed(2) %> د.ل
+                      </td>
+                      <td>
+                        <%= Number(i.total_price).toFixed(2) %> د.ل
+                      </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+              </table>
+              <div class="card-footer text-end"><strong>المجموع: <%= Number(order.total_amount).toFixed(2) %>
+                    د.ل</strong></div>
+            </div>
+            <% if (order.notes) { %>
+              <p class="text-muted mt-2">ملاحظات: <%= order.notes %>
+              </p>
+              <% } %>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h6>تحديث الحالة</h6>
+            <form method="post" action="/admin/orders/status/<%= order.id %>">
+              <select name="status" class="form-select mb-2">
+                <option value="pending" <%=order.status==='pending' ? 'selected' : '' %>>قيد الانتظار</option>
+                <option value="confirmed" <%=order.status==='confirmed' ? 'selected' : '' %>>مؤكد</option>
+                <option value="shipped" <%=order.status==='shipped' ? 'selected' : '' %>>تم الشحن</option>
+                <option value="delivered" <%=order.status==='delivered' ? 'selected' : '' %>>تم التوصيل</option>
+                <option value="cancelled" <%=order.status==='cancelled' ? 'selected' : '' %>>ملغي</option>
+                <option value="customer_refused" <%=order.status==='customer_refused' ? 'selected' : '' %>>العميل رفض
+                </option>
+              </select>
+              <button type="submit" class="btn btn-primary w-100">حفظ</button>
+            </form>
+            <hr>
+            <p class="small text-muted mb-0">تاريخ: <% var _d=new Date(order.created_at); var
+                _dd=String(_d.getDate()).padStart(2,'0'); var _mm=String(_d.getMonth()+1).padStart(2,'0'); var
+                _yy=_d.getFullYear(); var _hh=String(_d.getHours()).padStart(2,'0'); var
+                _min=String(_d.getMinutes()).padStart(2,'0'); %>
+                <%= _dd %>/<%= _mm %>/<%= _yy %>
+                      <%= _hh %>:<%= _min %>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
-    <% if (typeof merchant !== 'undefined' && merchant) { %>
-    <div class="card mb-3">
-      <div class="card-body">
-        <h6>التاجر المستهدف</h6>
-        <p class="mb-1"><strong>الاسم:</strong> <%= merchant.name || '—' %></p>
-        <p class="mb-1"><strong>اسم المتجر:</strong> <%= merchant.store_name || '—' %></p>
-        <p class="mb-0"><strong>الإيميل:</strong> <%= merchant.email || '—' %></p>
-      </div>
-    </div>
-    <% } %>
-    <div class="card">
-      <div class="card-header">المنتجات</div>
-      <table class="table mb-0">
-        <thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
-        <tbody>
-          <% items.forEach(function(i) { %>
-          <tr>
-            <td>
-              <% var imgSrc = i.image_url || (i.image_path ? ('/uploads/' + (i.image_path + '').replace(/\\/g, '/').replace(/^\/+/, '')) : ''); if (imgSrc) { %><img src="<%= imgSrc %>" alt="" class="rounded me-2" style="width:48px;height:48px;object-fit:cover"><% } %>
-              <%= i.product_name %>
-            </td>
-            <td><%= i.quantity %></td>
-            <td><%= Number(i.unit_price).toFixed(2) %> د.ل</td>
-            <td><%= Number(i.total_price).toFixed(2) %> د.ل</td>
-          </tr>
-          <% }); %>
-        </tbody>
-      </table>
-      <div class="card-footer text-end"><strong>المجموع: <%= Number(order.total_amount).toFixed(2) %> د.ل</strong></div>
-    </div>
-    <% if (order.notes) { %><p class="text-muted mt-2">ملاحظات: <%= order.notes %></p><% } %>
-  </div>
-  <div class="col-md-4">
-    <div class="card">
-      <div class="card-body">
-        <h6>تحديث الحالة</h6>
-        <form method="post" action="/admin/orders/status/<%= order.id %>">
-          <select name="status" class="form-select mb-2">
-            <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>قيد الانتظار</option>
-            <option value="confirmed" <%= order.status === 'confirmed' ? 'selected' : '' %>>مؤكد</option>
-            <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>تم الشحن</option>
-            <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>تم التوصيل</option>
-            <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>ملغي</option>
-          </select>
-          <button type="submit" class="btn btn-primary w-100">حفظ</button>
-        </form>
-        <hr>
-        <p class="small text-muted mb-0">تاريخ: <% var _d = new Date(order.created_at); var _dd = String(_d.getDate()).padStart(2,'0'); var _mm = String(_d.getMonth()+1).padStart(2,'0'); var _yy = _d.getFullYear(); var _hh = String(_d.getHours()).padStart(2,'0'); var _min = String(_d.getMinutes()).padStart(2,'0'); %><%= _dd %>/<%= _mm %>/<%= _yy %> <%= _hh %>:<%= _min %></p>
-      </div>
-    </div>
-  </div>
-</div>
-<a href="/admin/orders" class="btn btn-outline-secondary mt-3">← العودة للطلبات</a>
+    <a href="/admin/orders" class="btn btn-outline-secondary mt-3">← العودة للطلبات</a>
 
-<%- include('../partials/scripts') %>
+    <%- include('../partials/scripts') %>

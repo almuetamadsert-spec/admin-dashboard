@@ -1,0 +1,88 @@
+<%- include('../partials/head', { title: 'مستخدمو التطبيق' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">مستخدمو التطبيق (دخول فلاتر)</h4>
+<p class="text-muted small mb-3">إنشاء حسابات دخول للتطبيق: عميل أو تاجر (مرتبط بتاجر معيّن).</p>
+
+<% if (locals.query && locals.query.error === 'password_short') { %>
+<div class="alert alert-warning">كلمة المرور يجب أن تكون 4 أحرف على الأقل.</div>
+<% } %>
+<% if (locals.query && locals.query.error === 'email_exists') { %>
+<div class="alert alert-warning">هذا الإيميل مسجّل مسبقاً.</div>
+<% } %>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form method="post" action="/admin/app-users" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small">الإيميل</label>
+        <input type="email" name="email" class="form-control" placeholder="user@example.com" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">كلمة المرور</label>
+        <input type="password" name="password" class="form-control" placeholder="4+ أحرف" minlength="4" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">الرتبة</label>
+        <select name="role" class="form-select" id="appUserRole">
+          <option value="customer">عميل</option>
+          <option value="merchant">تاجر</option>
+        </select>
+      </div>
+      <div class="col-md-3" id="merchantSelectWrap">
+        <label class="form-label small">التاجر (للتسجيل كتاجر)</label>
+        <select name="merchant_id" class="form-select">
+          <option value="">— اختر التاجر —</option>
+          <% (merchants || []).forEach(function(m) { %>
+          <option value="<%= m.id %>"><%= m.name %> — <%= m.store_name || '' %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">إضافة مستخدم</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>الإيميل</th><th>الرتبة</th><th>التاجر المرتبط</th><th>تاريخ الإنشاء</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% (users || []).forEach(function(u) { %>
+        <tr>
+          <td><%= u.email %></td>
+          <td><span class="badge bg-<%= u.role === 'merchant' ? 'info' : 'secondary' %>"><%= u.role === 'merchant' ? 'تاجر' : 'عميل' %></span></td>
+          <td><%= u.merchant_name ? (u.merchant_name + (u.store_name ? ' — ' + u.store_name : '')) : '—' %></td>
+          <td><%= u.created_at ? new Date(u.created_at).toLocaleDateString('ar-LY') : '—' %></td>
+          <td>
+            <a href="/admin/app-users/edit/<%= u.id %>" class="btn btn-sm btn-outline-primary me-1">تعديل</a>
+            <form action="/admin/app-users/delete/<%= u.id %>" method="post" class="d-inline" onsubmit="return confirm('حذف هذا المستخدم؟');">
+              <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+        <% if (!users || users.length === 0) { %>
+        <tr><td colspan="5" class="text-muted">لا يوجد مستخدمون. أضف مستخدماً أو استخدم الحسابات الافتراضية (customer@test.com / merchant@test.com — 123456).</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+(function() {
+  var role = document.getElementById('appUserRole');
+  var wrap = document.getElementById('merchantSelectWrap');
+  if (!role || !wrap) return;
+  function toggle() { wrap.style.display = role.value === 'merchant' ? '' : 'none'; }
+  role.addEventListener('change', toggle);
+  toggle();
+})();
+</script>
+
+<%- include('../partials/scripts') %>

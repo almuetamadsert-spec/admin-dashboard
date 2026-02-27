@@ -1,0 +1,36 @@
+<%- include('../partials/head', { title: 'تعديل شريحة الإعلان' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">تعديل شريحة الإعلان</h4>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post" action="/admin/store-ui/slide/edit/<%= slide.id %>" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label class="form-label">الصورة الحالية</label>
+        <div>
+          <img src="/uploads/<%= slide.image_path %>" alt="" style="max-width:100%;max-height:200px;object-fit:contain;border-radius:8px">
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">استبدال الصورة (اختياري)</label>
+        <input type="file" name="image" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp">
+        <p class="form-text small text-muted">اتركه فارغاً للإبقاء على الصورة الحالية.</p>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">شكل الزوايا</label>
+        <select name="corner_style" class="form-select">
+          <% cornerStyles.forEach(function(s) { %>
+          <option value="<%= s.value %>" <%= slide.corner_style === s.value ? 'selected' : '' %>><%= s.label %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">حفظ</button>
+        <a href="/admin/store-ui" class="btn btn-secondary">إلغاء</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/scripts') %>

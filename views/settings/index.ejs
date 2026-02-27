@@ -194,6 +194,56 @@
     </div>
   </div>
 
+  <h6 class="border-bottom pb-2 mb-3 mt-4">روابط السوشيال ميديا</h6>
+  <p class="text-muted small mb-3">الروابط تظهر في تطبيق العميل (تبويب حسابي). يمكن اختيار شكل الأيقونة ولون الخلفية ولون الرمز.</p>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label">فيسبوك</label>
+      <input type="url" name="social_facebook_url" class="form-control" value="<%= settings.social_facebook_url || '' %>" placeholder="https://facebook.com/...">
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">انستقرام</label>
+      <input type="url" name="social_instagram_url" class="form-control" value="<%= settings.social_instagram_url || '' %>" placeholder="https://instagram.com/...">
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">واتساب</label>
+      <input type="url" name="social_whatsapp_url" class="form-control" value="<%= settings.social_whatsapp_url || '' %>" placeholder="https://wa.me/...">
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">تيك توك</label>
+      <input type="url" name="social_tiktok_url" class="form-control" value="<%= settings.social_tiktok_url || '' %>" placeholder="https://tiktok.com/...">
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">يوتيوب</label>
+      <input type="url" name="social_youtube_url" class="form-control" value="<%= settings.social_youtube_url || '' %>" placeholder="https://youtube.com/...">
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">تويتر / X</label>
+      <input type="url" name="social_twitter_url" class="form-control" value="<%= settings.social_twitter_url || '' %>" placeholder="https://twitter.com/...">
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">تيليجرام</label>
+      <input type="url" name="social_telegram_url" class="form-control" value="<%= settings.social_telegram_url || '' %>" placeholder="https://t.me/...">
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">شكل الأيقونة</label>
+      <select name="social_icon_shape" class="form-select">
+        <option value="circle" <%= (settings.social_icon_shape || 'circle') === 'circle' ? 'selected' : '' %>>دائري</option>
+        <option value="rounded" <%= (settings.social_icon_shape || '') === 'rounded' ? 'selected' : '' %>>مربع بزوايا دائرية</option>
+        <option value="square" <%= (settings.social_icon_shape || '') === 'square' ? 'selected' : '' %>>مربع بزوايا حادة</option>
+        <option value="none" <%= (settings.social_icon_shape || '') === 'none' ? 'selected' : '' %>>بدون إطار (الرمز فقط)</option>
+      </select>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">لون خلفية الأيقونة</label>
+      <input type="color" name="social_icon_bg_color" class="form-control form-control-color" value="<%= settings.social_icon_bg_color || '#06A3E7' %>" title="لون الخلفية">
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">لون الرمز</label>
+      <input type="color" name="social_icon_symbol_color" class="form-control form-control-color" value="<%= settings.social_icon_symbol_color || '#ffffff' %>" title="لون الرمز">
+    </div>
+  </div>
+
   <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
 </form>
 

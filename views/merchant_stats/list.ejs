@@ -1,0 +1,49 @@
+<%- include('../partials/head', { title: 'إحصائيات الأداء — التجار' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<div class="main-content">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="page-title mb-1">إحصائيات الأداء</h4>
+      <p class="text-muted small mb-0">عدد الطلبات، تم التسليم، ملغي، إجمالي المبيعات لكل تاجر.</p>
+    </div>
+    <a href="/admin/merchants" class="btn btn-outline-secondary"><i class="bi bi-arrow-right me-1"></i> رجوع — إدارة التجار</a>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><i class="bi bi-graph-up me-2"></i> أداء التجار</div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>التاجر</th>
+            <th>المتجر</th>
+            <th>المدينة</th>
+            <th>عدد الطلبات</th>
+            <th>تم التسليم</th>
+            <th>ملغي</th>
+            <th>إجمالي المبيعات (د.ل)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% list.forEach(function(r) { %>
+          <tr>
+            <td><strong><%= r.name %></strong></td>
+            <td><%= r.store_name || '—' %></td>
+            <td><%= r.city_name || '—' %></td>
+            <td><%= r.total %></td>
+            <td><span class="badge bg-success"><%= r.delivered %></span></td>
+            <td><%= r.cancelled %></td>
+            <td><%= (r.totalSales || 0).toFixed(2) %></td>
+          </tr>
+          <% }); %>
+          <% if (!list.length) { %>
+          <tr><td colspan="7" class="text-center text-muted py-4">لا يوجد تجار أو لا توجد طلبات.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/scripts') %>

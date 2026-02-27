@@ -1,14 +1,66 @@
 const express = require('express');
 const { getSettings, setSetting } = require('../../lib/settings');
 const { notifyMerchantsNewOrder } = require('../../lib/onesignal');
+const { emitNewOrder } = require('../../lib/socket');
 
 const router = express.Router();
 
-function getNextOrderNumber(db) {
-  const settings = getSettings(db);
+/**
+ * GET /api/orders?phone=xxx — طلبات العميل حسب رقم الهاتف (للتطبيق: طلباتي).
+ * يرجع الطلبات مع العناصر وصورة المنتج الأول لكل طلب.
+ */
+router.get('/', async (req, res) => {
+  const phone = (req.query.phone || '').trim().replace(/\s+/g, '');
+  if (!phone) {
+    return res.status(400).json({ ok: false, message: 'رقم الهاتف مطلوب' });
+  }
+  const db = req.db;
+  try {
+    const orders = await db.prepare(`
+      SELECT o.id, o.order_number, o.status, o.total_amount, o.created_at, o.updated_at
+      FROM orders o
+      WHERE TRIM(REPLACE(o.customer_phone, ' ', '')) = ?
+      ORDER BY o.created_at DESC
+    `).all(phone);
+    const itemsStmt = db.prepare(`
+      SELECT oi.id, oi.order_id, oi.product_id, oi.product_name, oi.quantity, oi.unit_price, oi.total_price, p.image_path
+      FROM order_items oi
+      LEFT JOIN products p ON oi.product_id = p.id
+      WHERE oi.order_id = ?
+    `);
+    const list = [];
+    for (const o of orders) {
+      const items = (await itemsStmt.all(o.id)).map((row) => ({
+        id: row.id,
+        product_id: row.product_id,
+        product_name: row.product_name,
+        quantity: row.quantity,
+        unit_price: row.unit_price,
+        total_price: row.total_price,
+        image_path: row.image_path || null,
+      }));
+      list.push({
+        id: o.id,
+        order_number: o.order_number,
+        status: o.status || 'pending',
+        total_amount: Number(o.total_amount) || 0,
+        created_at: o.created_at,
+        updated_at: o.updated_at,
+        items,
+      });
+    }
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ ok: true, orders: list });
+  } catch (e) {
+    res.status(500).json({ ok: false, message: e.message });
+  }
+});
+
+async function getNextOrderNumber(db) {
+  const settings = await getSettings(db);
   let next = parseInt(settings.next_order_number, 10);
   if (!Number.isFinite(next) || next < 1000) next = 1000;
-  setSetting(db, 'next_order_number', String(next + 1));
+  await setSetting(db, 'next_order_number', String(next + 1));
   return next + '#';
 }
 
@@ -17,7 +69,7 @@ function getNextOrderNumber(db) {
  * Body (JSON): city_id (مطلوب), customer_name, customer_phone, customer_address?, customer_email?, items: [{ product_id, quantity }], notes?
  * الإشعار يُرسل للتجار في نفس مدينة العميل فقط، ويتضمن بيانات العميل.
  */
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const db = req.db;
   const body = req.body || {};
   const cityId = body.city_id != null ? parseInt(body.city_id, 10) : null;
@@ -31,7 +83,7 @@ router.post('/', (req, res) => {
   if (!cityId || !Number.isFinite(cityId)) {
     return res.status(400).json({ ok: false, error: 'city_id_required', message: 'مدينة العميل مطلوبة' });
   }
-  const city = db.prepare('SELECT id FROM cities WHERE id = ? AND is_active = 1').get(cityId);
+  const city = await db.prepare('SELECT id FROM cities WHERE id = ? AND is_active = 1').get(cityId);
   if (!city) {
     return res.status(400).json({ ok: false, error: 'invalid_city', message: 'مدينة غير صالحة' });
   }
@@ -43,18 +95,36 @@ router.post('/', (req, res) => {
   }
 
   const rawItems = Array.isArray(body.items) ? body.items : (body.items ? [body.items] : []);
-  const productIds = rawItems.map((i) => i && i.product_id != null ? parseInt(i.product_id, 10) : null).filter(Number.isFinite);
-  const quantities = rawItems.map((i) => i && i.quantity != null ? parseInt(i.quantity, 10) || 1 : 1);
-  while (quantities.length < productIds.length) quantities.push(1);
+  const productIds = [];
+  const quantities = [];
+  const optionsArr = [];
+
+  for (const item of rawItems) {
+    if (item && item.product_id != null) {
+      const pid = parseInt(item.product_id, 10);
+      if (Number.isFinite(pid)) {
+        productIds.push(pid);
+        quantities.push(parseInt(item.quantity, 10) || 1);
+        optionsArr.push(item.options ? String(item.options).trim() : '');
+      }
+    }
+  }
 
   if (productIds.length === 0) {
     return res.status(400).json({ ok: false, error: 'items_required', message: 'يجب إضافة منتج واحد على الأقل' });
   }
 
-  const products = db.prepare('SELECT id, name_ar, price, discount_percent FROM products WHERE id = ?');
+  const fetchProduct = db.prepare('SELECT id, name_ar, price, discount_percent FROM products WHERE id = ?');
+  // تحميل بيانات المنتجات مرة واحدة لكل معرف فريد
+  const productCache = new Map();
+  for (const pid of new Set(productIds)) {
+    const p = await fetchProduct.get(pid);
+    if (p) productCache.set(String(pid), p);
+  }
+
   let totalAmount = 0;
   for (let i = 0; i < productIds.length; i++) {
-    const p = products.get(productIds[i]);
+    const p = productCache.get(String(productIds[i]));
     if (p) {
       const qty = quantities[i] || 1;
       const unitPrice = p.price * (1 - (p.discount_percent || 0) / 100);
@@ -62,8 +132,8 @@ router.post('/', (req, res) => {
     }
   }
 
-  const orderNumber = getNextOrderNumber(db);
-  const r = db.prepare(`
+  const orderNumber = await getNextOrderNumber(db);
+  const r = await db.prepare(`
     INSERT INTO orders (order_number, customer_name, customer_phone, customer_phone_alt, customer_email, customer_address, city_id, status, total_amount, notes)
     VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
   `).run(orderNumber, customerName, customerPhone, customerPhoneAlt || null, customerEmail, customerAddress, cityId, totalAmount, notes);
@@ -75,12 +145,13 @@ router.post('/', (req, res) => {
   `);
 
   for (let i = 0; i < productIds.length; i++) {
-    const pid = productIds[i];
+    const p = productCache.get(String(productIds[i]));
     const qty = quantities[i] || 1;
-    const p = products.get(pid);
+    const opts = optionsArr[i] || '';
     if (p) {
       const unitPrice = p.price * (1 - (p.discount_percent || 0) / 100);
-      insertItem.run(orderId, pid, p.name_ar, qty, unitPrice, unitPrice * qty);
+      const finalName = opts ? `${p.name_ar} (${opts})` : p.name_ar;
+      await insertItem.run(orderId, productIds[i], finalName, qty, unitPrice, unitPrice * qty);
     }
   }
 
@@ -88,7 +159,17 @@ router.post('/', (req, res) => {
     cityId,
     customerName,
     customerPhone
-  }).catch(() => {});
+  }).catch(() => { });
+
+  const io = req.app.locals.io;
+  if (io) {
+    emitNewOrder(io, cityId, {
+      order_id: orderId,
+      order_number: orderNumber,
+      total_amount: totalAmount,
+      city_id: cityId
+    });
+  }
 
   res.status(201).json({
     ok: true,

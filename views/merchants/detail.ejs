@@ -1,0 +1,64 @@
+<%- include('../partials/head', { title: 'تفاصيل المتجر — ' + (merchant.store_name || merchant.name) }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<div class="main-content">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <a href="/admin/merchants/follow-up" class="btn btn-outline-secondary btn-sm mb-2"><i class="bi bi-arrow-right me-1"></i> رجوع لمتابعة المتاجر</a>
+      <h4 class="page-title mb-1">بيانات المتجر — <%= merchant.store_name || merchant.name || '—' %></h4>
+      <p class="text-muted small mb-0"><%= merchant.city_name || '—' %> | <%= merchant.email || '—' %></p>
+    </div>
+    <a href="/admin/merchants/edit/<%= merchant.id %>" class="btn btn-primary"><i class="bi bi-pencil me-1"></i> تعديل التاجر</a>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header">معلومات المتجر</div>
+    <div class="card-body">
+      <div class="row g-2 small">
+        <div class="col-md-4"><strong>اسم المالك:</strong> <%= merchant.name || '—' %></div>
+        <div class="col-md-4"><strong>اسم المتجر:</strong> <%= merchant.store_name || '—' %></div>
+        <div class="col-md-4"><strong>المدينة:</strong> <%= merchant.city_name || '—' %></div>
+        <div class="col-md-4"><strong>الهاتف:</strong> <%= merchant.phone || '—' %></div>
+        <div class="col-md-4"><strong>البريد:</strong> <%= merchant.email || '—' %></div>
+        <div class="col-md-4"><strong>الحالة:</strong> <%= merchant.is_active ? 'نشط' : 'مجمد' %></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <span><i class="bi bi-cart-check me-2"></i> طلبات المتجر (<%= orders.length %>)</span>
+      <a href="/admin/orders?merchant_id=<%= merchant.id %>" class="btn btn-sm btn-outline-primary">عرض في الطلبات</a>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>رقم الطلب</th>
+            <th>المبلغ</th>
+            <th>الحالة</th>
+            <th>التاريخ</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!orders || orders.length === 0) { %>
+          <tr><td colspan="5" class="text-center text-muted py-4">لا توجد طلبات لهذا المتجر.</td></tr>
+          <% } else { %>
+          <% orders.forEach(function(o) { %>
+          <tr>
+            <td><strong>#<%= o.id %></strong></td>
+            <td><%= Number(o.total_amount || 0).toFixed(2) %> د.ل</td>
+            <td><span class="badge bg-<%= o.status === 'delivered' ? 'success' : (o.status === 'cancelled' || o.status === 'customer_refused' ? 'danger' : 'warning') %>"><%= (STATUS_LABELS && STATUS_LABELS[o.status]) || o.status %></span></td>
+            <td><%= o.created_at ? new Date(o.created_at).toLocaleString('ar-LY') : '—' %></td>
+            <td><a href="/admin/orders/<%= o.id %>" class="btn btn-sm btn-outline-secondary">عرض</a></td>
+          </tr>
+          <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/scripts') %>

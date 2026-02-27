@@ -111,6 +111,15 @@ async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
   `);
 
+  try {
+    const ti = db.exec("PRAGMA table_info(orders)");
+    const names = (ti[0] && ti[0].values) ? ti[0].values.map((row) => row[1]) : [];
+    if (names.indexOf('merchant_contacted_at') === -1) {
+      db.exec('ALTER TABLE orders ADD COLUMN merchant_contacted_at DATETIME');
+      save();
+    }
+  } catch (e) { /* عمود موجود مسبقاً أو خطأ غير متوقع */ }
+
   db.exec(`
     CREATE TABLE IF NOT EXISTS settings (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -174,6 +183,32 @@ async function initDb() {
       is_active INTEGER DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+    CREATE TABLE IF NOT EXISTS app_users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT,
+      role TEXT NOT NULL DEFAULT 'customer',
+      merchant_id INTEGER,
+      google_id TEXT,
+      apple_id TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (merchant_id) REFERENCES merchants(id)
+    );
+    CREATE TABLE IF NOT EXISTS app_sessions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      token TEXT UNIQUE NOT NULL,
+      expires_at DATETIME NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES app_users(id)
+    );
+    CREATE TABLE IF NOT EXISTS store_slides (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      image_path TEXT NOT NULL,
+      corner_style TEXT NOT NULL DEFAULT 'rounded',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   try {
@@ -189,6 +224,10 @@ async function initDb() {
     const mcols = minfo[0] && minfo[0].values ? minfo[0].values.map(r => r[1]) : [];
     if (!mcols.includes('onesignal_player_id')) db.run("ALTER TABLE merchants ADD COLUMN onesignal_player_id TEXT");
     if (!mcols.includes('store_name')) db.run("ALTER TABLE merchants ADD COLUMN store_name TEXT");
+    if (!mcols.includes('card_color')) db.run("ALTER TABLE merchants ADD COLUMN card_color TEXT");
+    if (!mcols.includes('order_limit')) db.run("ALTER TABLE merchants ADD COLUMN order_limit INTEGER DEFAULT 20");
+    if (!mcols.includes('commission_rate_tiers')) db.run("ALTER TABLE merchants ADD COLUMN commission_rate_tiers TEXT");
+    if (!mcols.includes('fixed_commission_tiers')) db.run("ALTER TABLE merchants ADD COLUMN fixed_commission_tiers TEXT");
   } catch (e) { /* ignore */ }
 
   try {
@@ -196,6 +235,54 @@ async function initDb() {
     const pcols = pinfo[0] && pinfo[0].values ? pinfo[0].values.map(r => r[1]) : [];
     if (!pcols.includes('hide_when_out_of_stock')) db.run("ALTER TABLE products ADD COLUMN hide_when_out_of_stock INTEGER DEFAULT 0");
     if (!pcols.includes('low_stock_alert')) db.run("ALTER TABLE products ADD COLUMN low_stock_alert INTEGER DEFAULT 0");
+    if (!pcols.includes('colors')) db.run("ALTER TABLE products ADD COLUMN colors TEXT");
+    if (!pcols.includes('sizes')) db.run("ALTER TABLE products ADD COLUMN sizes TEXT");
+    if (!pcols.includes('storage_capacities')) db.run("ALTER TABLE products ADD COLUMN storage_capacities TEXT");
+    if (!pcols.includes('battery_capacities')) db.run("ALTER TABLE products ADD COLUMN battery_capacities TEXT");
+    if (!pcols.includes('short_description')) db.run("ALTER TABLE products ADD COLUMN short_description TEXT");
+    if (!pcols.includes('long_description')) db.run("ALTER TABLE products ADD COLUMN long_description TEXT");
+    save();
+  } catch (e) { /* ignore */ }
+
+  try {
+    const cinfo = db.exec("PRAGMA table_info(categories)");
+    const ccols = cinfo[0] && cinfo[0].values ? cinfo[0].values.map(r => r[1]) : [];
+    if (!ccols.includes('icon_type')) db.run("ALTER TABLE categories ADD COLUMN icon_type TEXT DEFAULT 'circle'");
+    if (!ccols.includes('icon_name')) db.run("ALTER TABLE categories ADD COLUMN icon_name TEXT");
+    if (!ccols.includes('icon_color')) db.run("ALTER TABLE categories ADD COLUMN icon_color TEXT DEFAULT '#06A3E7'");
+    if (!ccols.includes('icon_symbol_color')) db.run("ALTER TABLE categories ADD COLUMN icon_symbol_color TEXT");
+    if (!ccols.includes('icon_opacity')) db.run("ALTER TABLE categories ADD COLUMN icon_opacity INTEGER DEFAULT 100");
+    if (!ccols.includes('icon_path')) db.run("ALTER TABLE categories ADD COLUMN icon_path TEXT");
+    if (!ccols.includes('sort_order')) db.run("ALTER TABLE categories ADD COLUMN sort_order INTEGER DEFAULT 0");
+  } catch (e) { /* ignore */ }
+
+  try {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS brand_categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name_ar TEXT NOT NULL,
+        icon_path TEXT,
+        icon_size TEXT DEFAULT 'medium',
+        icon_corner TEXT DEFAULT 'rounded',
+        icon_shape TEXT DEFAULT 'square',
+        icon_color TEXT DEFAULT '#06A3E7',
+        sort_order INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+  } catch (e) { /* ignore */ }
+  try {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS merchant_stock (
+        merchant_id INTEGER NOT NULL,
+        product_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 0,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (merchant_id, product_id),
+        FOREIGN KEY (merchant_id) REFERENCES merchants(id),
+        FOREIGN KEY (product_id) REFERENCES products(id)
+      )
+    `);
   } catch (e) { /* ignore */ }
   save();
 
@@ -205,11 +292,34 @@ async function initDb() {
     const hash = bcrypt.hashSync('admin123', 10);
     const sql = "INSERT INTO admins (username, password) VALUES ($1, $2)";
     const stmt = db.prepare(sql);
-    stmt.bind([ 'admin', hash ]);
+    stmt.bind(['admin', hash]);
     stmt.step();
     stmt.free();
     save();
     console.log('تم إنشاء حساب الأدمن: admin / admin123');
+  }
+
+  const bcrypt = require('bcryptjs');
+  const appUsersCheck = db.exec("SELECT id FROM app_users LIMIT 1");
+  if (!appUsersCheck.length || !appUsersCheck[0].values.length) {
+    const passHash = bcrypt.hashSync('123456', 10);
+    const ins = db.prepare("INSERT INTO app_users (email, password_hash, role, merchant_id) VALUES (?, ?, 'customer', NULL)");
+    ins.bind(['customer@test.com', passHash]);
+    ins.step();
+    ins.free();
+    const firstMerchant = db.prepare("SELECT id FROM merchants LIMIT 1");
+    let merchantId = null;
+    if (firstMerchant.step()) {
+      const row = firstMerchant.getAsObject();
+      merchantId = row.id;
+    }
+    firstMerchant.free();
+    const ins2 = db.prepare("INSERT INTO app_users (email, password_hash, role, merchant_id) VALUES (?, ?, 'merchant', ?)");
+    ins2.bind(['merchant@test.com', passHash, merchantId]);
+    ins2.step();
+    ins2.free();
+    save();
+    console.log('تم إنشاء مستخدمي التطبيق: customer@test.com و merchant@test.com / 123456');
   }
 
   function rowToLower(obj) {
@@ -220,6 +330,7 @@ async function initDb() {
   }
 
   const wrapper = {
+    driver: 'sqlite',
     exec(sql) {
       db.exec(sql);
       save();
@@ -232,7 +343,7 @@ async function initDb() {
           stmt.bind(params);
           const out = stmt.step() ? stmt.getAsObject() : undefined;
           stmt.free();
-          return out ? rowToLower(out) : out;
+          return Promise.resolve(out ? rowToLower(out) : out);
         },
         all(...params) {
           const stmt = db.prepare(named);
@@ -240,7 +351,7 @@ async function initDb() {
           const rows = [];
           while (stmt.step()) rows.push(rowToLower(stmt.getAsObject()));
           stmt.free();
-          return rows;
+          return Promise.resolve(rows);
         },
         run(...params) {
           const stmt = db.prepare(named);
@@ -250,7 +361,7 @@ async function initDb() {
           const r = db.exec("SELECT last_insert_rowid() AS id");
           const lastInsertRowid = r.length && r[0].values.length ? r[0].values[0][0] : 0;
           save();
-          return { lastInsertRowid };
+          return Promise.resolve({ lastInsertRowid });
         }
       };
     }

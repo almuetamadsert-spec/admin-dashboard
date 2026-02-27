@@ -1,25 +1,157 @@
 <%- include('../partials/head', { title: 'التصنيفات' }) %>
+<style>
+.category-icon-preview { width: 38px; height: 38px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; transition: color 0.15s, background 0.15s; }
+.category-icon-preview:not(.icon-adaptive) { background: #f0f0f0; }
+.category-icon-preview.icon-adaptive { background: transparent !important; color: currentColor; border: 1px solid var(--border-color, #e2e8f0); }
+.category-icon-cell i { font-size: 1.1rem; }
+.category-icon-cell.icon-adaptive { background: transparent !important; color: currentColor; border: 1px solid rgba(0,0,0,0.1); }
+@media (prefers-color-scheme: dark) {
+  .category-icon-cell.icon-adaptive { border-color: rgba(255,255,255,0.2); }
+}
+</style>
 <%- include('../partials/sidebar', { adminUsername }) %>
-
+<%
+var DEFAULT_ICON_PRESETS = [
+  { value: 'case_cover', label: 'غطاء حماية (Case / Cover)', icon: 'bi-phone' },
+  { value: 'screen_protector', label: 'لاصقة حماية الشاشة (Screen Protector)', icon: 'bi-phone-vibrate' },
+  { value: 'camera_lens_protector', label: 'لاصقة حماية الكاميرا (Camera Lens Protector)', icon: 'bi-camera' },
+  { value: 'phone_grip', label: 'مسكة هاتف (Phone Grip / PopSocket)', icon: 'bi-phone' },
+  { value: 'phone_strap', label: 'ميدالية هاتف (Phone Strap)', icon: 'bi-phone' },
+  { value: 'wall_charger', label: 'رأس شاحن (Wall Charger / Power Adapter)', icon: 'bi-plug' },
+  { value: 'charging_cable', label: 'كابل شحن (Charging Cable - Type-C / Lightning)', icon: 'bi-lightning-charging' },
+  { value: 'power_bank', label: 'شاحن متنقل (Power Bank)', icon: 'bi-battery-charging' },
+  { value: 'wireless_charging_pad', label: 'قاعدة شحن لاسلكي (Wireless Charging Pad)', icon: 'bi-broadcast' },
+  { value: 'car_charger', label: 'شاحن سيارة (Car Charger)', icon: 'bi-car-front' },
+  { value: 'wired_earphones', label: 'سماعات أذن سلكية (Wired Earphones)', icon: 'bi-headphones' },
+  { value: 'wireless_earbuds', label: 'سماعات بلوتوث (Wireless Earbuds)', icon: 'bi-headphones' },
+  { value: 'bluetooth_speaker', label: 'مكبر صوت بلوتوث (Bluetooth Speaker)', icon: 'bi-speaker' },
+  { value: 'audio_adapter', label: 'محول صوت (Audio Adapter - Type-C to 3.5mm)', icon: 'bi-usb-symbol' },
+  { value: 'tripod', label: 'حامل ثلاثي (Tripod)', icon: 'bi-camera' },
+  { value: 'selfie_stick', label: 'عصا سيلفي (Selfie Stick)', icon: 'bi-camera' },
+  { value: 'gimbal', label: 'مانع اهتزاز (Gimbal)', icon: 'bi-camera-video' },
+  { value: 'ring_light', label: 'إضاءة حلقية (Ring Light)', icon: 'bi-brightness-high' },
+  { value: 'stylus_pen', label: 'قلم ذكي (Stylus Pen)', icon: 'bi-pencil' },
+  { value: 'car_phone_holder', label: 'حامل هاتف للسيارة (Car Phone Holder)', icon: 'bi-phone' },
+  { value: 'desktop_stand', label: 'حامل مكتب (Desktop Stand)', icon: 'bi-display' },
+  { value: 'aux_cable', label: 'وصلة تشغيل الوسائط (AUX Cable)', icon: 'bi-music-note-beamed' },
+  { value: 'power_bank_portable', label: 'باور بانك (Power Bank / Portable Charger)', icon: 'bi-battery-charging' },
+  { value: 'solar_power_bank', label: 'شاحن طاقة شمسية (Solar Power Bank)', icon: 'bi-sun' },
+  { value: 'portable_power_station', label: 'محطة طاقة محمولة (Portable Power Station)', icon: 'bi-lightning-charging' },
+  { value: 'dslr_camera', label: 'كاميرا احترافية (DSLR / Mirrorless Camera)', icon: 'bi-camera' },
+  { value: 'action_camera', label: 'كاميرا رياضية (Action Camera / GoPro)', icon: 'bi-camera-video' },
+  { value: 'security_camera', label: 'كاميرا مراقبة ذكية (Smart Security Camera)', icon: 'bi-camera-video' },
+  { value: 'external_phone_lenses', label: 'عدسات هاتف خارجية (External Phone Lenses)', icon: 'bi-camera' },
+  { value: 'smartwatch', label: 'ساعة ذكية (Smartwatch)', icon: 'bi-smartwatch' }
+];
+var iconPresetsList = (typeof iconPresets !== 'undefined' && iconPresets && iconPresets.length) ? iconPresets : DEFAULT_ICON_PRESETS;
+iconPresetsList.forEach(function(p) { if (!p.icon) p.icon = 'bi-circle'; });
+%>
 <h4 class="mb-4">التصنيفات</h4>
 <div class="card mb-3">
   <div class="card-body">
-    <form id="addCategoryForm" class="row g-2">
-      <div class="col-md-4"><input type="text" id="name_ar" class="form-control" placeholder="الاسم (عربي) *" required></div>
-      <div class="col-md-4"><input type="text" id="name_en" class="form-control" placeholder="الاسم (إنجليزي)"></div>
-      <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">إضافة</button></div>
+    <form id="addCategoryForm" class="row g-3" enctype="multipart/form-data">
+      <div class="col-md-3">
+        <label class="form-label">اسم التصنيف * <span class="text-muted small">(يكتب يدوياً)</span></label>
+        <input type="text" id="name_ar" name="name_ar" class="form-control" required placeholder="أدخل اسم التصنيف">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">رمز الأيقونة</label>
+        <div class="d-flex align-items-center gap-2">
+          <div id="icon_preview" class="category-icon-preview flex-shrink-0" title="معاينة اللون"><i class="bi bi-tag"></i></div>
+          <select id="icon_name" name="icon_name" class="form-select flex-grow-1">
+            <option value="">— بدون —</option>
+            <% iconPresetsList.forEach(function(p) { %>
+            <option value="<%= p.value %>" data-icon="<%= p.icon || 'bi-circle' %>"><%= p.label %></option>
+            <% }); %>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">شكل الأيقونة</label>
+        <select id="icon_type" name="icon_type" class="form-select">
+          <option value="circle">دائري</option>
+          <option value="rounded">مربع بزوايا دائرية</option>
+          <option value="sharp">مربع بزوايا حادة</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">لون الأيقونة (المحيط)</label>
+        <input type="color" id="icon_color" name="icon_color" class="form-control form-control-color" value="#06A3E7" title="لون المحيط">
+        <div class="form-check form-check-inline mt-1">
+          <input type="checkbox" class="form-check-input" id="icon_color_transparent" name="icon_color_transparent">
+          <label class="form-check-label small" for="icon_color_transparent">شفاف</label>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">لون الرمز</label>
+        <input type="color" id="icon_symbol_color" name="icon_symbol_color" class="form-control form-control-color" value="#ffffff" title="لون الرمز">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">شفافية الأيقونة <span id="icon_opacity_val" class="small">100%</span></label>
+        <input type="range" id="icon_opacity" name="icon_opacity" class="form-range" min="0" max="100" value="100">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">ترتيب</label>
+        <input type="number" id="sort_order" name="sort_order" class="form-control" value="0" min="0">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">أيقونة من الجهاز (اختياري)</label>
+        <input type="file" id="icon_file" name="icon" class="form-control" accept="image/*">
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">إضافة</button>
+      </div>
     </form>
   </div>
 </div>
 <div class="card">
   <div class="table-responsive">
     <table class="table table-hover mb-0">
-      <thead><tr><th>الاسم (عربي)</th><th>الاسم (إنجليزي)</th><th></th></tr></thead>
+      <thead>
+        <tr>
+          <th>الأيقونة</th>
+          <th>اسم التصنيف</th>
+          <th>الشكل</th>
+          <th>اللون</th>
+          <th>الترتيب</th>
+          <th></th>
+        </tr>
+      </thead>
       <tbody id="categoriesTable">
         <% categories.forEach(function(c) { %>
-        <tr data-id="<%= c.id %>">
+        <tr data-id="<%= c.id %>" data-icon-type="<%= c.icon_type || 'circle' %>" data-icon-name="<%= c.icon_name || '' %>" data-icon-color="<%= (c.icon_color != null && c.icon_color !== '') ? c.icon_color : '#06A3E7' %>" data-icon-symbol-color="<%= (c.icon_symbol_color != null && c.icon_symbol_color !== '') ? c.icon_symbol_color : '#ffffff' %>" data-icon-opacity="<%= c.icon_opacity != null ? Math.min(100, Math.max(0, c.icon_opacity)) : 100 %>">
+          <td>
+            <% 
+            var catIconPreset = iconPresetsList.filter(function(p){ return p.value === (c.icon_name || ''); })[0];
+            var catIconClass = (catIconPreset && catIconPreset.icon) ? catIconPreset.icon : '';
+            var catIconColor = c.icon_color || '#06A3E7';
+            var catSymbolColor = (c.icon_symbol_color != null && c.icon_symbol_color !== '') ? c.icon_symbol_color : '#ffffff';
+            var catOpacity = c.icon_opacity != null ? Math.min(100, Math.max(0, c.icon_opacity)) : 100;
+            var catIconRadius = (c.icon_type === 'circle') ? '50%' : (c.icon_type === 'rounded' ? '8px' : '0');
+            %>
+            <% var isTransparent = (catIconColor === 'transparent'); %>
+            <% 
+            var bgStyle = 'transparent';
+            if (!isTransparent && catIconColor && catIconColor.length >= 6) {
+              var h = catIconColor.replace(/^#/,'');
+              if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+              var n = parseInt(h, 16);
+              if (!isNaN(n)) { var r = (n>>16)&255, g = (n>>8)&255, b = n&255; bgStyle = 'rgba('+r+','+g+','+b+','+(catOpacity/100)+')'; }
+              else bgStyle = catIconColor;
+            } else if (!isTransparent && catIconColor) bgStyle = catIconColor;
+            %>
+            <% if (c.icon_path) { %>
+            <span class="d-inline-flex align-items-center justify-content-center" style="width:36px;height:36px;border-radius:<%= catIconRadius %>;background:<%= bgStyle %>;"><img src="/uploads/<%= c.icon_path %>" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"></span>
+            <% } else if (catIconClass) { %>
+            <span class="d-inline-flex align-items-center justify-content-center category-icon-cell <%= isTransparent ? 'icon-adaptive' : '' %>" style="width:36px;height:36px;<%= isTransparent ? 'background:transparent;color:currentColor' : 'background:' + bgStyle + ';color:' + catSymbolColor %>;border-radius:<%= catIconRadius %>;"><i class="bi <%= catIconClass %>"></i></span>
+            <% } else { %>
+            <span class="d-inline-block rounded category-icon-cell <%= isTransparent ? 'icon-adaptive' : '' %>" style="width:36px;height:36px;background:<%= bgStyle %>;border-radius:<%= catIconRadius %>;"></span>
+            <% } %>
+          </td>
           <td><span class="cat-name-ar"><%= c.name_ar %></span></td>
-          <td><span class="cat-name-en"><%= c.name_en || '—' %></span></td>
+          <td><span class="cat-icon-type"><%= c.icon_type === 'circle' ? 'دائري' : c.icon_type === 'rounded' ? 'مربع دائري' : 'مربع حاد' %></span></td>
+          <td><% var dispColor = c.icon_color || '#06A3E7'; var dispSym = (c.icon_symbol_color != null && c.icon_symbol_color !== '') ? c.icon_symbol_color : '#fff'; %><% if (dispColor === 'transparent') { %><span class="text-muted">شفاف</span><% } else { %><span class="cat-icon-color" style="color:<%= dispColor %>">●</span> محيط <span class="cat-icon-color" style="color:<%= dispSym %>">◆</span> رمز<% } %> <span class="small text-muted"><%= c.icon_opacity != null ? c.icon_opacity : 100 %>%</span></td>
+          <td><span class="cat-sort-order"><%= c.sort_order != null ? c.sort_order : 0 %></span></td>
           <td>
             <button type="button" class="btn btn-sm btn-outline-primary btn-edit">تعديل</button>
             <button type="button" class="btn btn-sm btn-outline-danger btn-delete">حذف</button>
@@ -27,31 +159,176 @@
         </tr>
         <% }); %>
         <% if (!categories.length) { %>
-        <tr><td colspan="3" class="text-center text-muted">لا توجد تصنيفات</td></tr>
+        <tr><td colspan="6" class="text-center text-muted">لا توجد تصنيفات. أضف تصنيفاً من النموذج أعلاه.</td></tr>
         <% } %>
       </tbody>
     </table>
   </div>
 </div>
 
+<!-- modal تعديل -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">تعديل التصنيف</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editCategoryForm">
+          <input type="hidden" id="edit_id">
+          <div class="mb-2">
+            <label class="form-label">اسم التصنيف * <span class="text-muted small">(يكتب يدوياً)</span></label>
+            <input type="text" id="edit_name_ar" class="form-control" required placeholder="أدخل اسم التصنيف">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">رمز الأيقونة</label>
+            <div class="d-flex align-items-center gap-2">
+              <div id="edit_icon_preview" class="category-icon-preview flex-shrink-0" title="معاينة اللون"><i class="bi bi-tag"></i></div>
+              <select id="edit_icon_name" class="form-select flex-grow-1">
+                <option value="">— بدون —</option>
+                <% iconPresetsList.forEach(function(p) { %>
+                <option value="<%= p.value %>" data-icon="<%= p.icon || 'bi-circle' %>"><%= p.label %></option>
+                <% }); %>
+              </select>
+            </div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">شكل الأيقونة</label>
+            <select id="edit_icon_type" class="form-select">
+              <option value="circle">دائري</option>
+              <option value="rounded">مربع بزوايا دائرية</option>
+              <option value="sharp">مربع بزوايا حادة</option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">لون الأيقونة (المحيط)</label>
+            <input type="color" id="edit_icon_color" class="form-control form-control-color" value="#06A3E7">
+            <div class="form-check form-check-inline mt-1">
+              <input type="checkbox" class="form-check-input" id="edit_icon_color_transparent">
+              <label class="form-check-label small" for="edit_icon_color_transparent">شفاف</label>
+            </div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">لون الرمز</label>
+            <input type="color" id="edit_icon_symbol_color" class="form-control form-control-color" value="#ffffff">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">شفافية الأيقونة <span id="edit_icon_opacity_val" class="small">100%</span></label>
+            <input type="range" id="edit_icon_opacity" class="form-range" min="0" max="100" value="100">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">ترتيب</label>
+            <input type="number" id="edit_sort_order" class="form-control" value="0" min="0">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">أيقونة جديدة من الجهاز (اختياري)</label>
+            <input type="file" id="edit_icon_file" class="form-control" accept="image/*">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+        <button type="button" class="btn btn-primary" id="editSaveBtn">حفظ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+const iconPresets = <%- JSON.stringify(iconPresetsList) %>;
+
+function updateIconPreview(selectId, colorId, symbolColorId, opacityId, opacityLabelId, previewId, transparentCheckboxId) {
+  var sel = document.getElementById(selectId);
+  var colorEl = document.getElementById(colorId);
+  var symbolColorEl = symbolColorId ? document.getElementById(symbolColorId) : null;
+  var opacityEl = opacityId ? document.getElementById(opacityId) : null;
+  var preview = document.getElementById(previewId);
+  var transparentCb = transparentCheckboxId ? document.getElementById(transparentCheckboxId) : null;
+  if (!sel || !preview) return;
+  var isTransparent = transparentCb && transparentCb.checked;
+  var bgColor = (colorEl && colorEl.value) ? colorEl.value : '#06A3E7';
+  var symColor = (symbolColorEl && symbolColorEl.value) ? symbolColorEl.value : '#ffffff';
+  var opacity = (opacityEl && opacityEl.value !== '') ? Math.min(100, Math.max(0, parseInt(opacityEl.value, 10))) : 100;
+  if (opacityLabelId) {
+    var lbl = document.getElementById(opacityLabelId);
+    if (lbl) lbl.textContent = opacity + '%';
+  }
+  var opt = sel.options[sel.selectedIndex];
+  var iconClass = opt && opt.getAttribute('data-icon') ? opt.getAttribute('data-icon') : 'bi-tag';
+  preview.innerHTML = '<i class="bi ' + iconClass + '"></i>';
+  preview.style.opacity = '';
+  if (isTransparent) {
+    preview.style.background = 'transparent';
+    preview.style.color = 'currentColor';
+    preview.classList.add('icon-adaptive');
+  } else {
+    var bgStyle = bgColor;
+    if (bgColor && bgColor.indexOf('#') === 0) {
+      var h = bgColor.slice(1);
+      if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+      var n = parseInt(h, 16);
+      if (!isNaN(n)) bgStyle = 'rgba(' + ((n>>16)&255) + ',' + ((n>>8)&255) + ',' + (n&255) + ',' + (opacity/100) + ')';
+    }
+    preview.style.background = bgStyle;
+    preview.style.color = symColor;
+    preview.classList.remove('icon-adaptive');
+  }
+}
+function setupIconPreview(selectId, colorId, symbolColorId, opacityId, opacityLabelId, previewId, transparentCheckboxId) {
+  var sel = document.getElementById(selectId);
+  var colorEl = document.getElementById(colorId);
+  var symbolColorEl = symbolColorId ? document.getElementById(symbolColorId) : null;
+  var opacityEl = opacityId ? document.getElementById(opacityId) : null;
+  var transparentCb = transparentCheckboxId ? document.getElementById(transparentCheckboxId) : null;
+  var update = function() { updateIconPreview(selectId, colorId, symbolColorId, opacityId, opacityLabelId, previewId, transparentCheckboxId); };
+  if (sel) sel.addEventListener('change', update);
+  if (colorEl) { colorEl.addEventListener('input', update); colorEl.addEventListener('change', update); }
+  if (symbolColorEl) { symbolColorEl.addEventListener('input', update); symbolColorEl.addEventListener('change', update); }
+  if (opacityEl) { opacityEl.addEventListener('input', update); opacityEl.addEventListener('change', update); }
+  if (transparentCb) transparentCb.addEventListener('change', update);
+  update();
+}
+
 document.getElementById('addCategoryForm').onsubmit = async function(e) {
   e.preventDefault();
-  const name_ar = document.getElementById('name_ar').value.trim();
-  const name_en = document.getElementById('name_en').value.trim();
-  const res = await fetch('/admin/categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name_ar, name_en }) });
-  if (!res.ok) return alert('خطأ');
+  var nameArEl = document.getElementById('name_ar');
+  var nameAr = nameArEl && nameArEl.value ? nameArEl.value.trim() : '';
+  if (!nameAr) {
+    alert('الرجاء إدخال اسم التصنيف (مطلوب).');
+    if (nameArEl) { nameArEl.focus(); nameArEl.select(); }
+    return;
+  }
+  var form = document.getElementById('addCategoryForm');
+  var fd = new FormData(form);
+  if (document.getElementById('icon_color_transparent').checked) fd.set('icon_color', 'transparent');
+  var op = document.getElementById('icon_opacity');
+  fd.set('icon_opacity', (op && op.value !== '') ? op.value : '100');
+  var res = await fetch('/admin/categories', { method: 'POST', body: fd });
+  if (!res.ok) {
+    var err = await res.text();
+    try { var j = JSON.parse(err); err = j.error || err; } catch (_) {}
+    return alert('خطأ: ' + err);
+  }
   const { id } = await res.json();
   const tbody = document.getElementById('categoriesTable');
   const emptyRow = tbody.querySelector('tr td[colspan]');
   if (emptyRow) emptyRow.closest('tr').remove();
-  const tr = document.createElement('tr');
-  tr.dataset.id = id;
-  tr.innerHTML = '<td><span class="cat-name-ar">' + name_ar + '</span></td><td><span class="cat-name-en">' + (name_en || '—') + '</span></td><td><button type="button" class="btn btn-sm btn-outline-primary btn-edit">تعديل</button> <button type="button" class="btn btn-sm btn-outline-danger btn-delete">حذف</button></td>';
-  tbody.appendChild(tr);
-  document.getElementById('name_ar').value = '';
-  document.getElementById('name_en').value = '';
+  location.reload();
 };
+
+let editModal, editForm;
+document.addEventListener('DOMContentLoaded', function() {
+  editModal = new bootstrap.Modal(document.getElementById('editModal'));
+  setupIconPreview('icon_name', 'icon_color', 'icon_symbol_color', 'icon_opacity', 'icon_opacity_val', 'icon_preview', 'icon_color_transparent');
+  setupIconPreview('edit_icon_name', 'edit_icon_color', 'edit_icon_symbol_color', 'edit_icon_opacity', 'edit_icon_opacity_val', 'edit_icon_preview', 'edit_icon_color_transparent');
+  document.getElementById('icon_opacity').addEventListener('input', function() { var v = document.getElementById('icon_opacity_val'); if (v) v.textContent = this.value + '%'; });
+  document.getElementById('edit_icon_opacity').addEventListener('input', function() { var v = document.getElementById('edit_icon_opacity_val'); if (v) v.textContent = this.value + '%'; });
+});
+document.getElementById('editModal').addEventListener('shown.bs.modal', function() {
+  updateIconPreview('edit_icon_name', 'edit_icon_color', 'edit_icon_symbol_color', 'edit_icon_opacity', 'edit_icon_opacity_val', 'edit_icon_preview', 'edit_icon_color_transparent');
+});
+
 document.getElementById('categoriesTable').addEventListener('click', async function(e) {
   const tr = e.target.closest('tr[data-id]');
   if (!tr) return;
@@ -62,13 +339,53 @@ document.getElementById('categoriesTable').addEventListener('click', async funct
     tr.remove();
   }
   if (e.target.classList.contains('btn-edit')) {
-    const name_ar = prompt('الاسم (عربي):', tr.querySelector('.cat-name-ar').textContent);
-    if (name_ar === null) return;
-    const name_en = prompt('الاسم (إنجليزي):', tr.querySelector('.cat-name-en').textContent === '—' ? '' : tr.querySelector('.cat-name-en').textContent);
-    await fetch('/admin/categories/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name_ar: name_ar.trim(), name_en: (name_en || '').trim() }) });
-    tr.querySelector('.cat-name-ar').textContent = name_ar.trim();
-    tr.querySelector('.cat-name-en').textContent = (name_en && name_en.trim()) ? name_en.trim() : '—';
+    document.getElementById('edit_id').value = id;
+    document.getElementById('edit_name_ar').value = tr.querySelector('.cat-name-ar').textContent;
+    document.getElementById('edit_icon_type').value = tr.dataset.iconType || 'circle';
+    document.getElementById('edit_icon_name').value = tr.dataset.iconName || '';
+    var editColor = tr.dataset.iconColor || '#06A3E7';
+    document.getElementById('edit_icon_color_transparent').checked = (editColor === 'transparent');
+    document.getElementById('edit_icon_color').value = (editColor === 'transparent') ? '#06A3E7' : editColor;
+    document.getElementById('edit_icon_symbol_color').value = tr.dataset.iconSymbolColor || '#ffffff';
+    var editOp = tr.dataset.iconOpacity !== undefined && tr.dataset.iconOpacity !== '' ? tr.dataset.iconOpacity : '100';
+    document.getElementById('edit_icon_opacity').value = editOp;
+    var editOpVal = document.getElementById('edit_icon_opacity_val');
+    if (editOpVal) editOpVal.textContent = editOp + '%';
+    document.getElementById('edit_sort_order').value = tr.querySelector('.cat-sort-order').textContent;
+    document.getElementById('edit_icon_file').value = '';
+    editModal.show();
   }
 });
+
+document.getElementById('editSaveBtn').onclick = async function() {
+  var editNameAr = document.getElementById('edit_name_ar');
+  var nameAr = editNameAr && editNameAr.value ? editNameAr.value.trim() : '';
+  if (!nameAr) {
+    alert('الرجاء إدخال الاسم بالعربية (مطلوب).');
+    if (editNameAr) { editNameAr.focus(); editNameAr.select(); }
+    return;
+  }
+  const id = document.getElementById('edit_id').value;
+  const fd = new FormData();
+  fd.append('name_ar', nameAr);
+  fd.append('name_en', '');
+  fd.append('icon_type', document.getElementById('edit_icon_type').value);
+  fd.append('icon_name', document.getElementById('edit_icon_name').value);
+  fd.append('icon_color', document.getElementById('edit_icon_color_transparent').checked ? 'transparent' : document.getElementById('edit_icon_color').value);
+  fd.append('icon_symbol_color', document.getElementById('edit_icon_symbol_color').value || '#ffffff');
+  var editOpEl = document.getElementById('edit_icon_opacity');
+  fd.append('icon_opacity', (editOpEl && editOpEl.value !== '') ? editOpEl.value : '100');
+  fd.append('sort_order', document.getElementById('edit_sort_order').value);
+  const f = document.getElementById('edit_icon_file').files[0];
+  if (f) fd.append('icon', f);
+  const res = await fetch('/admin/categories/' + id, { method: 'PUT', body: fd });
+  if (!res.ok) {
+    var err = await res.text();
+    try { var j = JSON.parse(err); err = j.error || err; } catch (_) {}
+    return alert('خطأ: ' + err);
+  }
+  editModal.hide();
+  location.reload();
+};
 </script>
 <%- include('../partials/scripts') %>

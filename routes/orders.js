@@ -1,9 +1,11 @@
 const express = require('express');
 const { getSettings, setSetting, logActivity } = require('../lib/settings');
+const { notifyMerchantsNewOrder } = require('../lib/onesignal');
+const { emitNewOrder } = require('../lib/socket');
 
 const router = express.Router();
 
-const STATUS_LABELS = { pending: 'قيد الانتظار', confirmed: 'مؤكد', shipped: 'تم الشحن', delivered: 'تم التوصيل', cancelled: 'ملغي' };
+const STATUS_LABELS = { pending: 'قيد الانتظار', confirmed: 'مؤكد', shipped: 'تم الشحن', delivered: 'تم التوصيل', cancelled: 'ملغي', customer_refused: 'العميل رفض' };
 
 const PER_PAGE = 20;
 
@@ -31,15 +33,15 @@ function getOrdersWhere(filters) {
   return { where, params };
 }
 
-function getNextOrderNumber(db) {
-  const settings = getSettings(db);
+async function getNextOrderNumber(db) {
+  const settings = await getSettings(db);
   let next = parseInt(settings.next_order_number, 10);
   if (!Number.isFinite(next) || next < 1000) next = 1000;
-  setSetting(db, 'next_order_number', String(next + 1));
+  await setSetting(db, 'next_order_number', String(next + 1));
   return next + '#';
 }
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const db = req.db;
   const q = req.query.q || '';
   const status = req.query.status || '';
@@ -49,13 +51,14 @@ router.get('/', (req, res) => {
   const filters = { q, status, date_from, date_to };
   const { where, params } = getOrdersWhere(filters);
 
-  const total = db.prepare(`
+  const totalRow = await db.prepare(`
     SELECT COUNT(*) as c FROM orders o LEFT JOIN customers c ON o.customer_id = c.id WHERE ${where}
-  `).get(...params).c;
+  `).get(...params);
+  const total = totalRow ? totalRow.c : 0;
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
   const offset = (page - 1) * PER_PAGE;
 
-  const orders = db.prepare(`
+  const orders = await db.prepare(`
     SELECT o.*,
       COALESCE(o.customer_name, c.name) as display_name,
       COALESCE(o.customer_phone, c.phone) as display_phone,
@@ -80,7 +83,7 @@ router.get('/', (req, res) => {
   });
 });
 
-router.get('/export', (req, res) => {
+router.get('/export', async (req, res) => {
   const db = req.db;
   const filters = {
     q: req.query.q || '',
@@ -89,7 +92,7 @@ router.get('/export', (req, res) => {
     date_to: req.query.date_to || ''
   };
   const { where, params } = getOrdersWhere(filters);
-  const orders = db.prepare(`
+  const orders = await db.prepare(`
     SELECT o.*,
       COALESCE(o.customer_name, c.name) as display_name,
       COALESCE(o.customer_phone, c.phone) as display_phone,
@@ -118,12 +121,14 @@ router.get('/export', (req, res) => {
   res.send(csv);
 });
 
-router.get('/new', (req, res) => {
+router.get('/new', async (req, res) => {
   const db = req.db;
-  const customers = db.prepare('SELECT * FROM customers ORDER BY name').all();
-  const products = db.prepare('SELECT id, name_ar, name_en, price, discount_percent FROM products WHERE is_active = 1').all();
-  const cities = db.prepare('SELECT id, name FROM cities WHERE is_active = 1 ORDER BY name').all();
-  const merchants = db.prepare('SELECT id, name, store_name, email FROM merchants WHERE is_active = 1 ORDER BY name').all();
+  const [customers, products, cities, merchants] = await Promise.all([
+    db.prepare('SELECT * FROM customers ORDER BY name').all(),
+    db.prepare('SELECT id, name_ar, name_en, price, discount_percent FROM products WHERE is_active = 1').all(),
+    db.prepare('SELECT id, name FROM cities WHERE is_active = 1 ORDER BY name').all(),
+    db.prepare('SELECT id, name, store_name, email FROM merchants WHERE is_active = 1 ORDER BY name').all()
+  ]);
   res.render('orders/form', { order: null, items: [], customers, products, cities, merchants, adminUsername: req.session.adminUsername });
 });
 
@@ -171,10 +176,10 @@ function getAnyColContaining(row, part) {
   return null;
 }
 
-router.get('/view/:id', (req, res) => {
+router.get('/view/:id', async (req, res) => {
   const db = req.db;
   const orderId = req.params.id;
-  const orderWithCity = db.prepare(`
+  const orderWithCity = await db.prepare(`
     SELECT o.*, c.name as city_name
     FROM orders o
     LEFT JOIN cities c ON o.city_id = c.id
@@ -183,8 +188,8 @@ router.get('/view/:id', (req, res) => {
   if (!orderWithCity) return res.redirect('/admin/orders');
   const order = orderWithCity;
   const cityName = (order.city_name != null && String(order.city_name).trim() !== '') ? String(order.city_name).trim() : null;
-  const customer = order.customer_id != null ? db.prepare('SELECT * FROM customers WHERE id = ?').get(order.customer_id) : null;
-  const itemsWithImage = db.prepare(`
+  const customer = order.customer_id != null ? await db.prepare('SELECT * FROM customers WHERE id = ?').get(order.customer_id) : null;
+  const itemsWithImage = await db.prepare(`
     SELECT oi.id, oi.order_id, oi.product_id, oi.product_name, oi.quantity, oi.unit_price, oi.total_price, p.image_path
     FROM order_items oi
     LEFT JOIN products p ON oi.product_id = p.id
@@ -204,7 +209,7 @@ router.get('/view/:id', (req, res) => {
       image_url: image_url
     };
   });
-  const merchant = order.merchant_id != null ? db.prepare('SELECT id, name, store_name, email FROM merchants WHERE id = ?').get(order.merchant_id) : null;
+  const merchant = order.merchant_id != null ? await db.prepare('SELECT id, name, store_name, email FROM merchants WHERE id = ?').get(order.merchant_id) : null;
   res.render('orders/view', {
     order,
     items: orderItemsWithImages,
@@ -215,10 +220,10 @@ router.get('/view/:id', (req, res) => {
   });
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const db = req.db;
   const body = req.body || {};
-  const orderNumber = getNextOrderNumber(db);
+  const orderNumber = await getNextOrderNumber(db);
   const customerId = body.customer_id || null;
   const customerName = body.customer_name || '';
   const customerPhone = body.customer_phone || '';
@@ -231,12 +236,18 @@ router.post('/', (req, res) => {
   let totalAmount = 0;
   const productIds = Array.isArray(body.product_id) ? body.product_id : (body.product_id ? [body.product_id] : []);
   const quantities = Array.isArray(body.quantity) ? body.quantity : (body.quantity ? [body.quantity] : []);
-  const products = db.prepare('SELECT id, name_ar, price, discount_percent FROM products WHERE id = ?');
+  const fetchProduct = db.prepare('SELECT id, name_ar, price, discount_percent FROM products WHERE id = ?');
+
+  // تحميل بيانات المنتجات مرة واحدة لكل معرف فريد
+  const productCache = new Map();
+  for (const pid of new Set(productIds)) {
+    const p = await fetchProduct.get(pid);
+    if (p) productCache.set(String(pid), p);
+  }
 
   for (let i = 0; i < productIds.length; i++) {
-    const pid = productIds[i];
+    const p = productCache.get(String(productIds[i]));
     const qty = parseInt(quantities[i], 10) || 1;
-    const p = products.get(pid);
     if (p) {
       const unitPrice = p.price * (1 - (p.discount_percent || 0) / 100);
       totalAmount += unitPrice * qty;
@@ -244,10 +255,11 @@ router.post('/', (req, res) => {
   }
 
   const merchantId = body.merchant_id ? parseInt(body.merchant_id, 10) : null;
-  const r = db.prepare(`
+  const cityId = body.city_id ? parseInt(body.city_id, 10) : null;
+  const r = await db.prepare(`
     INSERT INTO orders (order_number, customer_id, customer_name, customer_phone, customer_phone_alt, customer_email, customer_address, city_id, merchant_id, status, total_amount, notes)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(orderNumber, customerId, customerName, customerPhone, customerPhoneAlt, customerEmail, customerAddress, body.city_id ? parseInt(body.city_id, 10) : null, merchantId, status, totalAmount, notes);
+  `).run(orderNumber, customerId, customerName, customerPhone, customerPhoneAlt, customerEmail, customerAddress, cityId, merchantId, status, totalAmount, notes);
 
   const orderId = r.lastInsertRowid;
   const insertItem = db.prepare(`
@@ -256,42 +268,53 @@ router.post('/', (req, res) => {
   `);
 
   for (let i = 0; i < productIds.length; i++) {
-    const pid = productIds[i];
+    const p = productCache.get(String(productIds[i]));
     const qty = parseInt(quantities[i], 10) || 1;
-    const p = products.get(pid);
     if (p) {
       const unitPrice = p.price * (1 - (p.discount_percent || 0) / 100);
-      insertItem.run(orderId, pid, p.name_ar, qty, unitPrice, unitPrice * qty);
+      await insertItem.run(orderId, productIds[i], p.name_ar, qty, unitPrice, unitPrice * qty);
     }
   }
 
-  const { notifyMerchantsNewOrder } = require('../lib/onesignal');
+  // إشعار جميع تجار المدينة (OneSignal)
   notifyMerchantsNewOrder(db, orderNumber, totalAmount, {
-    merchantId: merchantId || undefined,
-    cityId: !merchantId && body.city_id ? parseInt(body.city_id, 10) : undefined,
+    cityId: cityId || undefined,
     customerName: customerName || undefined,
     customerPhone: customerPhone || undefined
-  }).catch(() => {});
+  }).catch(() => { });
+
+  // إشعار فوري عبر Socket.io لجميع تجار المدينة
+  const io = req.app.locals.io;
+  if (io && cityId) {
+    emitNewOrder(io, cityId, {
+      order_id: orderId,
+      order_number: orderNumber,
+      total_amount: totalAmount,
+      city_id: cityId
+    });
+  }
 
   res.redirect('/admin/orders');
 });
 
-router.get('/edit/:id', (req, res) => {
+router.get('/edit/:id', async (req, res) => {
   const db = req.db;
-  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
+  const order = await db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
   if (!order) return res.redirect('/admin/orders');
-  const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(req.params.id);
-  const customers = db.prepare('SELECT * FROM customers ORDER BY name').all();
-  const products = db.prepare('SELECT id, name_ar, name_en, price, discount_percent FROM products WHERE is_active = 1').all();
-  const cities = db.prepare('SELECT id, name FROM cities WHERE is_active = 1 ORDER BY name').all();
-  const merchants = db.prepare('SELECT id, name, store_name, email FROM merchants WHERE is_active = 1 ORDER BY name').all();
+  const [items, customers, products, cities, merchants] = await Promise.all([
+    db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(req.params.id),
+    db.prepare('SELECT * FROM customers ORDER BY name').all(),
+    db.prepare('SELECT id, name_ar, name_en, price, discount_percent FROM products WHERE is_active = 1').all(),
+    db.prepare('SELECT id, name FROM cities WHERE is_active = 1 ORDER BY name').all(),
+    db.prepare('SELECT id, name, store_name, email FROM merchants WHERE is_active = 1 ORDER BY name').all()
+  ]);
   res.render('orders/form', { order, items, customers, products, cities, merchants, adminUsername: req.session.adminUsername });
 });
 
-router.post('/edit/:id', (req, res) => {
+router.post('/edit/:id', async (req, res) => {
   const db = req.db;
   const orderId = req.params.id;
-  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(orderId);
+  const order = await db.prepare('SELECT * FROM orders WHERE id = ?').get(orderId);
   if (!order) return res.redirect('/admin/orders');
   const body = req.body || {};
   const customerId = body.customer_id || null;
@@ -306,12 +329,18 @@ router.post('/edit/:id', (req, res) => {
   let totalAmount = 0;
   const productIds = Array.isArray(body.product_id) ? body.product_id : (body.product_id ? [body.product_id] : []);
   const quantities = Array.isArray(body.quantity) ? body.quantity : (body.quantity ? [body.quantity] : []);
-  const products = db.prepare('SELECT id, name_ar, price, discount_percent FROM products WHERE id = ?');
+  const fetchProduct = db.prepare('SELECT id, name_ar, price, discount_percent FROM products WHERE id = ?');
+
+  // تحميل بيانات المنتجات مرة واحدة لكل معرف فريد
+  const productCache = new Map();
+  for (const pid of new Set(productIds)) {
+    const p = await fetchProduct.get(pid);
+    if (p) productCache.set(String(pid), p);
+  }
 
   for (let i = 0; i < productIds.length; i++) {
-    const pid = productIds[i];
+    const p = productCache.get(String(productIds[i]));
     const qty = parseInt(quantities[i], 10) || 1;
-    const p = products.get(pid);
     if (p) {
       const unitPrice = p.price * (1 - (p.discount_percent || 0) / 100);
       totalAmount += unitPrice * qty;
@@ -319,69 +348,70 @@ router.post('/edit/:id', (req, res) => {
   }
 
   const merchantId = body.merchant_id ? parseInt(body.merchant_id, 10) : null;
-  db.prepare(`
+  await db.prepare(`
     UPDATE orders SET customer_id = ?, customer_name = ?, customer_phone = ?, customer_phone_alt = ?, customer_email = ?, customer_address = ?,
       city_id = ?, merchant_id = ?, status = ?, total_amount = ?, notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
   `).run(customerId, customerName, customerPhone, customerPhoneAlt, customerEmail, customerAddress, body.city_id ? parseInt(body.city_id, 10) : null, merchantId, status, totalAmount, notes, orderId);
 
-  db.prepare('DELETE FROM order_items WHERE order_id = ?').run(orderId);
+  await db.prepare('DELETE FROM order_items WHERE order_id = ?').run(orderId);
   const insertItem = db.prepare(`
     INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price)
     VALUES (?, ?, ?, ?, ?, ?)
   `);
   for (let i = 0; i < productIds.length; i++) {
-    const pid = productIds[i];
+    const p = productCache.get(String(productIds[i]));
     const qty = parseInt(quantities[i], 10) || 1;
-    const p = products.get(pid);
     if (p) {
       const unitPrice = p.price * (1 - (p.discount_percent || 0) / 100);
-      insertItem.run(orderId, pid, p.name_ar, qty, unitPrice, unitPrice * qty);
+      await insertItem.run(orderId, productIds[i], p.name_ar, qty, unitPrice, unitPrice * qty);
     }
   }
-  logActivity(db, req.session.adminId, req.session.adminUsername, 'تعديل الطلب', 'طلب ' + order.order_number);
+  await logActivity(db, req.session.adminId, req.session.adminUsername, 'تعديل الطلب', 'طلب ' + order.order_number);
   res.redirect('/admin/orders');
 });
 
-router.post('/bulk-delete', (req, res) => {
+router.post('/bulk-delete', async (req, res) => {
   const db = req.db;
   const raw = req.body.ids;
   const ids = typeof raw === 'string' ? raw.split(',').map(s => s.trim()).filter(Boolean) : (Array.isArray(raw) ? raw : (raw ? [raw] : []));
-  ids.forEach(id => {
-    db.prepare('DELETE FROM order_items WHERE order_id = ?').run(id);
-    db.prepare('DELETE FROM orders WHERE id = ?').run(id);
-  });
-  if (ids.length) logActivity(db, req.session.adminId, req.session.adminUsername, 'حذف طلبات', ids.length + ' طلب');
+  for (const id of ids) {
+    await db.prepare('DELETE FROM order_items WHERE order_id = ?').run(id);
+    await db.prepare('DELETE FROM orders WHERE id = ?').run(id);
+  }
+  if (ids.length) await logActivity(db, req.session.adminId, req.session.adminUsername, 'حذف طلبات', ids.length + ' طلب');
   res.redirect('/admin/orders');
 });
 
-router.post('/bulk-status', (req, res) => {
+router.post('/bulk-status', async (req, res) => {
   const db = req.db;
   const status = req.body.status;
   const raw = req.body.ids;
   const ids = typeof raw === 'string' ? raw.split(',').map(s => s.trim()).filter(Boolean) : (Array.isArray(raw) ? raw : (raw ? [raw] : []));
-  if (['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'].includes(status)) {
-    ids.forEach(id => {
-      db.prepare('UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(status, id);
-    });
+  if (Object.keys(STATUS_LABELS).includes(status)) {
+    for (const id of ids) {
+      await db.prepare('UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(status, id);
+    }
+    if (ids.length) await logActivity(db, req.session.adminId, req.session.adminUsername, 'تغيير حالة طلبات', ids.length + ' طلب → ' + (STATUS_LABELS[status] || status));
   }
   res.redirect('/admin/orders');
 });
 
-router.post('/delete/:id', (req, res) => {
+router.post('/delete/:id', async (req, res) => {
   const db = req.db;
-  const order = db.prepare('SELECT order_number FROM orders WHERE id = ?').get(req.params.id);
+  const order = await db.prepare('SELECT order_number FROM orders WHERE id = ?').get(req.params.id);
   if (!order) return res.redirect('/admin/orders');
-  db.prepare('DELETE FROM order_items WHERE order_id = ?').run(req.params.id);
-  db.prepare('DELETE FROM orders WHERE id = ?').run(req.params.id);
-  logActivity(db, req.session.adminId, req.session.adminUsername, 'حذف الطلب', order.order_number);
+  await db.prepare('DELETE FROM order_items WHERE order_id = ?').run(req.params.id);
+  await db.prepare('DELETE FROM orders WHERE id = ?').run(req.params.id);
+  await logActivity(db, req.session.adminId, req.session.adminUsername, 'حذف الطلب', order.order_number);
   res.redirect('/admin/orders');
 });
 
-router.post('/status/:id', (req, res) => {
+router.post('/status/:id', async (req, res) => {
   const db = req.db;
   const { status } = req.body || {};
-  if (['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'].includes(status)) {
-    db.prepare('UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(status, req.params.id);
+  if (Object.keys(STATUS_LABELS).includes(status)) {
+    await db.prepare('UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(status, req.params.id);
+    await logActivity(db, req.session.adminId, req.session.adminUsername, 'تغيير حالة طلب', 'طلب #' + req.params.id + ' → ' + (STATUS_LABELS[status] || status));
   }
   res.redirect('/admin/orders/view/' + req.params.id);
 });

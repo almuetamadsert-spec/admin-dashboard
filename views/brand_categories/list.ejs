@@ -1,0 +1,166 @@
+<%- include('../partials/head', { title: 'تصنيفات البراندات' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<h4 class="mb-4">تصنيفات البراندات</h4>
+<p class="text-muted small mb-4">البراندات تظهر في التطبيق ضمن "تصنيفات البراندات". الأيقونة تُرفع من الجهاز. اسم البراند يجب أن يطابق حقل "الشركة" في المنتجات لعرض منتجات هذا البراند.</p>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form id="brandCatForm" class="row g-3 align-items-end" enctype="multipart/form-data">
+      <input type="hidden" id="brandCatId" name="id" value="">
+      <div class="col-md-2">
+        <label class="form-label">اسم البراند *</label>
+        <input type="text" id="name_ar" name="name_ar" class="form-control" required placeholder="مثال: Anker">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">أيقونة (من الجهاز)</label>
+        <input type="file" id="icon_file" name="icon" class="form-control" accept="image/*">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">حجم الأيقونة</label>
+        <select id="icon_size" name="icon_size" class="form-select">
+          <% (iconSizes || []).forEach(function(s) { %>
+          <option value="<%= s.value %>"><%= s.label %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">زوايا الأيقونة</label>
+        <select id="icon_corner" name="icon_corner" class="form-select">
+          <% (iconCorners || []).forEach(function(s) { %>
+          <option value="<%= s.value %>"><%= s.label %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">شكل الأيقونة</label>
+        <select id="icon_shape" name="icon_shape" class="form-select">
+          <% (iconShapes || []).forEach(function(s) { %>
+          <option value="<%= s.value %>"><%= s.label %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">لون الخلفية</label>
+        <input type="color" id="icon_color" name="icon_color" class="form-control form-control-color" value="#06A3E7">
+      </div>
+      <div class="col-md-1">
+        <label class="form-label">ترتيب</label>
+        <input type="number" id="sort_order" name="sort_order" class="form-control" value="0" min="0">
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100" id="brandCatSubmitBtn">إضافة</button>
+        <button type="button" class="btn btn-secondary w-100 mt-1 d-none" id="brandCatCancelBtn">إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>الأيقونة</th>
+          <th>اسم البراند</th>
+          <th>الحجم</th>
+          <th>الزوايا</th>
+          <th>الشكل</th>
+          <th>الترتيب</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="brandCatTable">
+        <% (list || []).forEach(function(b) { %>
+        <tr data-id="<%= b.id %>">
+          <td>
+            <% if (b.icon_path) { %>
+            <img src="/uploads/<%= b.icon_path %>" alt="" style="width:36px;height:36px;object-fit:cover;border-radius:6px;background:<%= b.icon_color || '#eee' %>">
+            <% } else { %>
+            <span class="text-muted small">—</span>
+            <% } %>
+          </td>
+          <td><%= b.name_ar %></td>
+          <td><%= (iconSizes || []).find(function(s){ return s.value === b.icon_size; }) ? (iconSizes.find(function(s){ return s.value === b.icon_size; })).label : b.icon_size %></td>
+          <td><%= (iconCorners || []).find(function(s){ return s.value === b.icon_corner; }) ? (iconCorners.find(function(s){ return s.value === b.icon_corner; })).label : b.icon_corner %></td>
+          <td><%= (iconShapes || []).find(function(s){ return s.value === b.icon_shape; }) ? (iconShapes.find(function(s){ return s.value === b.icon_shape; })).label : b.icon_shape %></td>
+          <td><%= b.sort_order != null ? b.sort_order : 0 %></td>
+          <td>
+            <button type="button" class="btn btn-sm btn-outline-primary me-1 edit-brand-cat" data-id="<%= b.id %>" data-name="<%= b.name_ar %>" data-size="<%= b.icon_size || 'medium' %>" data-corner="<%= b.icon_corner || 'rounded' %>" data-shape="<%= b.icon_shape || 'square' %>" data-color="<%= b.icon_color || '#06A3E7' %>" data-sort="<%= b.sort_order != null ? b.sort_order : 0 %>">تعديل</button>
+            <button type="button" class="btn btn-sm btn-outline-danger delete-brand-cat" data-id="<%= b.id %>" data-name="<%= b.name_ar %>">حذف</button>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+(function() {
+  const form = document.getElementById('brandCatForm');
+  const idInput = document.getElementById('brandCatId');
+  const submitBtn = document.getElementById('brandCatSubmitBtn');
+  const cancelBtn = document.getElementById('brandCatCancelBtn');
+
+  function resetForm() {
+    idInput.value = '';
+    document.getElementById('name_ar').value = '';
+    document.getElementById('icon_file').value = '';
+    document.getElementById('icon_size').value = 'medium';
+    document.getElementById('icon_corner').value = 'rounded';
+    document.getElementById('icon_shape').value = 'square';
+    document.getElementById('icon_color').value = '#06A3E7';
+    document.getElementById('sort_order').value = '0';
+    submitBtn.textContent = 'إضافة';
+    cancelBtn.classList.add('d-none');
+  }
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const id = idInput.value.trim();
+    const fd = new FormData(form);
+    if (!id) {
+      fetch('/admin/brand-categories', { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(() => { location.reload(); })
+        .catch(err => alert('خطأ: ' + (err.message || 'فشل الإضافة')));
+    } else {
+      fetch('/admin/brand-categories/' + id, { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(() => { location.reload(); })
+        .catch(err => alert('خطأ: ' + (err.message || 'فشل التعديل')));
+    }
+  });
+
+  cancelBtn.addEventListener('click', resetForm);
+
+  document.querySelectorAll('.edit-brand-cat').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      idInput.value = this.dataset.id;
+      document.getElementById('name_ar').value = this.dataset.name || '';
+      document.getElementById('icon_size').value = this.dataset.size || 'medium';
+      document.getElementById('icon_corner').value = this.dataset.corner || 'rounded';
+      document.getElementById('icon_shape').value = this.dataset.shape || 'square';
+      document.getElementById('icon_color').value = this.dataset.color || '#06A3E7';
+      document.getElementById('sort_order').value = this.dataset.sort || '0';
+      document.getElementById('icon_file').value = '';
+      submitBtn.textContent = 'حفظ التعديل';
+      cancelBtn.classList.remove('d-none');
+    });
+  });
+
+  document.querySelectorAll('.delete-brand-cat').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (!confirm('حذف براند "' + (this.dataset.name || '') + '"؟')) return;
+      const id = this.dataset.id;
+      fetch('/admin/brand-categories/' + id, { method: 'DELETE' })
+        .then(r => r.json())
+        .then(() => { location.reload(); })
+        .catch(err => alert('خطأ: ' + (err.message || 'فشل الحذف')));
+    });
+  });
+})();
+</script>
+
+<%- include('../partials/scripts') %>

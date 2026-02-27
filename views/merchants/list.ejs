@@ -1,68 +1,123 @@
-<%- include('../partials/head', { title: 'التجار' }) %>
+<%- include('../partials/head', { title: 'إدارة التجار' }) %>
 <%- include('../partials/sidebar', { adminUsername }) %>
 
-<h4 class="mb-4">إدارة التجار (توجيه الطلبات)</h4>
-<p class="text-muted small mb-3">توجيه الإشعارات بناءً على إيميل التاجر.</p>
-<div class="card mb-3">
-  <div class="card-body">
-    <form method="post" action="/admin/merchants" class="row g-2">
-      <div class="col-md-2"><input type="text" name="name" class="form-control" placeholder="اسم التاجر" required></div>
-      <div class="col-md-2"><input type="text" name="store_name" class="form-control" placeholder="اسم المتجر"></div>
-      <div class="col-md-2">
-        <select name="city_id" class="form-select">
-          <option value="">— المدينة —</option>
-          <% cities.forEach(function(c) { %><option value="<%= c.id %>"><%= c.name %></option><% }); %>
+<div class="main-content">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="page-title mb-1">إدارة التجار</h4>
+      <p class="text-muted small mb-0">توجيه الطلبات والإشعارات حسب المدينة. لون البطاقة وحد الطلبات (منطق نظام المعتمد).</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/admin/merchants/export" class="btn btn-outline-success"><i class="bi bi-download me-1"></i> تصدير CSV</a>
+      <a href="/admin/merchants/stats" class="btn btn-outline-info"><i class="bi bi-graph-up me-1"></i> إحصائيات الأداء</a>
+      <a href="/admin/merchants/new" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> إضافة تاجر جديد</a>
+    </div>
+  </div>
+  <% if (typeof query !== 'undefined' && query.import === 'ok') { %>
+  <div class="alert alert-success">تم استيراد التجار بنجاح. عدد: <%= query.count || 0 %>، تخطي: <%= query.skipped || 0 %>.</div>
+  <% } %>
+  <% if (typeof query !== 'undefined' && query.import === 'no_file') { %>
+  <div class="alert alert-warning">لم يتم اختيار ملف للاستيراد.</div>
+  <% } %>
+  <form method="post" action="/admin/merchants/import" enctype="multipart/form-data" class="mb-3 d-flex align-items-end gap-2">
+    <div><label class="form-label small">استيراد تجار (CSV)</label><input type="file" name="csv_file" class="form-control form-control-sm" accept=".csv" required></div>
+    <button type="submit" class="btn btn-outline-primary btn-sm">استيراد</button>
+  </form>
+
+  <form method="get" action="/admin/merchants" class="mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-sm-5">
+        <label class="form-label small mb-1">بحث</label>
+        <input type="text" name="q" value="<%= query.q || '' %>" class="form-control form-control-sm" placeholder="الاسم، المتجر، الإيميل، الهاتف...">
+      </div>
+      <div class="col-sm-3">
+        <label class="form-label small mb-1">المدينة</label>
+        <select name="city_id" class="form-select form-select-sm">
+          <option value="">كل المدن</option>
+          <% cities.forEach(c => { %>
+          <option value="<%= c.id %>" <%= query.city_id == c.id ? 'selected' : '' %>><%= c.name %></option>
+          <% }); %>
         </select>
       </div>
-      <div class="col-md-2"><input type="text" name="phone" class="form-control" placeholder="الهاتف"></div>
-      <div class="col-md-2"><input type="email" name="email" class="form-control" placeholder="البريد (للإشعارات)"></div>
-      <div class="col-md-1"><select name="is_active" class="form-select"><option value="1">نشط</option><option value="0">معطل</option></select></div>
-      <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">إضافة</button></div>
-    </form>
-  </div>
-</div>
-<div class="card">
-  <div class="table-responsive">
-    <table class="table table-hover mb-0">
-      <thead>
-        <tr><th>التاجر</th><th>اسم المتجر</th><th>المدينة</th><th>الهاتف</th><th>البريد</th><th>الحالة</th><th></th></tr>
-      </thead>
-      <tbody>
-        <% merchants.forEach(function(m) { %>
-        <tr>
-          <td><%= m.name %></td>
-          <td><%= m.store_name || '—' %></td>
-          <td><%= m.city_name || '—' %></td>
-          <td><%= m.phone || '—' %></td>
-          <td><%= m.email || '—' %></td>
-          <td><%= m.is_active ? 'نشط' : 'معطل' %></td>
-          <td>
-            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#edit<%= m.id %>">تعديل</button>
-            <form action="/admin/merchants/delete/<%= m.id %>" method="post" class="d-inline" onsubmit="return confirm('حذف التاجر؟');"><button type="submit" class="btn btn-sm btn-outline-danger">حذف</button></form>
-          </td>
-        </tr>
-        <div class="modal fade" id="edit<%= m.id %>">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <form method="post" action="/admin/merchants/edit/<%= m.id %>">
-                <div class="modal-header"><h5 class="modal-title">تعديل التاجر</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body">
-                  <div class="mb-2"><label class="form-label small">اسم التاجر</label><input type="text" name="name" class="form-control" value="<%= m.name %>" required></div>
-                  <div class="mb-2"><label class="form-label small">اسم المتجر</label><input type="text" name="store_name" class="form-control" value="<%= m.store_name || '' %>" placeholder="اسم المتجر"></div>
-                  <div class="mb-2"><label class="form-label small">المدينة</label><select name="city_id" class="form-select"><option value="">— المدينة —</option><% cities.forEach(function(c) { %><option value="<%= c.id %>" <%= m.city_id == c.id ? 'selected' : '' %>><%= c.name %></option><% }); %></select></div>
-                  <div class="mb-2"><label class="form-label small">الهاتف</label><input type="text" name="phone" class="form-control" value="<%= m.phone || '' %>" placeholder="الهاتف"></div>
-                  <div class="mb-2"><label class="form-label small">البريد (للإشعارات)</label><input type="email" name="email" class="form-control" value="<%= m.email || '' %>" placeholder="البريد"></div>
-                  <div class="mb-2"><label class="form-label small">الحالة</label><select name="is_active" class="form-select"><option value="1" <%= m.is_active ? 'selected' : '' %>>نشط</option><option value="0" <%= !m.is_active ? 'selected' : '' %>>معطل</option></select></div>
-                </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button><button type="submit" class="btn btn-primary">حفظ</button></div>
+      <div class="col-sm-2">
+        <label class="form-label small mb-1">الحالة</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="">الكل</option>
+          <option value="active" <%= query.status === 'active' ? 'selected' : '' %>>نشط</option>
+          <option value="inactive" <%= query.status === 'inactive' ? 'selected' : '' %>>معطل</option>
+        </select>
+      </div>
+      <div class="col-sm-2 d-flex gap-1">
+        <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-search me-1"></i>بحث</button>
+        <a href="/admin/merchants" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x-lg"></i></a>
+      </div>
+    </div>
+  </form>
+
+  <div class="card">
+    <div class="card-header d-flex align-items-center">
+      <i class="bi bi-people me-2"></i>
+      قائمة التجار (<%= merchants.length %>)
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>اسم المالك</th>
+            <th>اسم المتجر</th>
+            <th>المدينة</th>
+            <th>الهاتف</th>
+            <th>البريد</th>
+            <th>لون البطاقة</th>
+            <th>حد الطلبات</th>
+            <th>الحالة</th>
+            <th width="140"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% merchants.forEach(function(m) { %>
+          <tr>
+            <td><strong><%= m.name %></strong></td>
+            <td><%= m.store_name || '—' %></td>
+            <td><%= m.city_name || '—' %></td>
+            <td><%= m.phone || '—' %></td>
+            <td><%= m.email || '—' %></td>
+            <td>
+              <% if (m.card_color) { %>
+              <span class="d-inline-block rounded" style="width:20px;height:20px;background:<%= m.card_color %>" title="<%= m.card_color %>"></span>
+              <% } else { %>
+              <span class="text-muted small">افتراضي</span>
+              <% } %>
+            </td>
+            <td><%= m.order_limit != null ? m.order_limit : 20 %></td>
+            <td>
+              <% if (m.is_active) { %>
+              <span class="badge bg-success">نشط</span>
+              <% } else { %>
+              <span class="badge bg-secondary">معطل</span>
+              <% } %>
+            </td>
+            <td>
+              <a href="/admin/merchants/edit/<%= m.id %>" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <form action="/admin/merchants/delete/<%= m.id %>" method="post" class="d-inline" onsubmit="return confirm('حذف التاجر «<%= m.name %>»؟');">
+                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
               </form>
-            </div>
-          </div>
-        </div>
-        <% }); %>
-        <% if (!merchants.length) { %><tr><td colspan="7" class="text-center text-muted">لا يوجد تجار</td></tr><% } %>
-      </tbody>
-    </table>
+            </td>
+          </tr>
+          <% }); %>
+          <% if (!merchants.length) { %>
+          <tr>
+            <td colspan="9" class="text-center text-muted py-5">
+              <i class="bi bi-people display-6 d-block mb-2"></i>
+              لا يوجد تجار. <a href="/admin/merchants/new">إضافة تاجر جديد</a>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 

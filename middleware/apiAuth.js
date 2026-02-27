@@ -4,7 +4,7 @@
  * أو Authorization: Basic base64(consumer_key:consumer_secret)
  * يضع على req: req.apiKeyPermission = 'read_only' | 'read_write'
  */
-function requireApiKey(req, res, next) {
+async function requireApiKey(req, res, next) {
   const db = req.db;
   if (!db) return res.status(503).json({ ok: false, error: 'service_unavailable' });
 
@@ -30,7 +30,7 @@ function requireApiKey(req, res, next) {
   }
 
   try {
-    const row = db.prepare('SELECT id, name, permission FROM api_keys WHERE consumer_key = ? AND consumer_secret = ? AND is_active = 1').get(consumerKey, consumerSecret);
+    const row = await db.prepare('SELECT id, name, permission FROM api_keys WHERE consumer_key = ? AND consumer_secret = ? AND is_active = 1').get(consumerKey, consumerSecret);
     if (!row) {
       return res.status(401).json({ ok: false, error: 'invalid_credentials', message: 'مفتاح أو سر غير صحيح' });
     }

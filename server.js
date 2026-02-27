@@ -1,8 +1,19 @@
+require('dotenv').config();
+const http = require('http');
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
+const { Server } = require('socket.io');
+const { setupSocket } = require('./lib/socket');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: '*', methods: ['GET', 'POST'] },
+  path: '/socket.io/'
+});
+app.locals.io = io;
+setupSocket(io, () => app.locals.db);
 const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
 if (isProduction) app.set('trust proxy', 1);
@@ -13,6 +24,10 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  next();
+});
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // السماح لطلبات المتجر التجريبي من نفس المصدر أو أي مصدر (للاختبار)
@@ -24,11 +39,15 @@ app.use('/api', function(req, res, next) {
   next();
 });
 
+if (isProduction && !process.env.SESSION_SECRET) {
+  console.warn('[تحذير] SESSION_SECRET غير مضبوط في بيئة الإنتاج — يُرجى تعيينه في .env');
+}
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 24 * 60 * 60 * 1000 }
+  cookie: { secure: isProduction, maxAge: 24 * 60 * 60 * 1000 }
 }));
 
 // قاعدة البيانات تُحمّل لاحقاً؛ التطبيق يبدأ الاستماع فوراً
@@ -37,15 +56,13 @@ app.locals.db = null;
 // فحص التوصيل — يعمل حتى قبل تحميل قاعدة البيانات
 app.get('/health', (req, res) => res.type('text').send('ok'));
 
-app.get('/store', (req, res) => res.redirect('/store/'));
-
-app.get('/api/status', (req, res) => {
+app.get('/api/status', async (req, res) => {
   const db = app.locals.db;
   let dbStatus = 'جاري التحميل...';
   let dbOk = false;
   if (db) {
     try {
-      db.prepare('SELECT 1').get();
+      await db.prepare('SELECT 1').get();
       dbStatus = 'متصل';
       dbOk = true;
     } catch (e) {
@@ -63,13 +80,13 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-app.get('/status', (req, res) => {
+app.get('/status', async (req, res) => {
   const db = app.locals.db;
   let dbStatus = 'جاري التحميل...';
   let dbOk = false;
   if (db) {
     try {
-      db.prepare('SELECT 1').get();
+      await db.prepare('SELECT 1').get();
       dbStatus = 'متصل ✓';
       dbOk = true;
     } catch (e) {
@@ -101,8 +118,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// تشخيص المفتاح (بدون مصادقة): يوضح ما يراه السيرفر وهل يوجد تطابق في قاعدة البيانات
-app.get('/api/debug-key-check', (req, res) => {
+// تشخيص المفتاح (محمي بمصادقة المشرف): يوضح ما يراه السيرفر وهل يوجد تطابق في قاعدة البيانات
+app.get('/api/debug-key-check', require('./middleware/auth').requireAuth, async (req, res) => {
   const db = req.db;
   if (!db) return res.status(503).json({ ok: false, message: 'قاعدة البيانات غير جاهزة' });
   const key = String(req.headers['x-consumer-key'] || '').trim();
@@ -110,10 +127,10 @@ app.get('/api/debug-key-check', (req, res) => {
   let dbHasKey = false;
   let dbFullMatch = false;
   try {
-    const byKey = db.prepare('SELECT id FROM api_keys WHERE consumer_key = ? LIMIT 1').get(key);
+    const byKey = await db.prepare('SELECT id FROM api_keys WHERE consumer_key = ? LIMIT 1').get(key);
     dbHasKey = !!byKey;
     if (key && secret) {
-      const row = db.prepare('SELECT id FROM api_keys WHERE consumer_key = ? AND consumer_secret = ? AND is_active = 1').get(key, secret);
+      const row = await db.prepare('SELECT id FROM api_keys WHERE consumer_key = ? AND consumer_secret = ? AND is_active = 1').get(key, secret);
       dbFullMatch = !!row;
     }
   } catch (e) {
@@ -143,30 +160,40 @@ app.use('/admin/orders', requireAuth, require('./routes/orders'));
 app.use('/admin/customers', requireAuth, require('./routes/customers'));
 app.use('/admin/sales', requireAuth, require('./routes/sales'));
 app.use('/admin/categories', requireAuth, require('./routes/categories'));
+app.use('/admin/brand-categories', requireAuth, require('./routes/brand_categories'));
 app.use('/admin/settings', requireAuth, require('./routes/settings'));
 app.use('/admin/cities', requireAuth, require('./routes/cities'));
 app.use('/admin/activity', requireAuth, require('./routes/activity'));
 app.use('/admin/cms', requireAuth, require('./routes/cms'));
 app.use('/admin/coupons', requireAuth, require('./routes/coupons'));
 app.use('/admin/merchants', requireAuth, require('./routes/merchants'));
+app.use('/admin/app-users', requireAuth, require('./routes/app_users'));
+app.use('/admin/store-ui', requireAuth, require('./routes/store_ui'));
 app.use('/admin/inventory', requireAuth, require('./routes/inventory'));
 app.use('/admin/api-docs', requireAuth, require('./routes/api-docs'));
 app.use('/admin', require('./routes/admin'));
 
 app.use('/api/cities', require('./middleware/apiAuth').requireApiKey, require('./routes/api/cities'));
 app.use('/api/cms', require('./middleware/apiAuth').requireApiKey, require('./routes/api/cms'));
+app.use('/api/categories', require('./middleware/apiAuth').requireApiKey, require('./routes/api/categories'));
+app.use('/api/brand-categories', require('./middleware/apiAuth').requireApiKey, require('./routes/api/brand_categories'));
 app.use('/api/products', require('./middleware/apiAuth').requireApiKey, require('./routes/api/products'));
 const apiAuth = require('./middleware/apiAuth');
 app.use('/api/orders', apiAuth.requireApiKey, apiAuth.requireWrite, require('./routes/api/orders'));
+app.use('/api/auth', require('./routes/api/auth'));
+app.use('/api/merchant', require('./routes/api/merchant'));
+app.use('/api/store-ui', require('./middleware/apiAuth').requireApiKey, require('./routes/api/store_ui'));
+app.use('/api/social-links', require('./middleware/apiAuth').requireApiKey, require('./routes/api/social_links'));
 
 // بدء الاستماع فوراً (قبل تحميل قاعدة البيانات)
-app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`الخادم يعمل على المنفذ ${PORT} (0.0.0.0)`);
   console.log('لوحة التحكم: /admin/login');
+  console.log('Socket.io: الإشعارات الفورية للتجار مفعّلة');
 });
 
-// تحميل قاعدة البيانات في الخلفية
-require('./db/init')
+// تحميل قاعدة البيانات في الخلفية (MariaDB إن وُجدت متغيرات الاتصال، وإلا SQLite)
+require('./db/loader')
   .then((db) => {
     app.locals.db = db;
     console.log('قاعدة البيانات جاهزة');

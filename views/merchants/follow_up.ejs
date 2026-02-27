@@ -1,0 +1,123 @@
+<%- include('../partials/head', { title: 'متابعة المتاجر' }) %>
+<%- include('../partials/sidebar', { adminUsername }) %>
+
+<div class="main-content">
+  <style>
+    .follow-up-wrap { max-width: 1000px; margin: 0 auto; }
+    .follow-up-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 2px solid #0284c7; }
+    .follow-up-title { margin: 0; font-size: 1.35rem; font-weight: 700; color: #0284c7; }
+    .follow-up-stat-box { background: linear-gradient(135deg, #0284c7, #0ea5e9); color: #fff; padding: 14px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; }
+    .follow-up-stat-box .val { font-size: 18px; font-weight: 800; margin-right: 8px; }
+    .follow-up-search { margin-bottom: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .follow-up-search input[type="search"] { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; width: 280px; max-width: 100%; }
+    .follow-up-btn { padding: 8px 18px; background: linear-gradient(135deg, #0284c7, #0ea5e9); color: #fff; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+    .follow-up-btn:hover { color: #fff; opacity: 0.95; }
+    .follow-up-btn-secondary { background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; }
+    .follow-up-btn-secondary:hover { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; color: #0369a1; }
+    .follow-up-alert { background: #fffbeb; border: 1px solid #fcd34d; border-right: 4px solid #f59e0b; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; }
+    .follow-up-alert strong { color: #92400e; }
+    .follow-up-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .follow-up-card { background: #fff; border: 1px solid #bae6fd; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.08); border-right: 4px solid #0ea5e9; }
+    .follow-up-card h3 { margin-top: 0; padding-bottom: 8px; font-size: 14px; font-weight: 600; border-bottom: 2px solid #f9fafb; }
+    .follow-up-card p { margin: 4px 0; font-size: 12px; }
+    .follow-up-status-badge { padding: 3px 8px; border-radius: 5px; text-decoration: none; font-size: 10px; font-weight: bold; }
+    .follow-up-status-active { background: #22c55e; color: #fff; }
+    .follow-up-status-frozen { background: #bae6fd; color: #0c4a6e; }
+    .follow-up-stalled { background: #fef2f2; color: #b91c1c; padding: 5px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; border: 1px solid #fecaca; margin-bottom: 8px; }
+    .follow-up-progress { background: #e5e7eb; height: 8px; border-radius: 5px; margin: 8px 0; overflow: hidden; }
+    .follow-up-progress-inner { height: 100%; border-radius: 5px; }
+    .follow-up-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .follow-up-badge-time { background: #e2e8f0; padding: 6px 10px; border-radius: 5px; font-size: 11px; color: #475569; font-weight: 600; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 4px; }
+    .follow-up-empty { grid-column: 1 / -1; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 48px 24px; text-align: center; color: #64748b; font-size: 15px; }
+    .follow-up-empty a { color: #0284c7; font-weight: 600; text-decoration: none; }
+    @media (max-width: 900px) { .follow-up-cards { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .follow-up-cards { grid-template-columns: 1fr; } }
+  </style>
+
+  <div class="follow-up-wrap">
+    <% if (totalStalledOrders > 0) { %>
+    <div class="follow-up-alert">
+      <strong>تنبيهات:</strong>
+      <ul class="mb-0 mt-2">
+        <li>يوجد <strong><%= totalStalledOrders %></strong> طلب تم قبوله بدون إجراء منذ أكثر من 5 دقائق (تظهر تحت كل تاجر أدناه).</li>
+      </ul>
+    </div>
+    <% } %>
+
+    <div class="follow-up-header">
+      <h1 class="follow-up-title">لوحة تحكم متابعة المتاجر</h1>
+      <div class="follow-up-stat-box">
+        <span>إجمالي العمولة المستحقة:</span>
+        <span class="val"><%= Number(totalAllCommissions).toFixed(2) %> د.ل</span>
+      </div>
+    </div>
+
+    <form method="get" action="/admin/merchants/follow-up" class="follow-up-search">
+      <input type="search" name="s" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="بحث بالاسم أو الإيميل أو المتجر أو رقم الهاتف...">
+      <button type="submit" class="follow-up-btn follow-up-btn-secondary">بحث</button>
+      <% if (search) { %>
+      <a href="/admin/merchants/follow-up" class="follow-up-btn follow-up-btn-secondary">إلغاء البحث</a>
+      <% } %>
+    </form>
+
+    <div class="follow-up-cards">
+      <% if (!merchants || merchants.length === 0) { %>
+      <div class="follow-up-empty">
+        <% if (search) { %>
+        لا توجد نتائج للبحث.
+        <% } else { %>
+        لا يوجد متاجر مسجلة.<br>
+        <a href="/admin/merchants/new">إضافة متجر جديد ←</a>
+        <% } %>
+      </div>
+      <% } else { %>
+      <% merchants.forEach(function(m) {
+        const stat = (merchantStats && merchantStats[m.id]) || {};
+        const count = stat.count != null ? stat.count : 0;
+        const limit = stat.limit != null ? stat.limit : 20;
+        const totalSales = stat.totalSales != null ? stat.totalSales : 0;
+        const stalledCount = stat.stalledCount != null ? stat.stalledCount : 0;
+        const lastActivity = stat.lastActivity;
+        const perc = limit > 0 ? Math.min(100, (count / limit) * 100) : 0;
+        const color = perc >= 100 ? '#dc2626' : (perc >= 50 ? '#eab308' : '#22c55e');
+        const isActive = m.is_active !== 0;
+        const cardColor = m.card_color || '#7d9a7d';
+      %>
+      <div class="follow-up-card" style="border-right-color: <%= cardColor %>;">
+        <div class="d-flex justify-content-between align-items-start">
+          <h3 class="flex-grow-1"><%= m.store_name || m.name || '—' %> | <%= m.city_name || '—' %></h3>
+          <% if (isActive) { %>
+          <a href="/admin/merchants/follow-up?merchant_status_action=freeze&m_id=<%= m.id %>" class="follow-up-status-badge follow-up-status-active" onclick="return confirm('هل أنت متأكد من تجميد حساب هذا المتجر؟')">نشط</a>
+          <% } else { %>
+          <a href="/admin/merchants/follow-up?merchant_status_action=activate&m_id=<%= m.id %>" class="follow-up-status-badge follow-up-status-frozen" onclick="return confirm('هل أنت متأكد من تفعيل حساب هذا المتجر؟')">مجمد</a>
+          <% } %>
+        </div>
+        <p><strong>الإيميل:</strong> <%= m.email || '—' %></p>
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <span><strong>الطلبات:</strong> <%= count %> / <%= limit %></span>
+        </div>
+        <% if (stalledCount > 0) { %>
+        <div class="follow-up-stalled">
+          <i class="bi bi-exclamation-triangle-fill me-1"></i>
+          يوجد <%= stalledCount %> طلب تم قبوله بدون إجراء
+        </div>
+        <% } %>
+        <div class="follow-up-progress">
+          <div class="follow-up-progress-inner" style="background: <%= color %>; width: <%= perc %>%;"></div>
+        </div>
+        <p><strong>إجمالي المبيعات:</strong> <%= Number(totalSales).toFixed(2) %> د.ل</p>
+        <div class="follow-up-actions">
+          <a href="/admin/merchants/detail/<%= m.id %>" class="follow-up-btn">عرض التفاصيل والأرشفة</a>
+          <span class="follow-up-badge-time">
+            <i class="bi bi-clock"></i>
+            <%= lastActivity ? new Date(lastActivity).toLocaleString('ar-LY') : '—' %>
+          </span>
+        </div>
+      </div>
+      <% }); %>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/scripts') %>

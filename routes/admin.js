@@ -8,13 +8,13 @@ router.get('/login', (req, res) => {
   res.render('admin/login', { error: null });
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   const db = req.db;
   const { username, password } = req.body || {};
   if (!username || !password) {
     return res.render('admin/login', { error: 'أدخل اسم المستخدم وكلمة المرور' });
   }
-  const admin = db.prepare('SELECT * FROM admins WHERE username = ?').get(username);
+  const admin = await db.prepare('SELECT * FROM admins WHERE username = ?').get(username);
   if (!admin || !bcrypt.compareSync(password, admin.password)) {
     return res.render('admin/login', { error: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
   }

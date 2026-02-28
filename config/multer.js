@@ -23,4 +23,25 @@ const upload = multer({
   }
 });
 
-module.exports = { upload, uploadMultiple: upload.array('images', 10) };
+// CSV Upload configuration
+const csvDir = path.join(__dirname, '..', 'uploads', 'csv');
+if (!fs.existsSync(csvDir)) fs.mkdirSync(csvDir, { recursive: true });
+
+const storageCsv = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, csvDir),
+  filename: (req, file, cb) => {
+    cb(null, `import_${Date.now()}_${file.originalname}`);
+  }
+});
+
+const uploadCsv = multer({
+  storage: storageCsv,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit for CSV
+  fileFilter: (req, file, cb) => {
+    const allowed = /\.(csv)$/i.test(file.originalname);
+    if (allowed) cb(null, true);
+    else cb(new Error('الرجاء رفع ملف بصيغة CSV فقط.'));
+  }
+});
+
+module.exports = { upload, uploadCsv, uploadMultiple: upload.array('images', 10) };

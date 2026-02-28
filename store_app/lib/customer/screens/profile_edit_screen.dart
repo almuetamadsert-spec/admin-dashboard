@@ -106,22 +106,23 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F7FA),
+        backgroundColor: context.colors.surfaceContainerLowest,
         appBar: AppBar(
-          backgroundColor: const Color(0xFF1E3A5F),
-          foregroundColor: Colors.white,
-          title: const Text('تعديل الحساب', style: TextStyle(fontSize: 17)),
+          backgroundColor: context.theme.scaffoldBackgroundColor,
+          foregroundColor: context.colors.onSurface,
+          title: Text('تعديل الحساب', style: context.textTheme.titleLarge?.copyWith(fontSize: 18)),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_forward),
+            icon: Icon(Icons.arrow_back, color: context.colors.onSurface),
             onPressed: () => Navigator.of(context).pop(),
           ),
+          elevation: 0,
           actions: [
             if (!_loading)
               TextButton(
                 onPressed: _saving ? null : _save,
                 child: _saving
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Text('حفظ', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+                    ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: context.colors.primary))
+                    : Text('حفظ', style: TextStyle(color: context.colors.primary, fontSize: 15, fontWeight: FontWeight.bold)),
               ),
           ],
         ),
@@ -140,12 +141,12 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                           children: [
                             CircleAvatar(
                               radius: 48,
-                              backgroundColor: kPrimaryBlue.withOpacity(0.15),
+                              backgroundColor: context.colors.primary.withOpacity(0.1),
                               child: Text(
                                 _nameController.text.isNotEmpty
                                     ? _nameController.text.trim()[0].toUpperCase()
                                     : '؟',
-                                style: const TextStyle(fontSize: 38, fontWeight: FontWeight.bold, color: kPrimaryBlue),
+                                style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold, color: context.colors.primary),
                               ),
                             ),
                             Positioned(
@@ -153,7 +154,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                               left: 2,
                               child: Container(
                                 padding: const EdgeInsets.all(5),
-                                decoration: const BoxDecoration(color: kPrimaryBlue, shape: BoxShape.circle),
+                                decoration: BoxDecoration(color: context.colors.primary, shape: BoxShape.circle),
                                 child: const Icon(Icons.camera_alt_outlined, size: 16, color: Colors.white),
                               ),
                             ),
@@ -210,9 +211,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                           child: DropdownButtonFormField<int>(
                             value: _selectedCityId,
-                            decoration: const InputDecoration(
+                            dropdownColor: context.theme.cardColor,
+                            decoration: InputDecoration(
                               border: InputBorder.none,
-                              prefixIcon: Icon(Icons.location_city_outlined, color: Colors.grey),
+                              prefixIcon: Icon(Icons.location_city_outlined, color: context.isDark ? kDarkTextSecondary : Colors.grey),
                               hintText: 'اختر مدينتك',
                             ),
                             items: [
@@ -242,7 +244,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                             : const Icon(Icons.check_circle_outline),
                         label: const Text('حفظ التعديلات', style: TextStyle(fontSize: 15)),
                         style: FilledButton.styleFrom(
-                          backgroundColor: kPrimaryBlue,
+                          backgroundColor: context.colors.primary,
+                          foregroundColor: context.colors.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         ),
@@ -258,16 +261,23 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   Widget _sectionTitle(String text) {
     return Text(
       text,
-      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.grey.shade600),
+      style: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: context.isDark ? kDarkTextSecondary : Colors.grey.shade600,
+      ),
     );
   }
 
   Widget _card({required List<Widget> children}) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 3))],
+        boxShadow: [
+          if (!context.isDark)
+            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 3))
+        ],
       ),
       child: Column(children: children),
     );
@@ -290,9 +300,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       validator: validator,
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: TextStyle(color: context.isDark ? kDarkTextSecondary : kTextSecondary),
         border: InputBorder.none,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        prefixIcon: Icon(icon, color: Colors.grey.shade500, size: 20),
+        prefixIcon: Icon(icon, color: context.isDark ? kDarkTextSecondary : Colors.grey.shade500, size: 20),
       ),
       onChanged: (_) {
         if (label.contains('الاسم')) setState(() {}); // تحديث Avatar

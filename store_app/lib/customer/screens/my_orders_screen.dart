@@ -5,6 +5,7 @@ import '../../api/api_client.dart';
 import '../../config.dart';
 import '../../models/my_order.dart';
 import '../../theme/app_theme.dart';
+import '../widgets/custom_illustration.dart';
 import 'order_tracking_screen.dart';
 
 /// شاشة طلباتي — قائمة الطلبات القديمة والحالية.
@@ -117,16 +118,59 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   )
                 : _orders == null || _orders!.isEmpty
                     ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.receipt_long, size: 64, color: Colors.grey.shade400),
-                            const SizedBox(height: 16),
-                            Text(
-                              'لا توجد طلبات',
-                              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
-                            ),
-                          ],
+                        child: Padding(
+                          padding: const EdgeInsets.all(32),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const CustomIllustration(
+                                type: IllustrationType.emptyOrders,
+                                size: 240,
+                              ),
+                              const SizedBox(height: 24),
+                              Text(
+                                'سجل طلباتك فارغ',
+                                style: context.textTheme.titleLarge?.copyWith(
+                                  fontSize: 22,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              Text(
+                                'لم نجد أي طلبات مسجلة بهذا الرقم. ابدأ رحلة التسوق اليوم واستمتع بتجربة فريدة مع المعتمد.',
+                                textAlign: TextAlign.center,
+                                style: context.textTheme.bodyMedium?.copyWith(
+                                  color: context.isDark ? kDarkTextSecondary : kTextSecondary,
+                                  height: 1.6,
+                                ),
+                              ),
+                              const SizedBox(height: 40),
+                              SizedBox(
+                                width: double.infinity,
+                                child: FilledButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  style: FilledButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 18),
+                                    backgroundColor: kPrimaryBlue,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  child: const Text(
+                                    'اكتشف المنتجات',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       )
                     : RefreshIndicator(

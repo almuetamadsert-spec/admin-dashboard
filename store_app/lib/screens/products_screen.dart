@@ -4,6 +4,7 @@ import '../api/api_client.dart';
 import '../config.dart';
 import '../models/cart_item.dart';
 import '../models/product.dart';
+import '../customer/widgets/product_card.dart';
 
 class ProductsScreen extends StatefulWidget {
   final List<CartItem> cart;
@@ -104,179 +105,26 @@ class _ProductsScreenState extends State<ProductsScreen> {
     return s.imageUrl;
   }
 
-  TextAlign _textAlignFrom(String align) {
-    switch (align) {
-      case 'left': return TextAlign.left;
-      case 'center': return TextAlign.center;
-      case 'right': return TextAlign.right;
-      default: return TextAlign.right;
-    }
-  }
-
   Widget _productCard(Product p) {
-    final imageUrl = _productImageUrl(p);
-    final card = _sliderData?.cardLayout ?? const ProductCardLayout();
-    final cardRadius = card.borderRadius;
-    final cardColor = _cardColorFromHex(card.bgColor);
-    final hasDiscount = p.finalPrice < p.price;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      elevation: 1.5,
-      shadowColor: Colors.black12,
-      color: cardColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(cardRadius)),
-      margin: const EdgeInsets.all(6),
-      child: InkWell(
-        onTap: () {
-          // If we want to open product detail in the future, we could add a tap handler here.
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  imageUrl.isEmpty
-                      ? Container(color: Colors.grey.shade200, child: const Icon(Icons.image_not_supported, size: 40))
-                      : Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade200, child: const Icon(Icons.broken_image, size: 40)),
-                        ),
-                  if (hasDiscount)
-                    Positioned(
-                      top: 6,
-                      left: 6,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(6)),
-                        child: const Text('عرض', style: TextStyle(color: Colors.white, fontSize: 10)),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (p.company != null && p.company!.isNotEmpty)
-                    Text(
-                      p.company!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2.0, bottom: 4.0),
-                    child: Text(
-                      p.displayName,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                    ),
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        '${p.finalPrice.toStringAsFixed(0)} د.ل',
-                        style: TextStyle(fontWeight: FontWeight.bold, color: _cardColorFromHex(card.addBtnColor.isEmpty ? '#06A3E7' : card.addBtnColor), fontSize: 14),
-                      ),
-                      const SizedBox(width: 4),
-                      if (hasDiscount)
-                        Text(
-                          '${p.price.toStringAsFixed(0)} د.ل',
-                          style: TextStyle(fontSize: 11, color: Colors.grey.shade500, decoration: TextDecoration.lineThrough),
-                        ),
-                    ],
-                  ),
-                  if (card.showAddToCart || card.showBuyNow) _buildActionButtons(p, card),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+    return ProductCard(
+      product: p,
+      layout: _sliderData?.cardLayout ?? const ProductCardLayout(),
+      onTap: (product) {
+        // Handle tap if needed
+      },
+      onAddToCart: (product) {
+        widget.onAddToCart(product);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('تمت إضافة ${product.displayName}')));
+      },
+      onBuyNow: () {
+        widget.onAddToCart(p);
+        widget.onOpenCart();
+      },
     );
   }
 
-  Widget _buildActionButtons(Product p, ProductCardLayout card) {
-    if (!card.showAddToCart && !card.showBuyNow) return const SizedBox.shrink();
+  // Remove unused helpers like _textAlignFrom, _cardColorFromHex, _buildActionButtons
 
-    final btnColor = _cardColorFromHex(card.addBtnColor.isEmpty ? '#06A3E7' : card.addBtnColor);
-    final shape = card.addBtnStyle == 'sharp'
-        ? RoundedRectangleBorder(borderRadius: BorderRadius.zero)
-        : card.addBtnStyle == 'full_rounded'
-            ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))
-            : RoundedRectangleBorder(borderRadius: BorderRadius.circular(8));
-    final padding = card.addBtnStyle == 'small_rounded' ? const EdgeInsets.symmetric(horizontal: 12, vertical: 6) : const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
-
-    final bool hasBoth = card.showAddToCart && card.showBuyNow;
-
-    Widget cartBtn = FilledButton.icon(
-      onPressed: p.stock > 0
-          ? () {
-              widget.onAddToCart(p);
-              if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('تمت إضافة ${p.displayName}')));
-            }
-          : null,
-      icon: const Icon(Icons.add_shopping_cart, size: 16),
-      label: const Text('إضافة'),
-      style: FilledButton.styleFrom(
-        backgroundColor: btnColor,
-        foregroundColor: Colors.white,
-        padding: padding,
-        minimumSize: Size.zero,
-        shape: shape,
-        textStyle: const TextStyle(fontSize: 12),
-      ),
-    );
-
-    Widget buyBtn = FilledButton.icon(
-      onPressed: p.stock > 0
-          ? () {
-              widget.onAddToCart(p);
-              widget.onOpenCart();
-            }
-          : null,
-      icon: const Icon(Icons.shopping_bag, size: 16),
-      label: const Text('شراء'),
-      style: FilledButton.styleFrom(
-        backgroundColor: Colors.orange,
-        foregroundColor: Colors.white,
-        padding: padding,
-        minimumSize: Size.zero,
-        shape: shape,
-        textStyle: const TextStyle(fontSize: 12),
-      ),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 8.0),
-      child: Row(
-        children: [
-          if (card.showAddToCart) Expanded(child: cartBtn),
-          if (hasBoth) const SizedBox(width: 4),
-          if (card.showBuyNow) Expanded(child: buyBtn),
-        ],
-      ),
-    );
-  }
-
-  Color _cardColorFromHex(String hex) {
-    if (hex.isEmpty) return Colors.white;
-    var h = hex.replaceFirst('#', '');
-    if (h.length == 6) h = 'FF$h';
-    final n = int.tryParse(h, radix: 16);
-    if (n == null) return Colors.white;
-    return Color(n);
-  }
 
   @override
   Widget build(BuildContext context) {

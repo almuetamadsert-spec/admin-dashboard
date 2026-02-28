@@ -108,6 +108,8 @@ async function initDb() {
     );
     CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at);
     CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+    CREATE INDEX IF NOT EXISTS idx_orders_city ON orders(city_id);
+    CREATE INDEX IF NOT EXISTS idx_orders_merchant ON orders(merchant_id);
     CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
   `);
 
@@ -146,69 +148,91 @@ async function initDb() {
     CREATE TABLE IF NOT EXISTS cms_pages (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       slug TEXT UNIQUE NOT NULL,
-      title_ar TEXT,
+      title_ar TEXT NOT NULL,
       title_en TEXT,
       content_ar TEXT,
       content_en TEXT,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-    CREATE TABLE IF NOT EXISTS coupons (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      code TEXT UNIQUE NOT NULL,
-      discount_type TEXT NOT NULL DEFAULT 'percent',
-      discount_value REAL NOT NULL DEFAULT 0,
-      min_order REAL DEFAULT 0,
-      max_uses INTEGER DEFAULT 0,
-      used_count INTEGER DEFAULT 0,
-      expires_at DATETIME,
       is_active INTEGER DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
-    CREATE TABLE IF NOT EXISTS merchants (
+    CREATE TABLE IF NOT EXISTS home_sections (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      city_id INTEGER,
-      phone TEXT,
-      email TEXT,
+      title_ar TEXT NOT NULL,
+      title_en TEXT,
+      section_type TEXT NOT NULL, -- 'slider', 'list', 'grid', 'categories'
+      content_source TEXT NOT NULL, -- 'latest', 'sale', 'best_sellers', 'category', 'manual'
+      category_id INTEGER,
+      items_limit INTEGER DEFAULT 10,
+      sort_order INTEGER DEFAULT 0,
       is_active INTEGER DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (city_id) REFERENCES cities(id)
+      FOREIGN KEY (category_id) REFERENCES categories(id)
     );
-    CREATE TABLE IF NOT EXISTS api_keys (
+    CREATE TABLE IF NOT EXISTS home_section_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      consumer_key TEXT UNIQUE NOT NULL,
-      consumer_secret TEXT NOT NULL,
-      permission TEXT NOT NULL DEFAULT 'read_only',
-      is_active INTEGER DEFAULT 1,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      section_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      sort_order INTEGER DEFAULT 0,
+      FOREIGN KEY (section_id) REFERENCES home_sections(id) ON DELETE CASCADE,
+      FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
     );
-    CREATE TABLE IF NOT EXISTS app_users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      email TEXT UNIQUE NOT NULL,
-      password_hash TEXT,
-      role TEXT NOT NULL DEFAULT 'customer',
-      merchant_id INTEGER,
-      google_id TEXT,
-      apple_id TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (merchant_id) REFERENCES merchants(id)
-    );
-    CREATE TABLE IF NOT EXISTS app_sessions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      token TEXT UNIQUE NOT NULL,
-      expires_at DATETIME NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES app_users(id)
-    );
-    CREATE TABLE IF NOT EXISTS store_slides (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      image_path TEXT NOT NULL,
-      corner_style TEXT NOT NULL DEFAULT 'rounded',
-      sort_order INTEGER NOT NULL DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+    CREATE TABLE IF NOT EXISTS coupons(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            code TEXT UNIQUE NOT NULL,
+            discount_type TEXT NOT NULL DEFAULT 'percent',
+            discount_value REAL NOT NULL DEFAULT 0,
+            min_order REAL DEFAULT 0,
+            max_uses INTEGER DEFAULT 0,
+            used_count INTEGER DEFAULT 0,
+            expires_at DATETIME,
+            is_active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+          );
+    CREATE TABLE IF NOT EXISTS merchants(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            city_id INTEGER,
+            phone TEXT,
+            email TEXT,
+            is_active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(city_id) REFERENCES cities(id)
+          );
+    CREATE TABLE IF NOT EXISTS api_keys(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            consumer_key TEXT UNIQUE NOT NULL,
+            consumer_secret TEXT NOT NULL,
+            permission TEXT NOT NULL DEFAULT 'read_only',
+            is_active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+          );
+    CREATE TABLE IF NOT EXISTS app_users(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT,
+            role TEXT NOT NULL DEFAULT 'customer',
+            merchant_id INTEGER,
+            google_id TEXT,
+            apple_id TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(merchant_id) REFERENCES merchants(id)
+          );
+    CREATE TABLE IF NOT EXISTS app_sessions(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            token TEXT UNIQUE NOT NULL,
+            expires_at DATETIME NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES app_users(id)
+          );
+    CREATE TABLE IF NOT EXISTS store_slides(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            image_path TEXT NOT NULL,
+            corner_style TEXT NOT NULL DEFAULT 'rounded',
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+          );
   `);
 
   try {
@@ -258,30 +282,30 @@ async function initDb() {
 
   try {
     db.run(`
-      CREATE TABLE IF NOT EXISTS brand_categories (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name_ar TEXT NOT NULL,
-        icon_path TEXT,
-        icon_size TEXT DEFAULT 'medium',
-        icon_corner TEXT DEFAULT 'rounded',
-        icon_shape TEXT DEFAULT 'square',
-        icon_color TEXT DEFAULT '#06A3E7',
-        sort_order INTEGER DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
+      CREATE TABLE IF NOT EXISTS brand_categories(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name_ar TEXT NOT NULL,
+    icon_path TEXT,
+    icon_size TEXT DEFAULT 'medium',
+    icon_corner TEXT DEFAULT 'rounded',
+    icon_shape TEXT DEFAULT 'square',
+    icon_color TEXT DEFAULT '#06A3E7',
+    sort_order INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
     `);
   } catch (e) { /* ignore */ }
   try {
     db.run(`
-      CREATE TABLE IF NOT EXISTS merchant_stock (
-        merchant_id INTEGER NOT NULL,
-        product_id INTEGER NOT NULL,
-        quantity INTEGER NOT NULL DEFAULT 0,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (merchant_id, product_id),
-        FOREIGN KEY (merchant_id) REFERENCES merchants(id),
-        FOREIGN KEY (product_id) REFERENCES products(id)
-      )
+      CREATE TABLE IF NOT EXISTS merchant_stock(
+      merchant_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      quantity INTEGER NOT NULL DEFAULT 0,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY(merchant_id, product_id),
+      FOREIGN KEY(merchant_id) REFERENCES merchants(id),
+      FOREIGN KEY(product_id) REFERENCES products(id)
+    )
     `);
   } catch (e) { /* ignore */ }
   save();

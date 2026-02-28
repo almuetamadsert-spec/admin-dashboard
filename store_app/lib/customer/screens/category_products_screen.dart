@@ -6,6 +6,7 @@ import '../../models/cart_item.dart';
 import '../../models/category.dart';
 import '../../models/product.dart';
 import '../../theme/app_theme.dart';
+import '../widgets/product_card.dart';
 
 /// صفحة أنيقة تعرض منتجات التصنيف مع بحث وفلتر (السعر / التاريخ).
 class CategoryProductsScreen extends StatefulWidget {
@@ -55,6 +56,8 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
     super.dispose();
   }
 
+  SliderData? _sliderData;
+
   Future<void> _load() async {
     setState(() {
       _loading = true;
@@ -66,9 +69,13 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
         q: _searchQuery.isEmpty ? null : _searchQuery,
         sort: _sort.isEmpty ? null : _sort,
       );
+      SliderData? sd;
+      try { sd = await ApiClient.getSlider(); } catch(_) {}
+      
       if (mounted) {
         setState(() {
           _products = list;
+          _sliderData = sd;
           _loading = false;
         });
       }
@@ -89,102 +96,18 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
   }
 
   Widget _productCard(Product p) {
-    final imageUrl = _productImageUrl(p);
-    final hasDiscount = p.finalPrice < p.price;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.08),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.all(6),
-      child: InkWell(
-        onTap: () => widget.onProductTap?.call(p),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  imageUrl.isEmpty
-                      ? Container(
-                          color: Colors.grey.shade200,
-                          child: const Icon(Icons.image_not_supported, size: 40),
-                        )
-                      : Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: Colors.grey.shade200,
-                            child: const Icon(Icons.broken_image, size: 40),
-                          ),
-                        ),
-                  Positioned(
-                    top: 6,
-                    right: 6,
-                    child: Icon(Icons.favorite_border, size: 20, color: Colors.grey.shade600),
-                  ),
-                  if (hasDiscount)
-                    Positioned(
-                      top: 6,
-                      left: 6,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text('عرض', style: TextStyle(color: Colors.white, fontSize: 10)),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (p.company != null && p.company!.isNotEmpty)
-                    Text(
-                      p.company!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2.0, bottom: 4.0),
-                    child: Text(
-                      p.displayName,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                    ),
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        '${p.finalPrice.toStringAsFixed(0)} د.ل',
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: kPrimaryBlue, fontSize: 14),
-                      ),
-                      const SizedBox(width: 4),
-                      if (hasDiscount)
-                        Text(
-                          '${p.price.toStringAsFixed(0)} د.ل',
-                          style: TextStyle(fontSize: 11, color: Colors.grey.shade500, decoration: TextDecoration.lineThrough),
-                        ),
-                    ],
-                  ),
-                  _buildActionButtons(p),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+    return ProductCard(
+      product: p,
+      layout: _sliderData?.cardLayout ?? const ProductCardLayout(),
+      onTap: (product) => widget.onProductTap?.call(product),
+      onAddToCart: (product) {
+        widget.onAddToCart(product);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('تمت إضافة ${product.displayName}')));
+      },
+      onBuyNow: () {
+        widget.onAddToCart(p);
+        widget.onOpenCart();
+      },
     );
   }
 
@@ -254,10 +177,34 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_forward),
-            onPressed: () => Navigator.of(context).pop(),
+          leading: Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.shopping_cart_outlined),
+                onPressed: widget.onOpenCart,
+              ),
+              if (widget.cart.isNotEmpty)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                    child: Text(
+                      '${widget.cart.fold(0, (s, e) => s + e.quantity)}',
+                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+            ],
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.arrow_forward),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
           title: Text(widget.category.displayName, style: const TextStyle(fontSize: 18)),
         ),
         body: Column(

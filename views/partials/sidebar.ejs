@@ -1,29 +1,45 @@
 <div class="d-flex">
   <nav class="sidebar position-fixed top-0 start-0 bottom-0 z-1">
-    <div class="brand">
+    <div class="brand text-center">
       <h5 class="text-white mb-0">لوحة التحكم</h5>
-      <small><%= adminUsername %></small>
+      <small>
+        <%= adminUsername %>
+      </small>
     </div>
-    <ul class="nav flex-column pt-2 pb-3">
+    <ul class="nav flex-column pt-2 pb-5"
+      style="overflow-y: auto; max-height: calc(100vh - 80px); flex-wrap: nowrap !important; display: flex !important; flex-direction: column !important;">
+      <li class="nav-header">التقارير</li>
       <li><a class="nav-link" href="/admin/dashboard"><i class="bi bi-grid-1x2"></i> الرئيسية</a></li>
-      <li><a class="nav-link" href="/admin/settings"><i class="bi bi-gear"></i> الإعدادات</a></li>
-      <li><a class="nav-link" href="/admin/api-docs"><i class="bi bi-code-slash"></i> توثيق API</a></li>
-      <li><a class="nav-link" href="/admin/products"><i class="bi bi-box-seam"></i> المنتجات</a></li>
-      <li><a class="nav-link" href="/admin/categories/page"><i class="bi bi-tags"></i> التصنيفات</a></li>
-      <li><a class="nav-link" href="/admin/brand-categories"><i class="bi bi-badge-tm"></i> تصنيفات البراندات</a></li>
-      <li><a class="nav-link" href="/admin/cities"><i class="bi bi-geo-alt"></i> مدن التوصيل</a></li>
-      <li><a class="nav-link" href="/admin/orders"><i class="bi bi-cart-check"></i> الطلبات</a></li>
-      <li><a class="nav-link" href="/admin/customers"><i class="bi bi-people"></i> العملاء</a></li>
-      <li><a class="nav-link" href="/admin/coupons"><i class="bi bi-percent"></i> الكوبونات</a></li>
-      <li><a class="nav-link" href="/admin/merchants"><i class="bi bi-shop"></i> التجار</a></li>
-      <li><a class="nav-link" href="/admin/merchants/stats"><i class="bi bi-graph-up-arrow"></i> إحصائيات الأداء</a></li>
-      <li><a class="nav-link" href="/admin/app-users"><i class="bi bi-phone"></i> مستخدمو التطبيق</a></li>
-      <li><a class="nav-link" href="/admin/store-ui"><i class="bi bi-images"></i> واجهة المتجر</a></li>
-      <li><a class="nav-link" href="/admin/inventory"><i class="bi bi-boxes"></i> المخزون والتنبيهات</a></li>
-      <li><a class="nav-link" href="/admin/cms"><i class="bi bi-file-text"></i> المحتوى (من نحن/الخصوصية)</a></li>
-      <li><a class="nav-link" href="/admin/activity"><i class="bi bi-journal-text"></i> سجل العمليات</a></li>
       <li><a class="nav-link" href="/admin/sales"><i class="bi bi-graph-up"></i> المبيعات</a></li>
-      <li class="mt-auto pt-2"><a class="nav-link" href="/admin/logout"><i class="bi bi-box-arrow-right"></i> خروج</a></li>
+      <li><a class="nav-link" href="/admin/merchants/stats"><i class="bi bi-graph-up-arrow"></i> الإحصائيات</a></li>
+
+      <li class="nav-header">إدارة المتجر</li>
+      <li><a class="nav-link" href="/admin/products"><i class="bi bi-box-seam"></i> المنتجات</a></li>
+      <li><a class="nav-link" href="/admin/orders"><i class="bi bi-cart-check"></i> الطلبات</a></li>
+      <li><a class="nav-link" href="/admin/categories/page"><i class="bi bi-tags"></i> التصنيفات</a></li>
+      <li><a class="nav-link" href="/admin/brand-categories"><i class="bi bi-badge-tm"></i> الماركات</a></li>
+      <li><a class="nav-link" href="/admin/inventory"><i class="bi bi-boxes"></i> المخزون</a></li>
+
+      <li class="nav-header">الواجهة والمحتوى</li>
+      <li><a class="nav-link" href="/admin/home-sections"><i class="bi bi-layout-text-window-reverse"></i> الرئيسية
+          (App)</a></li>
+      <li><a class="nav-link" href="/admin/store-ui"><i class="bi bi-images"></i> واجهة المتجر</a></li>
+      <li><a class="nav-link" href="/admin/cms"><i class="bi bi-file-text"></i> المحتوى</a></li>
+      <li><a class="nav-link" href="/admin/coupons"><i class="bi bi-percent"></i> الكوبونات</a></li>
+
+      <li class="nav-header">العملاء والتجار</li>
+      <li><a class="nav-link" href="/admin/customers"><i class="bi bi-people"></i> العملاء</a></li>
+      <li><a class="nav-link" href="/admin/merchants"><i class="bi bi-shop"></i> التجار</a></li>
+      <li><a class="nav-link" href="/admin/app-users"><i class="bi bi-phone"></i> المستخدمون</a></li>
+
+      <li class="nav-header">النظام</li>
+      <li><a class="nav-link" href="/admin/settings"><i class="bi bi-gear"></i> الإعدادات</a></li>
+      <li><a class="nav-link" href="/admin/cities"><i class="bi bi-geo-alt"></i> مدن التوصيل</a></li>
+      <li><a class="nav-link" href="/admin/api-docs"><i class="bi bi-code-slash"></i> توثيق API</a></li>
+      <li><a class="nav-link" href="/admin/activity"><i class="bi bi-journal-text"></i> سجل العمليات</a></li>
+
+      <li class="mt-4"><a class="nav-link text-danger" href="/admin/logout"><i class="bi bi-box-arrow-right"></i>
+          خروج</a></li>
     </ul>
   </nav>
   <main class="flex-grow-1 main-content">

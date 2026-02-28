@@ -18,7 +18,7 @@ class BrandCategory {
     this.iconSize = 'medium',
     this.iconCorner = 'rounded',
     this.iconShape = 'square',
-    this.iconColor = '#06A3E7',
+    this.iconColor = '#14acec',
     this.sortOrder = 0,
   });
 
@@ -33,7 +33,7 @@ class BrandCategory {
       iconSize: (json['icon_size'] as String? ?? 'medium').trim(),
       iconCorner: (json['icon_corner'] as String? ?? 'rounded').trim(),
       iconShape: (json['icon_shape'] as String? ?? 'square').trim(),
-      iconColor: (json['icon_color'] as String? ?? '#06A3E7').trim(),
+      iconColor: (json['icon_color'] as String? ?? '#14acec').trim(),
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
     );
   }

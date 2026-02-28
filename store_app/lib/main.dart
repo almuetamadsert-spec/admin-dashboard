@@ -45,14 +45,8 @@ class _AppState extends State<App> {
     return MaterialApp(
       title: 'المعتمد',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: kPrimaryBlue, brightness: Brightness.light),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: kPrimaryBlue, brightness: Brightness.dark),
-        useMaterial3: true,
-      ),
+      theme: AppThemes.light(),
+      darkTheme: AppThemes.dark(),
       themeMode: _themeMode,
       home: _AppRouter(onDarkModeChanged: _onDarkModeChanged),
     );

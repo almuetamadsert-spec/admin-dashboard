@@ -9,7 +9,7 @@ Color colorFromHex(String hex, {double opacity = 1.0}) {
   String h = hex.replaceFirst('#', '');
   if (h.length == 6) h = 'FF$h';
   final n = int.tryParse(h, radix: 16);
-  if (n == null) return const Color(0xFF06A3E7).withOpacity(opacity);
+  if (n == null) return const Color(0xFF14ACEC).withOpacity(opacity);
   return Color(n).withOpacity(opacity);
 }
 

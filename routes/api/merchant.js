@@ -268,16 +268,22 @@ router.post('/orders/:id/unavailable', async (req, res) => {
   const db = req.db;
   const merchantId = req.appUser.merchant_id;
   const orderId = req.params.id;
-  const order = await db.prepare('SELECT id FROM orders WHERE id = ? AND merchant_id = ?').get(orderId, merchantId);
+  const order = await db.prepare('SELECT id, notes FROM orders WHERE id = ? AND merchant_id = ?').get(orderId, merchantId);
   if (!order) return res.status(404).json({ ok: false, error: 'not_found', message: 'الطلب غير موجود' });
   try {
-    const note = (req.body && req.body.reason) || 'نفاد الكمية';
-    await db.prepare('UPDATE orders SET status = ?, notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run('cancelled', note, orderId);
+    const reason = (req.body && req.body.reason) || 'نفاد الكمية';
+    // إضافة السبب للملاحظات الموجودة بدلاً من الكتابة فوقها
+    const existingNotes = order.notes || '';
+    const updatedNotes = existingNotes
+      ? existingNotes + '\n[إلغاء التاجر: ' + reason + ']'
+      : '[إلغاء التاجر: ' + reason + ']';
+    await db.prepare('UPDATE orders SET status = ?, notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run('cancelled', updatedNotes, orderId);
     res.json({ ok: true, message: 'تم إلغاء الطلب' });
   } catch (e) {
     res.status(500).json({ ok: false, error: 'server_error', message: e.message });
   }
 });
+
 
 /** POST /api/merchant/orders/:id/refused — رفض العميل */
 router.post('/orders/:id/refused', async (req, res) => {

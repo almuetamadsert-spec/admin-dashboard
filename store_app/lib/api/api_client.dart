@@ -86,11 +86,13 @@ class ApiClient {
     final interval = (data['interval_seconds'] as num?)?.toInt() ?? 5;
     final layout = data['product_layout'] as String? ?? 'grid_2';
     final cardJson = data['product_card'] as Map<String, dynamic>?;
+    final logoJson = data['logo_settings'] as Map<String, dynamic>?;
     return SliderData(
       intervalSeconds: interval.clamp(2, 60),
       slides: list.map((e) => SliderSlide.fromJson(e as Map<String, dynamic>)).toList(),
       productLayout: ['grid_2', 'grid_3', 'slider'].contains(layout) ? layout : 'grid_2',
       cardLayout: ProductCardLayout.fromJson(cardJson),
+      logoSettings: LogoSettings.fromJson(logoJson),
     );
   }
 
@@ -106,14 +108,14 @@ class ApiClient {
   /// GET /api/social-links — روابط السوشيال ميديا
   static Future<Map<String, dynamic>> getSocialLinks() async {
     final r = await http.get(Uri.parse('$_base/api/social-links'), headers: _headers);
-    if (r.statusCode != 200) return {'ok': false, 'links': <Map<String, dynamic>>[], 'icon_shape': 'circle', 'icon_bg_color': '#06A3E7', 'icon_symbol_color': '#ffffff'};
+    if (r.statusCode != 200) return {'ok': false, 'links': <Map<String, dynamic>>[], 'icon_shape': 'circle', 'icon_bg_color': '#14acec', 'icon_symbol_color': '#ffffff'};
     final data = jsonDecode(r.body) as Map<String, dynamic>? ?? {};
     final list = data['links'] as List<dynamic>? ?? [];
     return {
       'ok': data['ok'] == true,
       'links': list.map((e) => e as Map<String, dynamic>).toList(),
       'icon_shape': data['icon_shape'] as String? ?? 'circle',
-      'icon_bg_color': data['icon_bg_color'] as String? ?? '#06A3E7',
+      'icon_bg_color': data['icon_bg_color'] as String? ?? '#14acec',
       'icon_symbol_color': data['icon_symbol_color'] as String? ?? '#ffffff',
     };
   }
@@ -159,6 +161,48 @@ class ApiClient {
     }
     throw Exception(data?['message'] ?? data?['error'] ?? 'فشل إرسال الطلب: ${r.statusCode}');
   }
+
+  /// GET /api/home — بيانات الصفحة الرئيسية الديناميكية
+  static Future<List<HomeSection>> getHomeData() async {
+    final r = await http.get(
+      Uri.parse('$_base/api/home?_=${DateTime.now().millisecondsSinceEpoch}'),
+      headers: _headers,
+    );
+    if (r.statusCode != 200) throw Exception('فشل تحميل بيانات الصفحة الرئيسية: ${r.statusCode}');
+    final data = jsonDecode(r.body) as Map<String, dynamic>?;
+    if (data?['ok'] != true) throw Exception(data?['message'] ?? 'فشل تحميل بيانات الصفحة الرئيسية');
+    final list = data!['sections'] as List<dynamic>? ?? [];
+    return list.map((e) => HomeSection.fromJson(e as Map<String, dynamic>)).toList();
+  }
+}
+
+class HomeSection {
+  final int id;
+  final String titleAr;
+  final String titleEn;
+  final String sectionType; // slider | list | grid | categories
+  final List<Product> products;
+
+  HomeSection({
+    required this.id,
+    required this.titleAr,
+    required this.titleEn,
+    required this.sectionType,
+    required this.products,
+  });
+
+  factory HomeSection.fromJson(Map<String, dynamic> j) {
+    final prodList = j['products'] as List<dynamic>? ?? [];
+    return HomeSection(
+      id: (j['id'] as num?)?.toInt() ?? 0,
+      titleAr: j['title_ar'] as String? ?? '—',
+      titleEn: j['title_en'] as String? ?? '',
+      sectionType: j['section_type'] as String? ?? 'list',
+      products: prodList.map((e) => Product.fromJson(e as Map<String, dynamic>)).toList(),
+    );
+  }
+
+  String get displayName => titleAr;
 }
 
 class SliderData {
@@ -166,12 +210,49 @@ class SliderData {
   final List<SliderSlide> slides;
   final String productLayout; // grid_2 | grid_3 | slider
   final ProductCardLayout cardLayout;
+  final LogoSettings logoSettings;
+  
   SliderData({
     required this.intervalSeconds,
     required this.slides,
     this.productLayout = 'grid_2',
     ProductCardLayout? cardLayout,
-  }) : cardLayout = cardLayout ?? const ProductCardLayout();
+    LogoSettings? logoSettings,
+  }) : cardLayout = cardLayout ?? const ProductCardLayout(),
+       logoSettings = logoSettings ?? const LogoSettings();
+}
+
+class LogoSettings {
+  final String url;
+  final int size;
+  final String position; // left | right | top | bottom
+  final int marginTop;
+  final int marginBottom;
+  final int marginLeft;
+  final int marginRight;
+
+  const LogoSettings({
+    this.url = '',
+    this.size = 100,
+    this.position = 'right',
+    this.marginTop = 0,
+    this.marginBottom = 0,
+    this.marginLeft = 0,
+    this.marginRight = 0,
+  });
+
+  factory LogoSettings.fromJson(Map<String, dynamic>? j) {
+    if (j == null) return const LogoSettings();
+    return LogoSettings(
+      url: (j['url'] as String?) ?? '',
+      size: (j['size'] as num?)?.toInt() ?? 100,
+      position: (j['position'] as String?) ?? 'right',
+      marginTop: int.tryParse(j['margin_top']?.toString() ?? '0') ?? 0,
+      marginBottom: int.tryParse(j['margin_bottom']?.toString() ?? '0') ?? 0,
+      marginLeft: int.tryParse(j['margin_left']?.toString() ?? '0') ?? 0,
+      marginRight: int.tryParse(j['margin_right']?.toString() ?? '0') ?? 0,
+    );
+  }
 }
 
 class ProductCardLayout {
@@ -179,24 +260,38 @@ class ProductCardLayout {
   final String radius; // sharp | rounded | medium
   final bool showAddToCart;
   final bool showBuyNow;
+  final bool showStock;
+  final String stockStyle; // none | text | number
+  final String stockColorAv;
+  final String stockColorOut;
+  final String priceColor;
   final String brandPosition; // left | right | top | bottom
+  final String brandAlign; // left | center | right
   final String nameAlign; // left | center | right
   final String priceAlign; // left | center | right
   final String addBtnStyle; // small_rounded | full_rounded | sharp
   final String addBtnPosition; // left | right
   final String addBtnColor; // hex
+  final String buyNowColor;
 
   const ProductCardLayout({
     this.bgColor = '#ffffff',
     this.radius = 'rounded',
     this.showAddToCart = false,
     this.showBuyNow = false,
+    this.showStock = false,
+    this.stockStyle = 'none',
+    this.stockColorAv = '#4caf50',
+    this.stockColorOut = '#f44336',
+    this.priceColor = '#0ea5e9',
     this.brandPosition = 'left',
+    this.brandAlign = 'right',
     this.nameAlign = 'right',
     this.priceAlign = 'right',
     this.addBtnStyle = 'small_rounded',
     this.addBtnPosition = 'right',
     this.addBtnColor = '#06A3E7',
+    this.buyNowColor = '#ff9800',
   });
 
   factory ProductCardLayout.fromJson(Map<String, dynamic>? j) {
@@ -206,12 +301,19 @@ class ProductCardLayout {
       radius: (j['radius'] as String?) ?? 'rounded',
       showAddToCart: j['show_add_to_cart'] == true,
       showBuyNow: j['show_buy_now'] == true,
+      buyNowColor: (j['buy_now_color'] as String?) ?? '#ff9800',
+      showStock: j['show_stock'] == true,
+      stockStyle: (j['stock_style'] as String?) ?? 'none',
+      stockColorAv: (j['stock_color_av'] as String?) ?? '#4caf50',
+      stockColorOut: (j['stock_color_out'] as String?) ?? '#f44336',
+      priceColor: (j['price_color'] as String?) ?? '#0ea5e9',
       brandPosition: (j['brand_position'] as String?) ?? 'left',
+      brandAlign: (j['brand_align'] as String?) ?? 'right',
       nameAlign: (j['name_align'] as String?) ?? 'right',
       priceAlign: (j['price_align'] as String?) ?? 'right',
       addBtnStyle: (j['add_btn_style'] as String?) ?? 'small_rounded',
       addBtnPosition: (j['add_btn_position'] as String?) ?? 'right',
-      addBtnColor: (j['add_btn_color'] as String?) ?? '#06A3E7',
+      addBtnColor: (j['add_btn_color'] as String?) ?? '#14acec',
     );
   }
 

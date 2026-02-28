@@ -1,5 +1,5 @@
 const express = require('express');
-const { getSettings, setSetting, logActivity } = require('../lib/settings');
+const { getSettings, setSetting, logActivity, getNextOrderNumber } = require('../lib/settings');
 const { notifyMerchantsNewOrder } = require('../lib/onesignal');
 const { emitNewOrder } = require('../lib/socket');
 
@@ -33,13 +33,6 @@ function getOrdersWhere(filters) {
   return { where, params };
 }
 
-async function getNextOrderNumber(db) {
-  const settings = await getSettings(db);
-  let next = parseInt(settings.next_order_number, 10);
-  if (!Number.isFinite(next) || next < 1000) next = 1000;
-  await setSetting(db, 'next_order_number', String(next + 1));
-  return next + '#';
-}
 
 router.get('/', async (req, res) => {
   const db = req.db;
@@ -131,50 +124,6 @@ router.get('/new', async (req, res) => {
   ]);
   res.render('orders/form', { order: null, items: [], customers, products, cities, merchants, adminUsername: req.session.adminUsername });
 });
-
-function rowKeysToLower(row) {
-  if (!row || typeof row !== 'object') return row;
-  const out = {};
-  for (const k of Object.keys(row)) out[k.toLowerCase()] = row[k];
-  return out;
-}
-
-function getCol(row, ...keys) {
-  if (!row) return null;
-  for (const k of keys) {
-    if (row[k] != null && row[k] !== '') return row[k];
-    const lower = k.toLowerCase();
-    if (row[lower] != null && row[lower] !== '') return row[lower];
-    const upper = k.toUpperCase();
-    if (row[upper] != null && row[upper] !== '') return row[upper];
-  }
-  return null;
-}
-
-function getColAnyCase(row, keyName) {
-  if (!row || typeof row !== 'object') return null;
-  const want = keyName.toLowerCase();
-  for (const k of Object.keys(row)) {
-    if (k.toLowerCase() === want) {
-      const v = row[k];
-      if (v == null) return null;
-      return typeof v === 'string' ? v.trim() : v;
-    }
-  }
-  return null;
-}
-
-function getAnyColContaining(row, part) {
-  if (!row || typeof row !== 'object') return null;
-  const p = String(part).toLowerCase();
-  for (const k of Object.keys(row)) {
-    if (k.toLowerCase().indexOf(p) !== -1) {
-      const v = row[k];
-      if (v != null && String(v).trim() !== '') return String(v).trim();
-    }
-  }
-  return null;
-}
 
 router.get('/view/:id', async (req, res) => {
   const db = req.db;
@@ -281,7 +230,7 @@ router.post('/', async (req, res) => {
     cityId: cityId || undefined,
     customerName: customerName || undefined,
     customerPhone: customerPhone || undefined
-  }).catch(() => { });
+  }).catch((err) => console.warn('[OneSignal] فشل إرسال إشعار طلب جديد:', err.message));
 
   // إشعار فوري عبر Socket.io لجميع تجار المدينة
   const io = req.app.locals.io;

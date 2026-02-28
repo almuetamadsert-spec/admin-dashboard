@@ -1,5 +1,5 @@
 const express = require('express');
-const { getSettings, setSetting } = require('../../lib/settings');
+const { getSettings, setSetting, getNextOrderNumber } = require('../../lib/settings');
 const { notifyMerchantsNewOrder } = require('../../lib/onesignal');
 const { emitNewOrder } = require('../../lib/socket');
 
@@ -22,15 +22,27 @@ router.get('/', async (req, res) => {
       WHERE TRIM(REPLACE(o.customer_phone, ' ', '')) = ?
       ORDER BY o.created_at DESC
     `).all(phone);
-    const itemsStmt = db.prepare(`
+
+    if (orders.length === 0) {
+      res.setHeader('Cache-Control', 'no-store');
+      return res.json({ ok: true, orders: [] });
+    }
+
+    // استعلام واحد لجميع items بدلاً من N+1
+    const orderIds = orders.map(o => o.id);
+    const placeholders = orderIds.map(() => '?').join(', ');
+    const allItems = await db.prepare(`
       SELECT oi.id, oi.order_id, oi.product_id, oi.product_name, oi.quantity, oi.unit_price, oi.total_price, p.image_path
       FROM order_items oi
       LEFT JOIN products p ON oi.product_id = p.id
-      WHERE oi.order_id = ?
-    `);
-    const list = [];
-    for (const o of orders) {
-      const items = (await itemsStmt.all(o.id)).map((row) => ({
+      WHERE oi.order_id IN (${placeholders})
+    `).all(...orderIds);
+
+    // تجميع items حسب order_id
+    const itemsByOrder = {};
+    for (const row of allItems) {
+      if (!itemsByOrder[row.order_id]) itemsByOrder[row.order_id] = [];
+      itemsByOrder[row.order_id].push({
         id: row.id,
         product_id: row.product_id,
         product_name: row.product_name,
@@ -38,31 +50,25 @@ router.get('/', async (req, res) => {
         unit_price: row.unit_price,
         total_price: row.total_price,
         image_path: row.image_path || null,
-      }));
-      list.push({
-        id: o.id,
-        order_number: o.order_number,
-        status: o.status || 'pending',
-        total_amount: Number(o.total_amount) || 0,
-        created_at: o.created_at,
-        updated_at: o.updated_at,
-        items,
       });
     }
+
+    const list = orders.map(o => ({
+      id: o.id,
+      order_number: o.order_number,
+      status: o.status || 'pending',
+      total_amount: Number(o.total_amount) || 0,
+      created_at: o.created_at,
+      updated_at: o.updated_at,
+      items: itemsByOrder[o.id] || [],
+    }));
+
     res.setHeader('Cache-Control', 'no-store');
     res.json({ ok: true, orders: list });
   } catch (e) {
     res.status(500).json({ ok: false, message: e.message });
   }
 });
-
-async function getNextOrderNumber(db) {
-  const settings = await getSettings(db);
-  let next = parseInt(settings.next_order_number, 10);
-  if (!Number.isFinite(next) || next < 1000) next = 1000;
-  await setSetting(db, 'next_order_number', String(next + 1));
-  return next + '#';
-}
 
 /**
  * POST /api/orders — إنشاء طلب من التطبيق.
@@ -159,7 +165,7 @@ router.post('/', async (req, res) => {
     cityId,
     customerName,
     customerPhone
-  }).catch(() => { });
+  }).catch((err) => console.warn('[OneSignal] فشل إرسال إشعار طلب جديد:', err.message));
 
   const io = req.app.locals.io;
   if (io) {

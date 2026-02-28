@@ -92,43 +92,44 @@ class OrderSuccessScreen extends StatelessWidget {
               const SizedBox(height: 24),
               const Text('المنتجات المطلوبة', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
-              SizedBox(
-                height: 80,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: cartItems.length,
-                  itemBuilder: (context, index) {
-                    final item = cartItems[index];
-                    final imageUrl = _imageUrl(item.product.imagePath);
-                    return Container(
-                      width: 80,
-                      margin: const EdgeInsets.only(left: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      child: Stack(
-                        children: [
-                          Center(
-                            child: imageUrl.isEmpty
-                                ? const Icon(Icons.image_not_supported, color: Colors.grey)
-                                : Image.network(imageUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image)),
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: cartItems.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final item = cartItems[index];
+                  final imageUrl = _imageUrl(item.product.imagePath);
+                  return Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: imageUrl.isEmpty
+                              ? Container(width: 50, height: 50, color: Colors.grey.shade100, child: const Icon(Icons.image_not_supported, size: 24))
+                              : Image.network(imageUrl, width: 50, height: 50, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(item.product.displayName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                              Text('الكمية: ${item.quantity}', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                            ],
                           ),
-                          Positioned(
-                            top: 4,
-                            right: 4,
-                            child: CircleAvatar(
-                              radius: 10,
-                              backgroundColor: kPrimaryBlue,
-                              child: Text('${item.quantity}', style: const TextStyle(fontSize: 10, color: Colors.white)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                        ),
+                        Text('${(item.product.finalPrice * item.quantity).toStringAsFixed(0)} د.ل', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 48),
               FilledButton(

@@ -40,42 +40,110 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   @override
   Widget build(BuildContext context) {
     final order = widget.order;
-    final step1Done = true; // تم استلام الطلب دائماً عند عرض الصفحة
-    final step2Done = order.isAccepted; // قيد التنفيذ = التاجر قبل
-    final step3Done = order.isAccepted && _contactSoonActive; // بعد 3 ثوانٍ من القبول
+    final step1Done = true;
+    final step2Done = order.isAccepted;
+    final step3Done = order.isAccepted && _contactSoonActive;
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
+        backgroundColor: context.colors.surfaceContainerLowest,
         appBar: AppBar(
+          elevation: 0,
+          backgroundColor: context.theme.scaffoldBackgroundColor,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_forward),
+            icon: Icon(Icons.arrow_back, color: context.colors.onSurface),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: Text('تتبع الطلب #${order.orderNumber}', style: const TextStyle(fontSize: 18)),
+          title: Text(
+            'تتبع الطلب',
+            style: context.textTheme.titleLarge?.copyWith(fontSize: 18),
+          ),
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _step(
-                done: step1Done,
-                title: 'تم استلام طلبك',
-                subtitle: 'وصل الطلب للتاجر',
+              // الهيدر - تفاصيل الطلب
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: context.theme.cardColor,
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+                  boxShadow: [
+                    if (!context.isDark)
+                      const BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 2)),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: kPrimaryBlue.withOpacity(0.05),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.local_shipping_outlined, color: kPrimaryBlue, size: 40),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'طلب رقم #${order.orderNumber}',
+                      style: context.textTheme.titleLarge?.copyWith(fontSize: 20),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'طلبك حالياً في مرحلة: ${_statusLabel(order.status)}',
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: context.isDark ? kDarkTextSecondary : kTextSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Divider(),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _infoItem('التاريخ', _dateText(order)),
+                        _infoItem('الإجمالي', '${order.totalAmount.toStringAsFixed(2)} د.ل'),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              _connector(done: step1Done),
-              _step(
-                done: step2Done,
-                title: 'قيد التنفيذ الآن',
-                subtitle: 'التاجر قبل الطلب ويعمل عليه',
+              const SizedBox(height: 30),
+              // التايم لاين
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Column(
+                  children: [
+                    _stepItem(
+                      done: step1Done,
+                      active: !step2Done,
+                      title: 'تم استلام طلبك',
+                      subtitle: 'لقد استلمنا طلبك بنجاح وهو الآن في انتظار تأكيد التاجر.',
+                      icon: Icons.receipt_long,
+                    ),
+                    _connector(done: step2Done),
+                    _stepItem(
+                      done: step2Done,
+                      active: step2Done && !step3Done,
+                      title: 'قيد التجهيز',
+                      subtitle: 'التاجر يقوم الآن بتجهيز منتجاتك بكل عناية.',
+                      icon: Icons.inventory_2_outlined,
+                    ),
+                    _connector(done: step3Done),
+                    _stepItem(
+                      done: step3Done,
+                      active: step3Done,
+                      title: 'سيتم التواصل معك',
+                      subtitle: 'التاجر سيتصل بك قريباً لتنسيق عملية التوصيل.',
+                      icon: Icons.phone_callback,
+                      isLast: true,
+                    ),
+                  ],
+                ),
               ),
-              _connector(done: step2Done),
-              _step(
-                done: step3Done,
-                title: 'سيتم التواصل معك بعد قليل',
-                subtitle: step3Done ? 'التاجر سيتواصل معك قريباً' : 'بعد قبول التاجر للطلب',
-              ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -83,57 +151,122 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     );
   }
 
+  String _statusLabel(String status) {
+    switch (status) {
+      case 'pending': return 'قيد الانتظار';
+      case 'confirmed': return 'مؤكد';
+      case 'shipped': return 'تم الشحن';
+      case 'delivered': return 'تم التوصيل';
+      case 'cancelled': return 'ملغي';
+      default: return status;
+    }
+  }
+
+  String _dateText(MyOrder order) {
+    final d = order.createdAt;
+    return '${d.year}/${d.month}/${d.day}';
+  }
+
+  Widget _infoItem(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: context.isDark ? kDarkTextSecondary : Colors.grey.shade500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: context.textTheme.titleMedium?.copyWith(fontSize: 14, fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
   Widget _connector({required bool done}) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 19, left: 19),
+    return Container(
+      margin: const EdgeInsets.only(right: 21),
+      alignment: Alignment.centerRight,
       child: Container(
         width: 2,
-        height: 24,
-        color: done ? kPrimaryBlue : Colors.grey.shade300,
+        height: 40,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              done ? kPrimaryBlue : Colors.grey.shade300,
+              done ? kPrimaryBlue : (context.isDark ? kDarkBorder : Colors.grey.shade200),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _step({
+  Widget _stepItem({
     required bool done,
+    required bool active,
     required String title,
     required String subtitle,
+    required IconData icon,
+    bool isLast = false,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: done ? kPrimaryBlue : Colors.grey.shade300,
-          ),
-          child: done
-              ? const Icon(Icons.check, color: Colors.white, size: 22)
-              : null,
+        Column(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 500),
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: done ? kPrimaryBlue : context.theme.cardColor,
+                border: Border.all(
+                  color: done ? kPrimaryBlue : (context.isDark ? kDarkBorder : Colors.grey.shade300),
+                  width: 2,
+                ),
+                boxShadow: [
+                  if (active) BoxShadow(color: kPrimaryBlue.withOpacity(0.3), blurRadius: 10, spreadRadius: 2),
+                ],
+              ),
+              child: Icon(
+                done ? Icons.check : icon,
+                color: done ? Colors.white : (context.isDark ? kDarkTextSecondary : Colors.grey.shade400),
+                size: 20,
+              ),
+            ),
+          ],
         ),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 8),
               Text(
                 title,
-                style: TextStyle(
+                style: context.textTheme.titleMedium?.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: done ? Colors.black87 : Colors.grey.shade600,
+                  color: done ? context.colors.onSurface : (context.isDark ? kDarkTextSecondary : Colors.grey.shade500),
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade600,
+                style: context.textTheme.bodySmall?.copyWith(
+                  fontSize: 12,
+                  color: context.isDark ? kDarkTextSecondary.withOpacity(0.7) : Colors.grey.shade600,
+                  height: 1.4,
                 ),
               ),
+              if (!isLast) const SizedBox(height: 10),
             ],
           ),
         ),

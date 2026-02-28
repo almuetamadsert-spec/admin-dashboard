@@ -30,9 +30,16 @@ app.use('/uploads', (req, res, next) => {
 });
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// السماح لطلبات المتجر التجريبي من نفس المصدر أو أي مصدر (للاختبار)
-app.use('/api', function(req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+// CORS — يقرأ ALLOWED_ORIGINS من البيئة (مفصولة بفاصلة)، ويُطبق على مسارات /api فقط
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim()).filter(Boolean)
+  : [];
+
+app.use('/api', function (req, res, next) {
+  const origin = req.headers.origin || '';
+  const allowed = ALLOWED_ORIGINS.length === 0 || ALLOWED_ORIGINS.includes(origin);
+  if (allowed && origin) res.setHeader('Access-Control-Allow-Origin', origin);
+  else if (ALLOWED_ORIGINS.length === 0) res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Consumer-Key, X-Consumer-Secret, Authorization');
   if (req.method === 'OPTIONS') return res.sendStatus(200);
@@ -170,6 +177,7 @@ app.use('/admin/merchants', requireAuth, require('./routes/merchants'));
 app.use('/admin/app-users', requireAuth, require('./routes/app_users'));
 app.use('/admin/store-ui', requireAuth, require('./routes/store_ui'));
 app.use('/admin/inventory', requireAuth, require('./routes/inventory'));
+app.use('/admin/home-sections', requireAuth, require('./routes/home_sections'));
 app.use('/admin/api-docs', requireAuth, require('./routes/api-docs'));
 app.use('/admin', require('./routes/admin'));
 
@@ -178,8 +186,30 @@ app.use('/api/cms', require('./middleware/apiAuth').requireApiKey, require('./ro
 app.use('/api/categories', require('./middleware/apiAuth').requireApiKey, require('./routes/api/categories'));
 app.use('/api/brand-categories', require('./middleware/apiAuth').requireApiKey, require('./routes/api/brand_categories'));
 app.use('/api/products', require('./middleware/apiAuth').requireApiKey, require('./routes/api/products'));
+app.use('/api/home', require('./middleware/apiAuth').requireApiKey, require('./routes/api/home'));
 const apiAuth = require('./middleware/apiAuth');
-app.use('/api/orders', apiAuth.requireApiKey, apiAuth.requireWrite, require('./routes/api/orders'));
+
+// Rate limiter بسيط: 100 طلب POST لكل IP كل 60 ثانية
+const _rateLimitMap = new Map();
+const RATE_LIMIT_MAX = 100;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+function ordersRateLimit(req, res, next) {
+  if (req.method !== 'POST') return next();
+  const ip = req.ip || req.connection.remoteAddress || 'unknown';
+  const now = Date.now();
+  let entry = _rateLimitMap.get(ip);
+  if (!entry || now - entry.start > RATE_LIMIT_WINDOW_MS) {
+    entry = { start: now, count: 0 };
+    _rateLimitMap.set(ip, entry);
+  }
+  entry.count++;
+  if (entry.count > RATE_LIMIT_MAX) {
+    return res.status(429).json({ ok: false, error: 'rate_limited', message: 'تم تجاوز الحد المسموح من الطلبات، يُرجى المحاولة لاحقاً' });
+  }
+  next();
+}
+
+app.use('/api/orders', apiAuth.requireApiKey, apiAuth.requireWrite, ordersRateLimit, require('./routes/api/orders'));
 app.use('/api/auth', require('./routes/api/auth'));
 app.use('/api/merchant', require('./routes/api/merchant'));
 app.use('/api/store-ui', require('./middleware/apiAuth').requireApiKey, require('./routes/api/store_ui'));

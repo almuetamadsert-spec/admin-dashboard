@@ -51,20 +51,60 @@
                     id="cardShowAdd" <%=locals.showAddToCart ? 'checked' : '' %>>
                   <label class="form-check-label small" for="cardShowAdd">إظهار زر إضافة للسلة</label>
                 </div>
-                <div class="form-check mt-2">
+                <div class="form-check mt-3">
                   <input class="form-check-input" type="checkbox" name="product_card_show_buy_now" value="1"
                     id="cardShowBuyNow" <%=locals.showBuyNow ? 'checked' : '' %>>
                   <label class="form-check-label small" for="cardShowBuyNow">إظهار زر اشتري الآن</label>
                 </div>
               </div>
+              <div class="col-md-5">
+                <label class="form-label small">إظهار حالة المخزون</label>
+                <select name="product_card_stock_style" class="form-select" style="min-width:180px">
+                  <option value="none" <%=(locals.stockStyle==='none' || !locals.stockStyle) ? 'selected' : '' %>>إخفاء
+                  </option>
+                  <option value="text" <%=(locals.stockStyle==='text' ) ? 'selected' : '' %>>إظهار كـ (متوفر / نفد)
+                  </option>
+                  <option value="number" <%=(locals.stockStyle==='number' ) ? 'selected' : '' %>>إظهار الكمية برقم
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">لون حالة المخزون (متوفر)</label>
+                <input type="color" name="product_card_stock_color_av" class="form-control form-control-color"
+                  value="<%= (locals.stockColorAv || '#4caf50') %>" title="لون نص متوفر">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">لون حالة المخزون (نفد)</label>
+                <input type="color" name="product_card_stock_color_out" class="form-control form-control-color"
+                  value="<%= (locals.stockColorOut || '#f44336') %>" title="لون نص نفد">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">لون السعر</label>
+                <input type="color" name="product_card_price_color" class="form-control form-control-color"
+                  value="<%= (locals.priceColor || '#0ea5e9') %>" title="لون نص السعر">
+              </div>
               <div class="w-100"></div>
               <div class="col-md-3">
-                <label class="form-label small">مكان البراند (الشركة)</label>
+                <label class="form-label small">مكان البراند (الشركة) عمودياً</label>
                 <select name="card_brand_position" class="form-select" style="min-width:120px">
-                  <option value="left" <%=(locals.cardBrandPos || 'left' )==='left' ? 'selected' : '' %>>يسار</option>
-                  <option value="right" <%=(locals.cardBrandPos || 'left' )==='right' ? 'selected' : '' %>>يمين</option>
-                  <option value="top" <%=(locals.cardBrandPos || 'left' )==='top' ? 'selected' : '' %>>فوق</option>
-                  <option value="bottom" <%=(locals.cardBrandPos || 'left' )==='bottom' ? 'selected' : '' %>>تحت
+                  <option value="left" <%=(locals.cardBrandPos || 'left' )==='left' ? 'selected' : '' %>>يسار (بجانب
+                    الصورة)</option>
+                  <option value="right" <%=(locals.cardBrandPos || 'left' )==='right' ? 'selected' : '' %>>يمين (بجانب
+                    الصورة)</option>
+                  <option value="top" <%=(locals.cardBrandPos || 'left' )==='top' ? 'selected' : '' %>>فوق الاسم
+                  </option>
+                  <option value="bottom" <%=(locals.cardBrandPos || 'left' )==='bottom' ? 'selected' : '' %>>تحت السعر
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">محاذاة البراند أفقياً</label>
+                <select name="card_brand_align" class="form-select" style="min-width:120px">
+                  <option value="left" <%=(locals.cardBrandAlign || 'right' )==='left' ? 'selected' : '' %>>يسار
+                  </option>
+                  <option value="center" <%=(locals.cardBrandAlign || 'right' )==='center' ? 'selected' : '' %>>وسط
+                  </option>
+                  <option value="right" <%=(locals.cardBrandAlign || 'right' )==='right' ? 'selected' : '' %>>يمين
                   </option>
                 </select>
               </div>
@@ -115,6 +155,11 @@
                 <input type="color" name="card_add_btn_color" class="form-control form-control-color"
                   value="<%= (locals.cardAddBtnColor || '#06A3E7') %>" title="لون الزر">
               </div>
+              <div class="col-md-3">
+                <label class="form-label small">لون زر اشتري الآن</label>
+                <input type="color" name="card_buy_now_color" class="form-control form-control-color"
+                  value="<%= (locals.cardBuyNowColor || '#ff9800') %>" title="لون رز اشتري الآن">
+              </div>
               <div class="col-auto mt-4">
                 <button type="submit" class="btn btn-primary">حفظ</button>
               </div>
@@ -145,6 +190,101 @@
               </div>
               <div class="col-auto">
                 <button type="submit" class="btn btn-primary">حفظ</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- إعداد شعار المتجر -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h6 class="card-title mb-3"><i class="bi bi-image"></i> شعار المتجر</h6>
+            <form method="post" action="/admin/store-ui/logo" enctype="multipart/form-data">
+              <div class="row g-4 align-items-start">
+                <div class="col-md-5">
+                  <div class="p-3 border rounded bg-light mb-3">
+                    <label class="form-label d-block fw-bold mb-2"><i class="bi bi-upload"></i> تحديث صورة
+                      الشعار</label>
+                    <input type="file" name="logo" class="form-control mb-2"
+                      accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml">
+                    <% if (locals.logoUrl) { %>
+                      <div class="mt-2 text-center p-3 border rounded white-bg" style="background: white;">
+                        <img src="/uploads/<%= logoUrl %>" alt="شعار المتجر" style="max-height: 80px; width: auto;">
+                        <div class="small text-muted mt-2">الشعار الحالي</div>
+                      </div>
+                      <% } %>
+                  </div>
+                </div>
+
+                <div class="col-md-7">
+                  <div class="row g-3">
+                    <!-- الحجم والموقع -->
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold">حجم الشعار (%)</label>
+                      <div class="d-flex align-items-center gap-2">
+                        <input type="range" name="logo_size" class="form-range flex-grow-1" min="10" max="300" step="1"
+                          value="<%= (locals.logoSize || '100') %>"
+                          oninput="this.nextElementSibling.value = this.value">
+                        <output class="badge bg-primary" style="min-width: 45px;">
+                          <%= (locals.logoSize || '100' ) %>
+                        </output>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold">موقع الشعار</label>
+                      <select name="logo_position" class="form-select">
+                        <% logoPositions.forEach(function(p) { %>
+                          <option value="<%= p.value %>" <%=(locals.logoPosition===p.value) ? 'selected' : '' %>>
+                            <%= p.label %>
+                          </option>
+                          <% }); %>
+                      </select>
+                    </div>
+
+                    <!-- الهوامش -->
+                    <div class="col-12 mt-3">
+                      <label class="form-label small fw-bold text-primary"><i class="bi bi-arrows-move"></i> التحكم
+                        الدقيق في الموقع (الهوامش بالبكسل)</label>
+                      <div class="row g-2">
+                        <div class="col-6">
+                          <div class="input-group input-group-sm">
+                            <span class="input-group-text">أعلى</span>
+                            <input type="number" name="logo_margin_top" class="form-control"
+                              value="<%= (locals.logoMarginTop || '0') %>">
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="input-group input-group-sm">
+                            <span class="input-group-text">أسفل</span>
+                            <input type="number" name="logo_margin_bottom" class="form-control"
+                              value="<%= (locals.logoMarginBottom || '0') %>">
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="input-group input-group-sm">
+                            <span class="input-group-text">يسار</span>
+                            <input type="number" name="logo_margin_left" class="form-control"
+                              value="<%= (locals.logoMarginLeft || '0') %>">
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="input-group input-group-sm">
+                            <span class="input-group-text">يمين</span>
+                            <input type="number" name="logo_margin_right" class="form-control"
+                              value="<%= (locals.logoMarginRight || '0') %>">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 text-end">
+                  <hr>
+                  <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-check2-circle"></i> حفظ إعدادات الشعار بالكامل
+                  </button>
+                </div>
               </div>
             </form>
           </div>

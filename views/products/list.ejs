@@ -1,55 +1,258 @@
 <%- include('../partials/head', { title: 'المنتجات' }) %>
-<%- include('../partials/sidebar', { adminUsername }) %>
+  <%- include('../partials/sidebar', { adminUsername }) %>
 
-<h4 class="mb-4">المنتجات</h4>
-<div class="mb-3">
-  <a href="/admin/products/new" class="btn btn-primary"><i class="bi bi-plus"></i> إضافة منتج</a>
-</div>
-<div class="card">
-  <div class="table-responsive">
-    <table class="table table-hover mb-0">
-      <thead>
-        <tr>
-          <th>صورة</th>
-          <th>الاسم</th>
-          <th>السعر</th>
-          <th>التخفيض</th>
-          <th>الشركة</th>
-          <th>التصنيف</th>
-          <th>المخزون</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <% products.forEach(function(p) { %>
-        <tr>
-          <td>
-            <% if (p.image_path) { %>
-              <img src="/uploads/<%= p.image_path %>" alt="" style="width:50px;height:50px;object-fit:cover;border-radius:6px">
-            <% } else { %>
-              <span class="text-muted">—</span>
+    <h4 class="mb-4">المنتجات</h4>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <a href="/admin/products/new" class="btn btn-primary"><i class="bi bi-plus"></i> إضافة منتج</a>
+        <button type="button" class="btn btn-outline-success ms-2" data-bs-toggle="modal" data-bs-target="#importModal">
+          <i class="bi bi-file-earmark-excel"></i> استيراد من ووكومرس (CSV)
+        </button>
+        <button id="bulkDeleteBtn" class="btn btn-danger ms-2" style="display: none;">
+          <i class="bi bi-trash"></i> حذف المحدد (<span id="selectedCount">0</span>)
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th style="width: 40px;"><input type="checkbox" id="selectAll"></th>
+              <th>صورة</th>
+              <th>الاسم</th>
+              <th>السعر</th>
+              <th>التخفيض</th>
+              <th>الشركة</th>
+              <th>التصنيف</th>
+              <th>المخزون</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% products.forEach(function(p) { %>
+              <tr>
+                <td><input type="checkbox" class="product-checkbox" value="<%= p.id %>"></td>
+                <td>
+                  <% if (p.image_path) { %>
+                    <img src="/uploads/<%= p.image_path %>" alt=""
+                      style="width:50px;height:50px;object-fit:cover;border-radius:6px">
+                    <% } else { %>
+                      <span class="text-muted">—</span>
+                      <% } %>
+                </td>
+                <td>
+                  <%= p.name_ar || p.name_en || '—' %>
+                </td>
+                <td>
+                  <%= Number(p.price).toFixed(2) %> د.ل
+                </td>
+                <td>
+                  <%= p.discount_percent ? p.discount_percent + '%' : '—' %>
+                </td>
+                <td>
+                  <%= p.company || '—' %>
+                </td>
+                <td>
+                  <%= p.category_name || '—' %>
+                </td>
+                <td>
+                  <%= p.stock %>
+                </td>
+                <td>
+                  <a href="/admin/products/edit/<%= p.id %>" class="btn btn-sm btn-outline-primary">تعديل</a>
+                  <form action="/admin/products/delete/<%= p.id %>" method="post" class="d-inline"
+                    onsubmit="return confirm('حذف المنتج؟');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
+                  </form>
+                </td>
+              </tr>
+              <% }); %>
+                <% if (!products.length) { %>
+                  <tr>
+                    <td colspan="8" class="text-center text-muted">لا توجد منتجات</td>
+                  </tr>
+                  <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <% if (totalPages> 1) { %>
+      <nav aria-label="Products pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+          <li class="page-item <%= currentPage <= 1 ? 'disabled' : '' %>">
+            <a class="page-link" href="?page=<%= currentPage - 1 %>">السابق</a>
+          </li>
+
+          <% for(let i=1; i <=totalPages; i++) { %>
+            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+              <a class="page-link" href="?page=<%= i %>">
+                <%= i %>
+              </a>
+            </li>
             <% } %>
-          </td>
-          <td><%= p.name_ar || p.name_en || '—' %></td>
-          <td><%= Number(p.price).toFixed(2) %> د.ل</td>
-          <td><%= p.discount_percent ? p.discount_percent + '%' : '—' %></td>
-          <td><%= p.company || '—' %></td>
-          <td><%= p.category_name || '—' %></td>
-          <td><%= p.stock %></td>
-          <td>
-            <a href="/admin/products/edit/<%= p.id %>" class="btn btn-sm btn-outline-primary">تعديل</a>
-            <form action="/admin/products/delete/<%= p.id %>" method="post" class="d-inline" onsubmit="return confirm('حذف المنتج؟');">
-              <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
-            </form>
-          </td>
-        </tr>
-        <% }); %>
-        <% if (!products.length) { %>
-        <tr><td colspan="8" class="text-center text-muted">لا توجد منتجات</td></tr>
-        <% } %>
-      </tbody>
-    </table>
-  </div>
-</div>
 
-<%- include('../partials/scripts') %>
+              <li class="page-item <%= currentPage >= totalPages ? 'disabled' : '' %>">
+                <a class="page-link" href="?page=<%= currentPage + 1 %>">التالي</a>
+              </li>
+        </ul>
+      </nav>
+      <% } %>
+
+        <!-- Modal استيراد المنتجات -->
+        <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <form id="importForm" action="/admin/products/import" method="post" enctype="multipart/form-data">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="importModalLabel">استيراد المنتجات (Excel / CSV)</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="alert alert-info" role="alert">
+                    يرجى تصدير منتجاتك من WooCommerce بصيغة CSV أو رفع ملف Excel (.xlsx, .xls) هنا. سنتعرف على الأعمدة
+                    الرئيسية كاسم المنتج، السعر، المخزون وغيرها ونقوم بإضافتها لمتجرك الحالي.
+                  </div>
+
+                  <div id="importAlert" style="display: none;"></div>
+
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">اختر ملف Excel او CSV:</label>
+                    <input type="file" class="form-control" name="csv_file"
+                      accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                      required>
+                  </div>
+
+                  <div id="importProgressBox" style="display: none;" class="mt-3">
+                    <div class="d-flex justify-content-between mb-1">
+                      <span id="importProgressText" style="font-size: 14px;">جاري الرفع والمعالجة...</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                      <div id="importProgressBg"
+                        class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar"
+                        style="width: 50%;"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                  <button type="submit" id="importSubmitBtn" class="btn btn-success">استيراد الآن</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('importForm');
+            if (form) {
+              form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                const btn = document.getElementById('importSubmitBtn');
+                const alertBox = document.getElementById('importAlert');
+                const progressBox = document.getElementById('importProgressBox');
+                const progressBg = document.getElementById('importProgressBg');
+                const progressText = document.getElementById('importProgressText');
+
+                alertBox.style.display = 'none';
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> جاري الرفع والتحليل...';
+
+                try {
+                  progressBox.style.display = 'block';
+                  progressBg.style.width = '50%';
+                  progressText.innerText = 'يتم الآن قراءة وتحليل الملف...';
+
+                  const res = await fetch('/admin/products/import', {
+                    method: 'POST',
+                    body: formData
+                  });
+
+                  const data = await res.json();
+                  progressBg.style.width = '100%';
+                  progressText.innerText = 'اكتملت العملية!';
+                  progressBg.classList.replace('bg-primary', data.success ? 'bg-success' : 'bg-danger');
+
+                  if (data.success) {
+                    alertBox.className = 'alert alert-success mt-3';
+                    alertBox.innerHTML = '<i class="bi bi-check-circle"></i> ' + data.message;
+                    alertBox.style.display = 'block';
+                    setTimeout(() => location.reload(), 2000);
+                  } else {
+                    throw new Error(data.message || 'حدث خطأ غير متوقع');
+                  }
+                } catch (err) {
+                  alertBox.className = 'alert alert-danger mt-3';
+                  alertBox.innerHTML = '<i class="bi bi-exclamation-triangle"></i> ' + err.message;
+                  alertBox.style.display = 'block';
+                  progressBox.style.display = 'none';
+                } finally {
+                  btn.disabled = false;
+                  btn.innerHTML = 'استيراد الآن';
+                }
+              });
+            }
+
+            // Bulk Delete Logic
+            const selectAll = document.getElementById('selectAll');
+            const productCheckboxes = document.querySelectorAll('.product-checkbox');
+            const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+            const selectedCountSpan = document.getElementById('selectedCount');
+
+            function updateBulkDeleteUI() {
+              const selected = Array.from(productCheckboxes).filter(cb => cb.checked);
+              if (selected.length > 0) {
+                bulkDeleteBtn.style.display = 'inline-block';
+                selectedCountSpan.innerText = selected.length;
+              } else {
+                bulkDeleteBtn.style.display = 'none';
+              }
+            }
+
+            if (selectAll) {
+              selectAll.addEventListener('change', function () {
+                productCheckboxes.forEach(cb => cb.checked = this.checked);
+                updateBulkDeleteUI();
+              });
+            }
+
+            productCheckboxes.forEach(cb => {
+              cb.addEventListener('change', updateBulkDeleteUI);
+            });
+
+            if (bulkDeleteBtn) {
+              bulkDeleteBtn.addEventListener('click', async function () {
+                const selectedIds = Array.from(productCheckboxes)
+                  .filter(cb => cb.checked)
+                  .map(cb => cb.value);
+
+                if (selectedIds.length === 0) return;
+
+                if (!confirm(`هل أنت متأكد من حذف ${selectedIds.length} منتج؟`)) return;
+
+                try {
+                  const res = await fetch('/admin/products/bulk-delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: selectedIds })
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                  } else {
+                    alert('خطأ: ' + data.message);
+                  }
+                } catch (err) {
+                  alert('حدث خطأ فني أثناء الحذف');
+                }
+              });
+            }
+          });
+        </script>
+
+        <%- include('../partials/scripts') %>

@@ -73,16 +73,7 @@ class _CustomerShellState extends State<CustomerShell> {
   }
 
   void _openCart() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CartScreen(
-          cart: _cart,
-          onUpdateQuantity: _updateQuantity,
-          onRemove: _removeFromCart,
-          onOrderSent: _clearCart,
-        ),
-      ),
-    );
+    setState(() => _selectedIndex = 2);
   }
 
   int get _cartCount => _cart.fold(0, (s, e) => s + e.quantity);
@@ -98,7 +89,7 @@ class _CustomerShellState extends State<CustomerShell> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 const DrawerHeader(
-                  decoration: BoxDecoration(color: kPrimaryBlue),
+                  decoration: const BoxDecoration(color: kPrimaryBlue),
                   child: Text(
                     'المعتمد',
                     style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
@@ -149,7 +140,7 @@ class _CustomerShellState extends State<CustomerShell> {
           ),
         ),
         body: IndexedStack(
-          index: _selectedIndex == 2 ? 0 : _selectedIndex,
+          index: _selectedIndex,
           children: [
             HomeScreen(
               cart: _cart,
@@ -194,15 +185,7 @@ class _CustomerShellState extends State<CustomerShell> {
                 );
               },
               onShowAllCategories: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => AllCategoriesScreen(
-                      cart: _cart,
-                      onAddToCart: _addToCart,
-                      onOpenCart: _openCart,
-                    ),
-                  ),
-                );
+                setState(() => _selectedIndex = 1);
               },
             ),
             AllCategoriesScreen(
@@ -210,7 +193,13 @@ class _CustomerShellState extends State<CustomerShell> {
               onAddToCart: _addToCart,
               onOpenCart: _openCart,
             ),
-            const SizedBox.shrink(),
+            CartScreen(
+              cart: _cart,
+              onUpdateQuantity: _updateQuantity,
+              onRemove: _removeFromCart,
+              onOrderSent: _clearCart,
+              showAppBar: true,
+            ),
             const MyOrdersScreen(),
             AccountScreen(onDarkModeChanged: widget.onDarkModeChanged),
           ],
@@ -222,15 +211,13 @@ class _CustomerShellState extends State<CustomerShell> {
           child: BottomNavigationBar(
             currentIndex: _selectedIndex,
             onTap: (i) {
-              if (i == 2) {
-                _openCart();
-                return;
-              }
               setState(() => _selectedIndex = i);
             },
             type: BottomNavigationBarType.fixed,
             selectedItemColor: kPrimaryBlue,
-            unselectedItemColor: Colors.grey,
+            unselectedItemColor: kTextSecondary,
+            backgroundColor: kBodyBg,
+            elevation: 8,
             items: [
               const BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'الرئيسية'),
               const BottomNavigationBarItem(icon: Icon(Icons.grid_view_outlined), activeIcon: Icon(Icons.grid_view), label: 'تصنيفات'),
@@ -267,4 +254,5 @@ class _CustomerShellState extends State<CustomerShell> {
       ),
     );
   }
+
 }

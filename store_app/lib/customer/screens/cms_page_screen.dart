@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+// import 'package:flutter_html/flutter_html.dart';
 
 import '../../api/api_client.dart';
 
@@ -64,8 +65,8 @@ class _CmsPageScreenState extends State<CmsPageScreen> {
                 ? Center(child: Text(_error!))
                 : SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
-                    child: SelectableText(
-                      _content ?? '',
+                    child: Text(
+                      (_content ?? '').replaceAll(r'\n', '\n').replaceAll('<strong>', '').replaceAll('</strong>', '').replaceAll('<br>', '\n').replaceAll('&bull;', '•'),
                       style: const TextStyle(fontSize: 15, height: 1.6),
                     ),
                   ),

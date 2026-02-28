@@ -1,47 +1,155 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= typeof title !== 'undefined' ? title : 'لوحة التحكم' %></title>
+  <title>
+    <%= typeof title !=='undefined' ? title : 'لوحة التحكم' %>
+  </title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    body { min-height: 100vh; background: #f4f6f9; }
-    .sidebar { background: #1e293b; min-height: 100vh; width: 260px; }
-    .sidebar .nav-link { color: #94a3b8; padding: 0.75rem 1rem; }
-    .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background: rgba(255,255,255,0.1); }
-    .sidebar .nav-link i { margin-left: 0.5rem; }
-    .card { border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-    .stat-card { border-right: 4px solid #3b82f6; }
-    .table th { font-weight: 600; color: #475569; }
+    :root {
+      --brand-primary: #14acec;
+      --brand-primary-dark: #1298d4;
+      --brand-text: #212529;
+      --brand-text-secondary: #495057;
+      --brand-section-bg: #f8f9fa;
+      --brand-card-border: #e9ecef;
+      --brand-success: #28a745;
+      --brand-warning: #ffc107;
+      --brand-danger: #dc3545;
+    }
+
+    /* Override Bootstrap primary */
+    .btn-primary {
+      background-color: var(--brand-primary) !important;
+      border-color: var(--brand-primary) !important;
+      color: #fff !important;
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+      background-color: var(--brand-primary-dark) !important;
+      border-color: var(--brand-primary-dark) !important;
+    }
+
+    .btn-outline-primary {
+      color: var(--brand-primary) !important;
+      border-color: var(--brand-primary) !important;
+    }
+
+    .btn-outline-primary:hover {
+      background-color: var(--brand-primary) !important;
+      color: #fff !important;
+    }
+
+    a {
+      color: var(--brand-primary);
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: var(--brand-primary);
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--brand-section-bg);
+      color: var(--brand-text);
+    }
+
+    .sidebar {
+      background: #1e293b;
+      min-height: 100vh;
+      width: 260px;
+    }
+
+    .sidebar .nav-link {
+      color: #94a3b8;
+      padding: 0.75rem 1rem;
+    }
+
+    .sidebar .nav-link:hover,
+    .sidebar .nav-link.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar .nav-link i {
+      margin-left: 0.5rem;
+    }
+
+    .card {
+      border: 1px solid var(--brand-card-border) !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      background: #fff;
+    }
+
+    .stat-card {
+      border-right: 4px solid var(--brand-primary) !important;
+    }
+
+    .table th {
+      font-weight: 600;
+      color: var(--brand-text-secondary);
+    }
+
+    .form-check-input:checked {
+      background-color: var(--brand-primary);
+      border-color: var(--brand-primary);
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 0.2rem rgba(20, 172, 236, 0.2);
+    }
+
+    .nav-link.active,
+    .nav-link:focus {
+      color: var(--brand-primary) !important;
+    }
+
+    .badge.bg-primary {
+      background-color: var(--brand-primary) !important;
+    }
+
+    .text-primary {
+      color: var(--brand-primary) !important;
+    }
   </style>
 </head>
+
 <body>
-  <% if (typeof adminUsername !== 'undefined' && adminUsername) { %>
-  <div class="d-flex">
-    <nav class="sidebar position-fixed top-0 start-0 bottom-0">
-      <div class="p-3 border-bottom border-secondary">
-        <h5 class="text-white mb-0">لوحة التحكم</h5>
-        <small class="text-secondary"><%= adminUsername %></small>
-      </div>
-      <ul class="nav flex-column pt-2">
-        <li><a class="nav-link" href="/admin/dashboard"><i class="bi bi-grid"></i> الرئيسية</a></li>
-        <li><a class="nav-link" href="/admin/products"><i class="bi bi-box-seam"></i> المنتجات</a></li>
-        <li><a class="nav-link" href="/admin/orders"><i class="bi bi-cart-check"></i> الطلبات</a></li>
-        <li><a class="nav-link" href="/admin/customers"><i class="bi bi-people"></i> العملاء</a></li>
-        <li><a class="nav-link" href="/admin/sales"><i class="bi bi-graph-up"></i> المبيعات</a></li>
-        <li><a class="nav-link" href="/admin/logout"><i class="bi bi-box-arrow-right"></i> خروج</a></li>
-      </ul>
-    </nav>
-    <main class="flex-grow-1 me-260" style="margin-right: 260px; padding: 1.5rem;">
-  <% } %>
-  <%- body %>
-  <% if (typeof adminUsername !== 'undefined' && adminUsername) { %>
-    </main>
-  </div>
-  <% } %>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <%- typeof scripts !== 'undefined' ? scripts : '' %>
+  <% if (typeof adminUsername !=='undefined' && adminUsername) { %>
+    <div class="d-flex">
+      <nav class="sidebar position-fixed top-0 start-0 bottom-0">
+        <div class="p-3 border-bottom border-secondary">
+          <h5 class="text-white mb-0">لوحة التحكم</h5>
+          <small class="text-secondary">
+            <%= adminUsername %>
+          </small>
+        </div>
+        <ul class="nav flex-column pt-2">
+          <li><a class="nav-link" href="/admin/dashboard"><i class="bi bi-grid"></i> الرئيسية</a></li>
+          <li><a class="nav-link" href="/admin/products"><i class="bi bi-box-seam"></i> المنتجات</a></li>
+          <li><a class="nav-link" href="/admin/orders"><i class="bi bi-cart-check"></i> الطلبات</a></li>
+          <li><a class="nav-link" href="/admin/customers"><i class="bi bi-people"></i> العملاء</a></li>
+          <li><a class="nav-link" href="/admin/sales"><i class="bi bi-graph-up"></i> المبيعات</a></li>
+          <li><a class="nav-link" href="/admin/logout"><i class="bi bi-box-arrow-right"></i> خروج</a></li>
+        </ul>
+      </nav>
+      <main class="flex-grow-1 me-260" style="margin-right: 260px; padding: 1.5rem;">
+        <% } %>
+          <%- body %>
+            <% if (typeof adminUsername !=='undefined' && adminUsername) { %>
+      </main>
+    </div>
+    <% } %>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+      <%- typeof scripts !=='undefined' ? scripts : '' %>
 </body>
+
 </html>

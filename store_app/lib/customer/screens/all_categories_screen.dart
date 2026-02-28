@@ -176,6 +176,34 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
+          leading: Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.shopping_cart_outlined),
+                onPressed: widget.onOpenCart,
+              ),
+              if (widget.cart.isNotEmpty)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                    child: Text(
+                      '${widget.cart.fold(0, (s, e) => s + e.quantity)}',
+                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.arrow_forward),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
           title: const Text('التصنيفات', style: TextStyle(fontSize: 18)),
         ),
         body: _loading

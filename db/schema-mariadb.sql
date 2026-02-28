@@ -246,6 +246,7 @@ CREATE TABLE IF NOT EXISTS brand_categories (
 CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_city ON orders(city_id);
+CREATE INDEX IF NOT EXISTS idx_orders_merchant ON orders(merchant_id);
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
 
 SET FOREIGN_KEY_CHECKS = 1;

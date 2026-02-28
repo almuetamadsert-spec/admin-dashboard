@@ -46,7 +46,9 @@ class _MerchantShellState extends State<MerchantShell> {
           onTap: (i) => setState(() => _index = i),
           type: BottomNavigationBarType.fixed,
           selectedItemColor: kPrimaryBlue,
-          unselectedItemColor: Colors.grey,
+          unselectedItemColor: kTextSecondary,
+          backgroundColor: kBodyBg,
+          elevation: 8,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'الرئيسية'),
             BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_outlined), activeIcon: Icon(Icons.account_balance_wallet), label: 'التسويات'),

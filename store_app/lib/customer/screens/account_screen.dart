@@ -73,7 +73,7 @@ class _AccountScreenState extends State<AccountScreen> {
     final initials = _name.trim().isNotEmpty ? _name.trim()[0].toUpperCase() : '؟';
     final hasProfile = _name.isNotEmpty || _phone.isNotEmpty;
     final links = _socialData['links'] as List<dynamic>? ?? [];
-    final bgHex = _socialData['icon_bg_color'] as String? ?? '#06A3E7';
+    final bgHex = _socialData['icon_bg_color'] as String? ?? '#14acec';
     final symHex = _socialData['icon_symbol_color'] as String? ?? '#ffffff';
     final iconShape = _socialData['icon_shape'] as String? ?? 'circle';
     final bgColor = _hexColor(bgHex, kPrimaryBlue);
@@ -82,7 +82,7 @@ class _AccountScreenState extends State<AccountScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F7FA),
+        backgroundColor: context.colors.surfaceContainerLowest,
         body: RefreshIndicator(
           onRefresh: _loadAll,
           child: SingleChildScrollView(
@@ -165,7 +165,7 @@ class _AccountScreenState extends State<AccountScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF1E3A5F), Color(0xFF06A3E7)],
+          colors: [Color(0xFF1A2A4A), kPrimaryBlue],
         ),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
       ),
@@ -211,7 +211,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                            child: const Icon(Icons.edit, size: 13, color: Color(0xFF06A3E7)),
+                            child: const Icon(Icons.edit, size: 13, color: kPrimaryBlue),
                           ),
                         ),
                       ],
@@ -278,9 +278,12 @@ class _AccountScreenState extends State<AccountScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.theme.cardColor,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 3))],
+          boxShadow: [
+            if (!context.isDark)
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 3))
+          ],
         ),
         child: Column(
           children: [
@@ -309,9 +312,12 @@ class _AccountScreenState extends State<AccountScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.theme.cardColor,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 3))],
+          boxShadow: [
+            if (!context.isDark)
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 3))
+          ],
         ),
         child: Column(
           children: [
@@ -362,9 +368,12 @@ class _AccountScreenState extends State<AccountScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 3))],
+        boxShadow: [
+          if (!context.isDark)
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 3))
+        ],
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

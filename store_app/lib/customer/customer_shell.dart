@@ -88,11 +88,35 @@ class _CustomerShellState extends State<CustomerShell> {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
-                const DrawerHeader(
-                  decoration: const BoxDecoration(color: kPrimaryBlue),
-                  child: Text(
-                    'المعتمد',
-                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(32),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                      colors: [kPrimaryBlue, Color(0xFF42C2F7)],
+                    ),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.white24,
+                        child: Icon(Icons.store_mall_directory_rounded, color: Colors.white, size: 30),
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'المعتمد',
+                        style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                      ),
+                      Text(
+                        'بوابتك لعالم التسوق الفاخر',
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                    ],
                   ),
                 ),
                 ListTile(
@@ -215,39 +239,41 @@ class _CustomerShellState extends State<CustomerShell> {
             },
             type: BottomNavigationBarType.fixed,
             selectedItemColor: kPrimaryBlue,
-            unselectedItemColor: kTextSecondary,
-            backgroundColor: kBodyBg,
-            elevation: 8,
+            unselectedItemColor: Colors.grey.shade400,
+            backgroundColor: Colors.white.withOpacity(0.95),
+            elevation: 0,
+            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11, fontFamily: 'Tajawal'),
+            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11, fontFamily: 'Tajawal'),
             items: [
-              const BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'الرئيسية'),
-              const BottomNavigationBarItem(icon: Icon(Icons.grid_view_outlined), activeIcon: Icon(Icons.grid_view), label: 'تصنيفات'),
+              const BottomNavigationBarItem(icon: Icon(Icons.home_outlined, size: 24), activeIcon: Icon(Icons.home_rounded, size: 24), label: 'الرئيسية'),
+              const BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded, size: 24), activeIcon: Icon(Icons.grid_view_rounded, size: 24), label: 'تصنيفات'),
               BottomNavigationBarItem(
                 icon: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    const Icon(Icons.shopping_cart_outlined),
+                    const Icon(Icons.shopping_bag_outlined, size: 24),
                     if (_cartCount > 0)
                       Positioned(
                         right: -6,
                         top: -4,
                         child: Container(
                           padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                          decoration: const BoxDecoration(color: kDanger, shape: BoxShape.circle),
                           constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                           child: Text(
                             _cartCount > 9 ? '9+' : '$_cartCount',
-                            style: const TextStyle(color: Colors.white, fontSize: 10),
+                            style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),
                         ),
                       ),
                   ],
                 ),
-                activeIcon: const Icon(Icons.shopping_cart),
+                activeIcon: const Icon(Icons.shopping_bag, size: 24),
                 label: 'السلة',
               ),
-              const BottomNavigationBarItem(icon: Icon(Icons.receipt_long), activeIcon: Icon(Icons.receipt_long), label: 'طلباتي'),
-              const BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'حسابي'),
+              const BottomNavigationBarItem(icon: Icon(Icons.receipt_long_rounded, size: 24), activeIcon: Icon(Icons.receipt_long_rounded, size: 24), label: 'طلباتي'),
+              const BottomNavigationBarItem(icon: Icon(Icons.person_outline_rounded, size: 24), activeIcon: Icon(Icons.person_rounded, size: 24), label: 'حسابي'),
             ],
           ),
         ),

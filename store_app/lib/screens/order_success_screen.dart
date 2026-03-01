@@ -42,12 +42,11 @@ class OrderSuccessScreen extends StatelessWidget {
               const SizedBox(height: 20),
               Container(
                 padding: const EdgeInsets.all(24),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
                   shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
                 ),
-                child: const Icon(Icons.check_circle, size: 80, color: Colors.green),
+                child: const Icon(Icons.check_circle_rounded, size: 80, color: Colors.green),
               ),
               const SizedBox(height: 24),
               const Text(
@@ -132,15 +131,29 @@ class OrderSuccessScreen extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 48),
-              FilledButton(
-                onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: const LinearGradient(
+                    colors: [kPrimaryBlue, Color(0xFF42C2F7)],
+                  ),
+                  boxShadow: [
+                    BoxShadow(color: kPrimaryBlue.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6)),
+                  ],
                 ),
-                child: const Text('رجوع للمتجر', style: TextStyle(fontSize: 16)),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text('الرجوع للمتجر', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                ),
               ),
             ],
           ),

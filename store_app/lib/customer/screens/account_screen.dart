@@ -85,6 +85,7 @@ class _AccountScreenState extends State<AccountScreen> {
         backgroundColor: context.colors.surfaceContainerLowest,
         body: RefreshIndicator(
           onRefresh: _loadAll,
+          color: kPrimaryBlue,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
@@ -93,63 +94,69 @@ class _AccountScreenState extends State<AccountScreen> {
                 // ── Header ──────────────────────────────
                 _buildHeader(initials, hasProfile),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 // ── بطاقة الطلبات ──────────────────────
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _sectionLabel('الطلبات'),
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                  child: _sectionLabel('النشاط التجاري'),
                 ),
-                const SizedBox(height: 8),
                 _buildOrderCard(),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 // ── الإعدادات ──────────────────────────
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _sectionLabel('الإعدادات'),
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                  child: _sectionLabel('تفضيلات التطبيق'),
                 ),
-                const SizedBox(height: 8),
                 _buildSettingsCard(),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 // ── معلومات ────────────────────────────
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _sectionLabel('معلومات'),
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                  child: _sectionLabel('حول المتجر'),
                 ),
-                const SizedBox(height: 8),
                 _buildInfoCard(),
 
                 // ── السوشيال ───────────────────────────
                 if (links.isNotEmpty) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: _sectionLabel('تابعنا'),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: _sectionLabel('تواصل معنا اجتماعياً'),
                   ),
                   const SizedBox(height: 12),
                   _buildSocialRow(links, iconShape, bgColor, symColor),
                 ],
 
                 // ── Footer ─────────────────────────────
-                const SizedBox(height: 28),
-                const Divider(height: 1),
-                const SizedBox(height: 16),
-                Text(
-                  'المعتمد سيرت',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: Colors.grey.shade500, fontWeight: FontWeight.w600),
+                const SizedBox(height: 48),
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'المعتمد سيرت للأعمال المحدودة',
+                          style: TextStyle(fontSize: 12, color: Colors.grey.shade500, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'الإصدار 1.0.0 (بناء 105)',
+                          style: TextStyle(fontSize: 10, color: Colors.grey.shade400),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'الإصدار 1.0.0',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
-                ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 60),
               ],
             ),
           ),
@@ -161,93 +168,116 @@ class _AccountScreenState extends State<AccountScreen> {
   // ── Header ─────────────────────────────────────────────────
   Widget _buildHeader(String initials, bool hasProfile) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1A2A4A), kPrimaryBlue],
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            kPrimaryBlue,
+            const Color(0xFF42C2F7), // تدرج لوني أزرق فاتح وأنيق
+          ],
         ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+        boxShadow: [
+          BoxShadow(
+            color: kPrimaryBlue.withOpacity(0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          )
+        ],
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'حسابي',
-                    style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'مركز الحساب',
+                        style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                      ),
+                      Text(
+                        'إدارة ملفك الشخصي وإعداداتك',
+                        style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w500),
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.notifications_none, color: Colors.white),
-                    onPressed: () => Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (_) => const NotificationsScreen())),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.notifications_active_outlined, color: Colors.white, size: 20),
+                      onPressed: () => Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (_) => const NotificationsScreen())),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 28),
               Row(
                 children: [
                   GestureDetector(
                     onTap: _goToEdit,
-                    child: Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 36,
-                          backgroundColor: Colors.white24,
-                          child: Text(
-                            initials,
-                            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      child: CircleAvatar(
+                        radius: 38,
+                        backgroundColor: Colors.white,
+                        child: Text(
+                          initials,
+                          style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900, color: kPrimaryBlue),
                         ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                            child: const Icon(Icons.edit, size: 13, color: kPrimaryBlue),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          hasProfile && _name.isNotEmpty ? _name : 'ضيف المعتمد',
+                          style: const TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 2),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.black12,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            _phone.isNotEmpty ? _phone : 'لم يتم ربط رقم هاتف',
+                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: hasProfile
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _name.isNotEmpty ? _name : 'مستخدم',
-                                style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
-                              ),
-                              if (_phone.isNotEmpty)
-                                Text(_phone, style: const TextStyle(color: Colors.white70, fontSize: 13)),
-                            ],
-                          )
-                        : GestureDetector(
-                            onTap: _goToEdit,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('أضف بياناتك',
-                                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                                Text('اضغط هنا',
-                                    style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13)),
-                              ],
-                            ),
-                          ),
-                  ),
-                  TextButton.icon(
-                    onPressed: _goToEdit,
-                    icon: const Icon(Icons.edit_outlined, size: 15, color: Colors.white70),
-                    label: const Text('تعديل', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                  Material(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      onTap: _goToEdit,
+                      borderRadius: BorderRadius.circular(12),
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(Icons.edit_note_rounded, color: Colors.white, size: 22),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -258,106 +288,154 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  // ── بطاقة الطلبات ────────────────────────────────────────
+  // ── بطاقات التصميم الجديد ────────────────────────────────────────
   Widget _buildOrderCard() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: _cardTile(
-        icon: Icons.shopping_bag_outlined,
-        iconColor: kPrimaryBlue,
-        title: 'طلباتي',
-        subtitle: 'عرض وتتبع جميع طلباتك',
+        icon: Icons.local_shipping_outlined,
+        iconColor: Colors.blue.shade700,
+        title: 'طلباتي ومشترياتي',
+        subtitle: 'تتبع حالة الشحن والمشتريات السابقة',
         onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MyOrdersScreen())),
       ),
     );
   }
 
-  // ── الإعدادات ─────────────────────────────────────────────
   Widget _buildSettingsCard() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
           color: context.theme.cardColor,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: context.isDark ? Colors.white10 : Colors.black.withOpacity(0.03)),
           boxShadow: [
             if (!context.isDark)
-              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 3))
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
+              )
           ],
         ),
-        child: Column(
-          children: [
-            ListTile(
-              leading: _iconBox(Icons.notifications_outlined, Colors.orange),
-              title: const Text('الإشعارات', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-              subtitle: const Text('تفعيل إشعارات الطلبات', style: TextStyle(fontSize: 12)),
-              trailing: const Icon(Icons.chevron_left, color: Colors.grey, size: 22),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NotificationsScreen())),
-            ),
-            const Divider(height: 1, indent: 68),
-            ListTile(
-              leading: _iconBox(_darkMode ? Icons.dark_mode : Icons.light_mode_outlined, Colors.indigo),
-              title: const Text('الوضع الليلي', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-              trailing: Switch(value: _darkMode, onChanged: _toggleDarkMode, activeColor: kPrimaryBlue),
-            ),
-          ],
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Column(
+            children: [
+              _premiumListTile(
+                icon: Icons.notifications_none_rounded,
+                iconColor: Colors.orange.shade600,
+                title: 'تنبيهات النظام',
+                subtitle: 'إدارة الإشعارات وتحديثات الطلبات',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NotificationsScreen())),
+              ),
+              _divider(),
+              _premiumListTile(
+                icon: _darkMode ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                iconColor: Colors.indigo.shade400,
+                title: 'المظهر الداكن',
+                subtitle: 'تبديل وضع الألوان للتطبيق',
+                trailing: Transform.scale(
+                  scale: 0.8,
+                  child: Switch(
+                    value: _darkMode,
+                    onChanged: _toggleDarkMode,
+                    activeColor: kPrimaryBlue,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // ── معلومات ───────────────────────────────────────────────
   Widget _buildInfoCard() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
           color: context.theme.cardColor,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: context.isDark ? Colors.white10 : Colors.black.withOpacity(0.03)),
           boxShadow: [
             if (!context.isDark)
-              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 3))
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
+              )
           ],
         ),
-        child: Column(
-          children: [
-            _infoTile(Icons.info_outline, Colors.teal, 'من نحن',
-                () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => CmsPageScreen(slug: 'about', title: 'من نحن')))),
-            const Divider(height: 1, indent: 68),
-            _infoTile(Icons.privacy_tip_outlined, Colors.blue, 'سياسة الخصوصية',
-                () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => CmsPageScreen(slug: 'privacy', title: 'سياسة الخصوصية')))),
-            const Divider(height: 1, indent: 68),
-            _infoTile(Icons.description_outlined, Colors.purple, 'الشروط والأحكام',
-                () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => CmsPageScreen(slug: 'terms', title: 'الشروط والأحكام')))),
-            const Divider(height: 1, indent: 68),
-            _infoTile(Icons.headset_mic_outlined, Colors.green, 'تواصل معنا عبر واتساب',
-                () => _openUrl('https://wa.me/218910000000')),
-          ],
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Column(
+            children: [
+              _premiumListTile(
+                icon: Icons.info_outline_rounded,
+                iconColor: kPrimaryBlue,
+                title: 'من نحن والمهمة',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => CmsPageScreen(slug: 'about', title: 'من نحن'))),
+              ),
+              _divider(),
+              _premiumListTile(
+                icon: Icons.security_outlined,
+                iconColor: kPrimaryBlue,
+                title: 'سياسة الخصوصية والأمان',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => CmsPageScreen(slug: 'privacy', title: 'سياسة الخصوصية'))),
+              ),
+              _divider(),
+              _premiumListTile(
+                icon: Icons.article_outlined,
+                iconColor: kPrimaryBlue,
+                title: 'الشروط والأحكام',
+                subtitle: 'حقوقك ومسؤولياتك القانونية',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => CmsPageScreen(slug: 'terms', title: 'الشروط والأحكام'))),
+              ),
+              _divider(),
+              _premiumListTile(
+                icon: BootstrapIcons.whatsapp,
+                iconColor: kSuccess,
+                title: 'مركز الدعم والمساعدة',
+                subtitle: 'تواصل مباشر عبر الواتساب',
+                onTap: () => _openUrl('https://wa.me/218910000000'),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _infoTile(IconData icon, Color color, String title, VoidCallback onTap) {
+  Widget _premiumListTile({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    String? subtitle,
+    Widget? trailing,
+    VoidCallback? onTap,
+  }) {
     return ListTile(
-      leading: _iconBox(icon, color),
-      title: Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-      trailing: const Icon(Icons.chevron_left, color: Colors.grey, size: 22),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      leading: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: iconColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Icon(icon, color: iconColor, size: 22),
+      ),
+      title: Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+      subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 11, color: Colors.grey)) : null,
+      trailing: trailing ?? Icon(Icons.arrow_back_ios_new, color: Colors.grey.shade300, size: 14),
       onTap: onTap,
     );
   }
 
-  Widget _iconBox(IconData icon, Color color) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Icon(icon, color: color, size: 20),
-    );
-  }
+  Widget _divider() => Divider(height: 1, thickness: 0.5, color: Colors.grey.withOpacity(0.1), indent: 70);
 
   Widget _cardTile({
     required IconData icon,
@@ -369,18 +447,22 @@ class _AccountScreenState extends State<AccountScreen> {
     return Container(
       decoration: BoxDecoration(
         color: context.theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: context.isDark ? Colors.white10 : Colors.black.withOpacity(0.03)),
         boxShadow: [
           if (!context.isDark)
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 3))
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            )
         ],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: _iconBox(icon, iconColor),
-        title: Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-        subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 12)) : null,
-        trailing: const Icon(Icons.chevron_left, color: Colors.grey, size: 22),
+      child: _premiumListTile(
+        icon: icon,
+        iconColor: iconColor,
+        title: title,
+        subtitle: subtitle,
         onTap: onTap,
       ),
     );
@@ -390,27 +472,33 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _buildSocialRow(List<dynamic> links, String shape, Color bg, Color sym) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 12,
+        runSpacing: 12,
         children: [
-          for (final link in links) ...[
-            const SizedBox(width: 10),
+          for (final link in links)
             InkWell(
               onTap: () => _openUrl(link['url'] as String? ?? ''),
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(16),
               child: Container(
-                width: 50,
-                height: 50,
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
                   color: bg,
                   shape: shape == 'circle' ? BoxShape.circle : BoxShape.rectangle,
-                  borderRadius: shape != 'circle' ? BorderRadius.circular(12) : null,
-                  boxShadow: [BoxShadow(color: bg.withOpacity(0.35), blurRadius: 6, offset: const Offset(0, 3))],
+                  borderRadius: shape != 'circle' ? BorderRadius.circular(16) : null,
+                  boxShadow: [
+                    BoxShadow(
+                      color: bg.withOpacity(0.4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    )
+                  ],
                 ),
                 child: Icon(_socialIcon(link['id'] as String? ?? ''), color: sym, size: 24),
               ),
             ),
-          ],
         ],
       ),
     );
@@ -431,8 +519,13 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _sectionLabel(String text) {
     return Text(
-      text,
-      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.grey.shade500, letterSpacing: 0.5),
+      text.toUpperCase(),
+      style: TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w900,
+        color: kPrimaryBlue.withOpacity(0.7),
+        letterSpacing: 1.2,
+      ),
     );
   }
 

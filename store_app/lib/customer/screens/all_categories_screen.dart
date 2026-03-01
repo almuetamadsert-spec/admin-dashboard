@@ -176,23 +176,43 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
+          centerTitle: true,
+          elevation: 0,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [kPrimaryBlue, Color(0xFF42C2F7)],
+              ),
+            ),
+          ),
           leading: Stack(
             alignment: Alignment.center,
             children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart_outlined),
-                onPressed: widget.onOpenCart,
+              Container(
+                margin: const EdgeInsets.only(right: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 20),
+                  onPressed: widget.onOpenCart,
+                ),
               ),
               if (widget.cart.isNotEmpty)
                 Positioned(
                   right: 8,
-                  top: 8,
+                  top: 4,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(color: kDanger, shape: BoxShape.circle),
+                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                     child: Text(
                       '${widget.cart.fold(0, (s, e) => s + e.quantity)}',
-                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -200,11 +220,15 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.arrow_forward),
+              icon: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 20),
               onPressed: () => Navigator.of(context).pop(),
             ),
+            const SizedBox(width: 8),
           ],
-          title: const Text('التصنيفات', style: TextStyle(fontSize: 18)),
+          title: const Text(
+            'التصنيفات',
+            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900),
+          ),
         ),
         body: _loading
             ? const Center(child: CircularProgressIndicator())
@@ -288,41 +312,47 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
         return InkWell(
           onTap: () => _onCategoryTap(c),
           borderRadius: BorderRadius.circular(isCircle ? 26 : radius),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: bgColor,
-                  shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
-                  borderRadius: isCircle ? null : BorderRadius.circular(radius.clamp(0.0, 16)),
-                  border: isBgTransparent ? Border.all(color: Colors.grey.shade300, width: 1) : null,
-                ),
-                child: iconUrl.isEmpty
-                    ? Icon(categoryIcon(c), color: symbolColor, size: 26)
-                    : ClipRRect(
-                        borderRadius: isCircle ? BorderRadius.circular(26) : BorderRadius.circular(radius.clamp(0.0, 16)),
-                        child: Image.network(
-                          iconUrl,
-                          fit: BoxFit.cover,
-                          width: 52,
-                          height: 52,
-                          errorBuilder: (_, __, ___) => Icon(categoryIcon(c), color: symbolColor, size: 26),
-                        ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 58,
+                      height: 58,
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        color: bgColor.withOpacity(isBgTransparent ? 0 : 0.1),
+                        shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
+                        borderRadius: isCircle ? null : BorderRadius.circular(radius.clamp(0.0, 16)),
+                        border: isBgTransparent ? Border.all(color: Colors.grey.shade100, width: 1.5) : null,
+                        boxShadow: [
+                          if (!isBgTransparent)
+                            BoxShadow(color: bgColor.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))
+                        ],
                       ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                c.displayName,
-                style: const TextStyle(fontSize: 11),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+                      child: Center(
+                        child: iconUrl.isEmpty
+                            ? Icon(categoryIcon(c), color: isBgTransparent ? kPrimaryBlue : bgColor.withOpacity(1), size: 28)
+                            : ClipRRect(
+                                borderRadius: isCircle ? BorderRadius.circular(29) : BorderRadius.circular(radius.clamp(0.0, 16)),
+                                child: Image.network(
+                                  iconUrl,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  errorBuilder: (_, __, ___) => Icon(categoryIcon(c), color: isBgTransparent ? kPrimaryBlue : bgColor.withOpacity(1), size: 28),
+                                ),
+                              ),
+                      ),
+                    ),
+                    Text(
+                      c.displayName,
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: -0.3),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
         );
       },
     );

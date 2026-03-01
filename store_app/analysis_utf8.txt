@@ -1,0 +1,182 @@
+﻿Resolving dependencies...
+Downloading packages...
+  characters 1.4.0 (1.4.1 available)
+  flutter_lints 3.0.2 (6.0.0 available)
+  lints 3.0.0 (6.1.0 available)
+  matcher 0.12.17 (0.12.19 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  meta 1.17.0 (1.18.1 available)
+  shared_preferences_android 2.4.20 (2.4.21 available)
+  test_api 0.7.7 (0.7.10 available)
+Got dependencies!
+8 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing store_app...                                          
+
+   info - Dangling library doc comment - lib\config.dart:1:1 - dangling_library_doc_comments
+warning - The value of the field '_lastClaimedCheck' isn't used - lib\core\socket_service.dart:14:18 - unused_field
+warning - Unused import: '../models/category.dart' - lib\customer\customer_shell.dart:4:8 - unused_import
+   info - Use 'const' with the constructor to improve performance - lib\customer\customer_shell.dart:232:23 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\customer\customer_shell.dart:233:24 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\customer\customer_shell.dart:233:25 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\customer_shell.dart:243:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:141:42 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\customer\screens\account_screen.dart:172:19 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\customer\screens\account_screen.dart:175:19 - prefer_const_literals_to_create_immutables
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:183:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:214:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:233:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:271:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:312:84 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:316:37 - deprecated_member_use
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\customer\screens\account_screen.dart:344:21 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:362:84 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:366:37 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\customer\screens\account_screen.dart:380:91 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\customer\screens\account_screen.dart:387:91 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\customer\screens\account_screen.dart:395:91 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:426:28 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:438:78 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:451:82 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:455:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:493:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\account_screen.dart:526:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\all_categories_screen.dart:196:39 - deprecated_member_use
+warning - The value of the local variable 'symbolColor' isn't used - lib\customer\screens\all_categories_screen.dart:306:15 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\all_categories_screen.dart:323:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\all_categories_screen.dart:329:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\all_categories_screen.dart:334:101 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\all_categories_screen.dart:342:135 - deprecated_member_use
+   info - The private field _sort could be 'final' - lib\customer\screens\brand_products_screen.dart:42:10 - prefer_final_fields
+warning - The declaration '_buildActionButtons' isn't referenced - lib\customer\screens\brand_products_screen.dart:107:10 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\brand_products_screen.dart:179:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\brand_products_screen.dart:217:31 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\brand_products_screen.dart:227:53 - deprecated_member_use
+  error - Expected to find ')' - lib\customer\screens\brand_products_screen.dart:306:6 - expected_token
+warning - The declaration '_productImageUrl' isn't referenced - lib\customer\screens\category_products_screen.dart:92:10 - unused_element
+warning - The declaration '_buildActionButtons' isn't referenced - lib\customer\screens\category_products_screen.dart:114:10 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\category_products_screen.dart:197:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\category_products_screen.dart:235:31 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\category_products_screen.dart:245:53 - deprecated_member_use
+  error - Expected to find ')' - lib\customer\screens\category_products_screen.dart:384:6 - expected_token
+   info - Statements in an if should be enclosed in a block - lib\customer\screens\cms_page_screen.dart:43:20 - curly_braces_in_flow_control_structures
+warning - The declaration '_productImageUrl' isn't referenced - lib\customer\screens\home_screen.dart:190:10 - unused_element
+   info - Use 'const' with the constructor to improve performance - lib\customer\screens\home_screen.dart:210:19 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\customer\screens\home_screen.dart:213:19 - prefer_const_literals_to_create_immutables
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\home_screen.dart:221:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\home_screen.dart:239:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\home_screen.dart:271:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\home_screen.dart:317:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\home_screen.dart:351:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\home_screen.dart:362:70 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\home_screen.dart:366:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\home_screen.dart:384:41 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\customer\screens\home_screen.dart:391:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\customer\screens\home_screen.dart:393:24 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\home_screen.dart:402:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\home_screen.dart:435:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\home_screen.dart:443:59 - deprecated_member_use
+warning - The declaration '_cardColorFromHex' isn't referenced - lib\customer\screens\home_screen.dart:574:9 - unused_element
+warning - The value of the field '_phone' isn't used - lib\customer\screens\my_orders_screen.dart:23:11 - unused_field
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\my_orders_screen.dart:210:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\my_orders_screen.dart:264:69 - deprecated_member_use
+   info - Unnecessary use of string interpolation - lib\customer\screens\my_orders_screen.dart:279:45 - unnecessary_string_interpolations
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\notifications_screen.dart:40:87 - deprecated_member_use
+   info - Use 'const' for final variables initialized to a constant value - lib\customer\screens\order_tracking_screen.dart:43:5 - prefer_const_declarations
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\order_tracking_screen.dart:92:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\order_tracking_screen.dart:244:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\order_tracking_screen.dart:274:62 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\product_detail_screen.dart:139:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\product_detail_screen.dart:172:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\product_detail_screen.dart:184:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\product_detail_screen.dart:256:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\product_detail_screen.dart:281:57 - deprecated_member_use
+   info - Unnecessary use of string interpolation - lib\customer\screens\product_detail_screen.dart:296:37 - unnecessary_string_interpolations
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\product_detail_screen.dart:315:86 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\product_detail_screen.dart:370:97 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\product_detail_screen.dart:428:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\product_detail_screen.dart:442:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\product_detail_screen.dart:444:62 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\product_detail_screen.dart:467:65 - deprecated_member_use
+  error - Expected a method, getter, setter or operator declaration - lib\customer\screens\product_detail_screen.dart:541:1 - expected_executable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\profile_edit_screen.dart:156:71 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\customer\screens\profile_edit_screen.dart:225:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\profile_edit_screen.dart:259:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\screens\profile_edit_screen.dart:302:43 - deprecated_member_use
+   info - Use 'const' for final variables initialized to a constant value - lib\customer\widgets\custom_illustration.dart:22:5 - prefer_const_declarations
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\widgets\custom_illustration.dart:24:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\widgets\custom_illustration.dart:79:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\customer\widgets\custom_illustration.dart:102:41 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\main.dart:80:20 - curly_braces_in_flow_control_structures
+warning - Unused import: 'screens/stats_screen.dart' - lib\merchant\merchant_shell.dart:7:8 - unused_import
+   info - Statements in an if should be enclosed in a block - lib\merchant\screens\inventory_add_screen.dart:31:20 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\merchant\screens\inventory_add_screen.dart:69:21 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\merchant\screens\inventory_add_screen.dart:69:57 - curly_braces_in_flow_control_structures
+   info - Unnecessary braces in a string interpolation - lib\merchant\screens\inventory_add_screen.dart:185:53 - unnecessary_brace_in_string_interps
+   info - Statements in an if should be enclosed in a block - lib\merchant\screens\inventory_screen.dart:28:20 - curly_braces_in_flow_control_structures
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:122:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:123:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:125:26 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\merchant\screens\merchant_dashboard_screen.dart:127:31 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:129:23 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:129:47 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\merchant\screens\merchant_dashboard_screen.dart:197:20 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:197:21 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:201:11 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:202:20 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\merchant\screens\merchant_dashboard_screen.dart:204:25 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:207:17 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\merchant\screens\merchant_dashboard_screen.dart:208:29 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:209:21 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:211:21 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:211:47 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:238:11 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\merchant\screens\merchant_dashboard_screen.dart:239:23 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:242:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:246:11 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:250:20 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_dashboard_screen.dart:261:15 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\merchant\screens\merchant_dashboard_screen.dart:344:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\merchant\screens\merchant_dashboard_screen.dart:381:51 - deprecated_member_use
+warning - Unused import: '../../theme/app_theme.dart' - lib\merchant\screens\merchant_order_detail_screen.dart:6:8 - unused_import
+   info - Statements in an if should be enclosed in a block - lib\merchant\screens\merchant_order_detail_screen.dart:37:20 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\merchant\screens\merchant_order_detail_screen.dart:42:20 - curly_braces_in_flow_control_structures
+warning - The declaration '_callCustomer' isn't referenced - lib\merchant\screens\merchant_order_detail_screen.dart:73:8 - unused_element
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\merchant\screens\merchant_order_detail_screen.dart:191:21 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\merchant\screens\merchant_order_detail_screen.dart:192:21 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\merchant\screens\merchant_order_detail_screen.dart:197:21 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\merchant\screens\merchant_order_detail_screen.dart:198:21 - deprecated_member_use
+warning - The value of the local variable 'customerPhone' isn't used - lib\merchant\screens\merchant_order_detail_screen.dart:240:11 - unused_local_variable
+   info - Statements in an if should be enclosed in a block - lib\merchant\screens\merchant_settlement_screen.dart:30:20 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\merchant\screens\merchant_settlement_screen.dart:35:20 - curly_braces_in_flow_control_structures
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_settlement_screen.dart:103:25 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\merchant\screens\merchant_settlement_screen.dart:105:37 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_settlement_screen.dart:107:29 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_settlement_screen.dart:107:54 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\merchant\screens\merchant_settlement_screen.dart:134:71 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_settlement_screen.dart:141:31 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\merchant\screens\merchant_settlement_screen.dart:143:40 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\merchant\screens\merchant_settlement_screen.dart:182:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\merchant\screens\merchant_settlement_screen.dart:205:51 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\merchant\screens\order_detail_screen.dart:33:20 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\merchant\screens\order_detail_screen.dart:38:20 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\merchant\screens\orders_list_screen.dart:32:20 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\merchant\screens\orders_list_screen.dart:37:20 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\merchant\screens\stats_screen.dart:30:20 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\merchant\screens\stats_screen.dart:35:20 - curly_braces_in_flow_control_structures
+warning - Unused import: 'package:shared_preferences/shared_preferences.dart' - lib\screens\cart_screen.dart:2:8 - unused_import
+warning - Unused import: '../api/api_client.dart' - lib\screens\cart_screen.dart:4:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\cart_screen.dart:101:59 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\screens\cart_screen.dart:169:50 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\cart_screen.dart:212:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\cart_screen.dart:241:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\checkout_screen.dart:181:51 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\screens\checkout_screen.dart:225:25 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\checkout_screen.dart:231:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\checkout_screen.dart:314:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\order_success_screen.dart:46:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\order_success_screen.dart:142:51 - deprecated_member_use
+warning - The declaration '_productImageUrl' isn't referenced - lib\screens\products_screen.dart:94:10 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\utils\category_icons.dart:12:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\utils\category_icons.dart:13:19 - deprecated_member_use
+

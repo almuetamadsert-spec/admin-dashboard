@@ -159,23 +159,43 @@ class _BrandProductsScreenState extends State<BrandProductsScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
+          centerTitle: true,
+          elevation: 0,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [kPrimaryBlue, Color(0xFF42C2F7)],
+              ),
+            ),
+          ),
           leading: Stack(
             alignment: Alignment.center,
             children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart_outlined),
-                onPressed: widget.onOpenCart,
+              Container(
+                margin: const EdgeInsets.only(right: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 20),
+                  onPressed: widget.onOpenCart,
+                ),
               ),
               if (widget.cart.isNotEmpty)
                 Positioned(
                   right: 8,
-                  top: 8,
+                  top: 4,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(color: kDanger, shape: BoxShape.circle),
+                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                     child: Text(
                       '${widget.cart.fold(0, (s, e) => s + e.quantity)}',
-                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -183,48 +203,71 @@ class _BrandProductsScreenState extends State<BrandProductsScreen> {
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.arrow_forward),
+              icon: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 20),
               onPressed: () => Navigator.of(context).pop(),
             ),
+            const SizedBox(width: 8),
           ],
-          title: Text(widget.brand.displayName, style: const TextStyle(fontSize: 18)),
+          title: Text(
+            widget.brand.displayName,
+            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900),
+          ),
         ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: 'بحث...',
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        body: Container(
+          color: kPrimaryBlue.withOpacity(0.02),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 5)),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 16),
+                      const Icon(Icons.search_rounded, color: Colors.grey, size: 20),
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: const InputDecoration(
+                            hintText: 'البحث في منتجات البراند...',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                            hintStyle: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.w400),
+                          ),
+                          onSubmitted: (v) {
+                            setState(() {
+                              _searchQuery = v.trim();
+                              _load();
+                            });
+                          },
+                        ),
                       ),
-                      onSubmitted: (v) {
-                        setState(() {
-                          _searchQuery = v.trim();
-                          _load();
-                        });
-                      },
-                    ),
+                      Container(
+                        margin: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: kPrimaryBlue,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _searchQuery = _searchController.text.trim();
+                              _load();
+                            });
+                          },
+                          icon: const Icon(Icons.tune_rounded, color: Colors.white, size: 18),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  IconButton.filled(
-                    onPressed: () {
-                      setState(() {
-                        _searchQuery = _searchController.text.trim();
-                        _load();
-                      });
-                    },
-                    icon: const Icon(Icons.search),
-                  ),
-                ],
+                ),
               ),
-            ),
             if (_loading)
               const Expanded(child: Center(child: CircularProgressIndicator()))
             else if (_error != null)
@@ -260,6 +303,10 @@ class _BrandProductsScreenState extends State<BrandProductsScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }
+}
+
+
+

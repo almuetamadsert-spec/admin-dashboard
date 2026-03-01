@@ -108,22 +108,34 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       child: Scaffold(
         backgroundColor: context.colors.surfaceContainerLowest,
         appBar: AppBar(
-          backgroundColor: context.theme.scaffoldBackgroundColor,
-          foregroundColor: context.colors.onSurface,
-          title: Text('تعديل الحساب', style: context.textTheme.titleLarge?.copyWith(fontSize: 18)),
+          centerTitle: true,
+          elevation: 0,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [kPrimaryBlue, Color(0xFF42C2F7)],
+              ),
+            ),
+          ),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: context.colors.onSurface),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          elevation: 0,
+          title: const Text(
+            'تعديل الحساب',
+            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900),
+          ),
           actions: [
             if (!_loading)
               TextButton(
                 onPressed: _saving ? null : _save,
                 child: _saving
-                    ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: context.colors.primary))
-                    : Text('حفظ', style: TextStyle(color: context.colors.primary, fontSize: 15, fontWeight: FontWeight.bold)),
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Text('حفظ', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
               ),
+            const SizedBox(width: 8),
           ],
         ),
         body: _loading
@@ -237,17 +249,28 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                       const SizedBox(height: 28),
 
                       // زر الحفظ
-                      FilledButton.icon(
-                        onPressed: _saving ? null : _save,
-                        icon: _saving
-                            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : const Icon(Icons.check_circle_outline),
-                        label: const Text('حفظ التعديلات', style: TextStyle(fontSize: 15)),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: context.colors.primary,
-                          foregroundColor: context.colors.onPrimary,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: const LinearGradient(
+                            colors: [kPrimaryBlue, Color(0xFF42C2F7)],
+                          ),
+                          boxShadow: [
+                            BoxShadow(color: kPrimaryBlue.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6)),
+                          ],
+                        ),
+                        child: ElevatedButton.icon(
+                          onPressed: _saving ? null : _save,
+                          icon: _saving
+                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : const Icon(Icons.check_circle_outline, color: Colors.white),
+                          label: const Text('حفظ التعديلات', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
                         ),
                       ),
                     ],

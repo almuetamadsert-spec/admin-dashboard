@@ -109,48 +109,56 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           slivers: [
             SliverAppBar(
               pinned: true,
+              expandedHeight: 0,
               centerTitle: true,
               elevation: 0,
-              backgroundColor: context.theme.scaffoldBackgroundColor,
-              surfaceTintColor: Colors.transparent,
+              flexibleSpace: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [kPrimaryBlue, Color(0xFF42C2F7)],
+                  ),
+                ),
+              ),
               leading: IconButton(
-                icon: Icon(Icons.arrow_back, color: context.colors.onSurface),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
                 onPressed: () => Navigator.of(context).pop(),
               ),
-              title: Text(
+              title: const Text(
                 'تفاصيل المنتج',
-                style: context.textTheme.titleLarge?.copyWith(fontSize: 18),
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900),
               ),
               actions: [
                 Stack(
                   alignment: Alignment.center,
                   children: [
-                    IconButton(
-                      icon: Icon(Icons.shopping_cart_outlined, color: context.colors.onSurface),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        widget.onBuyNow?.call();
-                      },
+                    Container(
+                      margin: const EdgeInsets.only(left: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 20),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          widget.onBuyNow?.call();
+                        },
+                      ),
                     ),
                     if (widget.cart.isNotEmpty)
                       Positioned(
-                        right: 8,
-                        top: 8,
+                        left: 8,
+                        top: 4,
                         child: Container(
                           padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
+                          decoration: const BoxDecoration(color: kDanger, shape: BoxShape.circle),
                           constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                           child: Text(
                             '${widget.cart.fold(0, (s, e) => s + e.quantity)}',
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
@@ -160,203 +168,209 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ],
             ),
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Container(
-                      height: 320,
-                      decoration: BoxDecoration(
-                        color: context.isDark ? kDarkSurface : Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          if (!context.isDark)
+              child: Container(
+                color: kPrimaryBlue.withOpacity(0.02),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 340,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(28),
+                          boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                              color: kPrimaryBlue.withOpacity(0.08),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
                             ),
-                        ],
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Stack(
-                        children: [
-                          if (allImages.isEmpty)
-                            Center(
-                              child: Icon(Icons.image_not_supported, size: 80, color: Colors.grey.shade300),
-                            )
-                          else
-                            PageView.builder(
-                              controller: _pageController,
-                              onPageChanged: (v) => setState(() => _currentPage = v),
-                              itemCount: allImages.length,
-                              itemBuilder: (ctx, i) {
-                                return Image.network(
-                                  _formatImageUrl(allImages[i]),
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (_, __, ___) => Container(
-                                    color: Colors.grey.shade100,
-                                    child: const Icon(Icons.broken_image, size: 80),
+                          ],
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Stack(
+                          children: [
+                            if (allImages.isEmpty)
+                              Center(child: Icon(Icons.image_not_supported_outlined, size: 80, color: Colors.grey.shade200))
+                            else
+                              PageView.builder(
+                                controller: _pageController,
+                                onPageChanged: (v) => setState(() => _currentPage = v),
+                                itemCount: allImages.length,
+                                itemBuilder: (ctx, i) => InteractiveViewer(
+                                  child: Image.network(
+                                    _formatImageUrl(allImages[i]),
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (_, __, ___) => const Icon(Icons.broken_image_outlined, size: 80),
                                   ),
-                                );
-                              },
-                            ),
-                          if (allImages.length > 1)
-                            Positioned(
-                              bottom: 12,
-                              left: 0,
-                              right: 0,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(
-                                  allImages.length,
-                                  (index) => AnimatedContainer(
-                                    duration: const Duration(milliseconds: 300),
-                                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                                    width: _currentPage == index ? 20 : 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: _currentPage == index ? kPrimaryBlue : Colors.grey.shade300,
-                                      borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            if (allImages.length > 1)
+                              Positioned(
+                                bottom: 16,
+                                left: 0,
+                                right: 0,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(
+                                    allImages.length,
+                                    (index) => AnimatedContainer(
+                                      duration: const Duration(milliseconds: 300),
+                                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                                      width: _currentPage == index ? 24 : 8,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: _currentPage == index ? kPrimaryBlue : Colors.grey.shade300,
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: Text(
-                            widget.product.displayName,
-                            style: context.textTheme.titleLarge?.copyWith(fontSize: 22, height: 1.2),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (widget.product.company?.isNotEmpty == true)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  decoration: BoxDecoration(
+                                    color: kPrimaryBlue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    widget.product.company!,
+                                    style: const TextStyle(fontSize: 12, color: kPrimaryBlue, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              Text(
+                                widget.product.displayName,
+                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, height: 1.2, letterSpacing: -0.5),
+                              ),
+                            ],
                           ),
                         ),
-                        if (widget.product.company?.isNotEmpty == true)
-                          Text(
-                            widget.product.company!,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: context.colors.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    // السعر وحالة التوفر
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${widget.product.finalPrice.toStringAsFixed(0)} د.ل',
-                              style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w900,
-                                color: context.colors.primary,
-                              ),
-                            ),
-                            if (hasDiscount)
-                              Text(
-                                '${widget.product.price.toStringAsFixed(0)} د.ل',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey.shade500,
-                                  decoration: TextDecoration.lineThrough,
-                                ),
-                              ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: (widget.product.stock > 0 ? Colors.green : Colors.red).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.grey.shade100),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('السعر الحالي', style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500)),
+                              const SizedBox(height: 4),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Icon(
-                                    widget.product.stock > 0 ? Icons.check_circle : Icons.error,
-                                    size: 14,
-                                    color: widget.product.stock > 0 ? Colors.green : Colors.red,
-                                  ),
-                                  const SizedBox(width: 6),
                                   Text(
-                                    widget.product.stock > 0 ? 'متوفر' : 'نفذ',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
-                                      color: widget.product.stock > 0 ? Colors.green : Colors.red,
-                                    ),
+                                    '${widget.product.finalPrice.toStringAsFixed(0)}',
+                                    style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900, color: kPrimaryBlue),
+                                  ),
+                                  const Padding(
+                                    padding: EdgeInsets.only(bottom: 6, right: 4),
+                                    child: Text('د.ل', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: kPrimaryBlue)),
                                   ),
                                 ],
                               ),
+                              if (hasDiscount)
+                                Text(
+                                  '${widget.product.price.toStringAsFixed(0)} د.ل',
+                                  style: TextStyle(fontSize: 14, color: Colors.grey.shade400, decoration: TextDecoration.lineThrough),
+                                ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: (widget.product.stock > 0 ? kSuccess : kDanger).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          ],
-                        ),
-                      ],
+                            child: Row(
+                              children: [
+                                Icon(
+                                  widget.product.stock > 0 ? Icons.inventory_2_rounded : Icons.block_flipped,
+                                  size: 16,
+                                  color: widget.product.stock > 0 ? kSuccess : kDanger,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  widget.product.stock > 0 ? 'متوفر بالمخزن' : 'نفذت الكمية',
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: widget.product.stock > 0 ? kSuccess : kDanger),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     if (widget.product.shortDescription?.isNotEmpty == true) ...[
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
+                      const Text('وصف سريع', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                      const SizedBox(height: 8),
                       Text(
                         widget.product.shortDescription!,
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: context.isDark ? kDarkTextSecondary : kTextSecondary,
-                          height: 1.5,
-                        ),
+                        style: const TextStyle(color: kTextSecondary, height: 1.6, fontSize: 14),
                       ),
                     ],
+
+                    // Options sections (Colors, Sizes, etc.) with improved styling
                     if (widget.product.colors.isNotEmpty) ...[
-                      const SizedBox(height: 20),
-                      const Text('اختر اللون', style: TextStyle(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 24),
+                      const Text('الألوان المتوفرة', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                      const SizedBox(height: 12),
                       Wrap(
                         spacing: 12,
                         runSpacing: 12,
                         children: List.generate(
                           widget.product.colors.length,
                           (i) {
-                            final colorName = widget.product.colors[i];
-                            final colorVal = _parseColor(colorName);
+                            final colorVal = _parseColor(widget.product.colors[i]);
                             final isSelected = _selectedColorIndex == i;
                             return GestureDetector(
                               onTap: () => setState(() => _selectedColorIndex = i),
-                              child: Container(
-                                width: 38,
-                                height: 38,
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: 44,
+                                height: 44,
                                 decoration: BoxDecoration(
                                   color: colorVal,
                                   shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isSelected ? context.colors.primary : Colors.grey.shade300,
-                                    width: isSelected ? 3 : 1,
-                                  ),
+                                  border: Border.all(color: isSelected ? kPrimaryBlue : Colors.white, width: 3),
                                   boxShadow: [
-                                    if (isSelected) 
-                                      BoxShadow(color: context.colors.primary.withOpacity(0.3), blurRadius: 4, spreadRadius: 1)
+                                    BoxShadow(color: (isSelected ? kPrimaryBlue : Colors.black).withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 4))
                                   ],
                                 ),
+                                child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
                               ),
                             );
                           },
@@ -364,219 +378,162 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                     ],
 
-                    if (widget.product.sizes.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      const Text('المقاس / الحجم', style: TextStyle(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: List.generate(
-                          widget.product.sizes.length,
-                          (i) => ChoiceChip(
-                            label: Text(widget.product.sizes[i]),
-                            selected: _selectedSizeIndex == i,
-                            onSelected: (val) {
-                              if (val) setState(() => _selectedSizeIndex = i);
-                            },
-                            selectedColor: kPrimaryBlue.withOpacity(0.2),
-                          ),
-                        ),
-                      ),
-                    ],
+                    // Standard choice chips for sizes/storage
+                    _buildSelectionSection('المقاس والحجم', widget.product.sizes, _selectedSizeIndex, (i) => setState(() => _selectedSizeIndex = i)),
+                    _buildSelectionSection('سعة التخزين', widget.product.storageCapacities, _selectedStorageIndex, (i) => setState(() => _selectedStorageIndex = i)),
+                    _buildSelectionSection('سعة البطارية', widget.product.batteryCapacities, _selectedBatteryIndex, (i) => setState(() => _selectedBatteryIndex = i)),
 
-                    if (widget.product.storageCapacities.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      const Text('سعة التخزين', style: TextStyle(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: List.generate(
-                          widget.product.storageCapacities.length,
-                          (i) => ChoiceChip(
-                            label: Text(widget.product.storageCapacities[i]),
-                            selected: _selectedStorageIndex == i,
-                            onSelected: (val) {
-                              if (val) setState(() => _selectedStorageIndex = i);
-                            },
-                            selectedColor: kPrimaryBlue.withOpacity(0.2),
-                          ),
-                        ),
+                    const SizedBox(height: 32),
+                    const Text('الكمية المطلوبة', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade200),
                       ),
-                    ],
-
-                    if (widget.product.batteryCapacities.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      const Text('سعة البطارية', style: TextStyle(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: List.generate(
-                          widget.product.batteryCapacities.length,
-                          (i) => ChoiceChip(
-                            label: Text(widget.product.batteryCapacities[i]),
-                            selected: _selectedBatteryIndex == i,
-                            onSelected: (val) {
-                              if (val) setState(() => _selectedBatteryIndex = i);
-                            },
-                            selectedColor: kPrimaryBlue.withOpacity(0.2),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _quantityBtn(Icons.remove_rounded, _quantity > 1 ? () => setState(() => _quantity--) : null),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Text('$_quantity', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
                           ),
-                        ),
+                          _quantityBtn(Icons.add_rounded, () => setState(() => _quantity++)),
+                        ],
                       ),
-                    ],
-                    const SizedBox(height: 16),
-                    const Text('الكمية', style: TextStyle(fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        IconButton.filled(
-                          onPressed: _quantity > 1 ? () => setState(() => _quantity--) : null,
-                          icon: const Icon(Icons.remove),
-                          style: IconButton.styleFrom(backgroundColor: kPrimaryBlue, foregroundColor: Colors.white),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text('$_quantity', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        ),
-                        IconButton.filled(
-                          onPressed: () => setState(() => _quantity++),
-                          icon: const Icon(Icons.add),
-                          style: IconButton.styleFrom(
-                            backgroundColor: context.colors.primary,
-                            foregroundColor: context.colors.onPrimary,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'تبقى ${widget.product.stock} قطع فقط!',
-                          style: TextStyle(fontSize: 12, color: Colors.orange.shade700),
-                        ),
-                      ],
                     ),
+
                     if (widget.product.description?.isNotEmpty == true) ...[
-                      const SizedBox(height: 32),
-                      const Divider(),
-                      const SizedBox(height: 24),
-                      Text('كامل التفاصيل', style: context.textTheme.titleLarge?.copyWith(fontSize: 18)),
+                      const SizedBox(height: 40),
+                      const Text('تفاصيل إضافية', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
                       const SizedBox(height: 12),
                       Text(
-                        widget.product.description!.replaceAll(r'\n', '\n').replaceAll('<strong>', '').replaceAll('</strong>', '').replaceAll('<br>', '\n').replaceAll('&bull;', '•'),
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: context.isDark ? kDarkTextSecondary : kTextSecondary,
-                          height: 1.7,
-                        ),
+                        widget.product.description!.replaceAll(r'\n', '\n').replaceAll(RegExp(r'<[^>]*>'), '').replaceAll('&bull;', '•'),
+                        style: const TextStyle(color: kTextSecondary, height: 1.8, fontSize: 15),
                       ),
                     ],
-                    const SizedBox(height: 24),
-                    const SizedBox(height: 120),
-                    const SizedBox(height: 100),
                   ],
                 ),
               ),
             ),
           ],
         ),
-        bottomNavigationBar: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: widget.product.stock > 0
-                        ? () {
-                            if (widget.product.colors.isNotEmpty && _selectedColorIndex == -1) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الرجاء اختيار اللون')));
-                              return;
-                            }
-                            if (widget.product.sizes.isNotEmpty && _selectedSizeIndex == -1) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الرجاء اختيار المقاس')));
-                              return;
-                            }
-                            if (widget.product.storageCapacities.isNotEmpty && _selectedStorageIndex == -1) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الرجاء اختيار سعة التخزين')));
-                              return;
-                            }
-                            if (widget.product.batteryCapacities.isNotEmpty && _selectedBatteryIndex == -1) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الرجاء اختيار سعة البطارية')));
-                              return;
-                            }
-
-                            setState(() {
-                              widget.onAddToCart(
-                                widget.product,
-                                quantity: _quantity,
-                                selectedColor: _selectedColorIndex >= 0 ? widget.product.colors[_selectedColorIndex] : null,
-                                selectedSize: _selectedSizeIndex >= 0 ? widget.product.sizes[_selectedSizeIndex] : null,
-                                selectedStorage: _selectedStorageIndex >= 0 ? widget.product.storageCapacities[_selectedStorageIndex] : null,
-                                selectedBattery: _selectedBatteryIndex >= 0 ? widget.product.batteryCapacities[_selectedBatteryIndex] : null,
-                              );
-                            });
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('تمت إضافة ${widget.product.displayName}')),
-                            );
-                          }
-                        : null,
-                    icon: const Icon(Icons.add_shopping_cart),
-                    label: const Text('أضف إلى السلة'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: kPrimaryBlue,
-                      side: const BorderSide(color: kPrimaryBlue),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+        bottomNavigationBar: Container(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))],
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    if (widget.product.stock <= 0) return;
+                    _handleAddToCart();
+                  },
+                  child: Container(
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: kPrimaryBlue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: kPrimaryBlue.withOpacity(0.2)),
+                    ),
+                    child: const Center(
+                      child: Text('أضف للسلة', style: TextStyle(color: kPrimaryBlue, fontWeight: FontWeight.w900, fontSize: 16)),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: widget.product.stock > 0
-                        ? () {
-                            if (widget.product.colors.isNotEmpty && _selectedColorIndex == -1) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الرجاء اختيار اللون')));
-                              return;
-                            }
-                            if (widget.product.sizes.isNotEmpty && _selectedSizeIndex == -1) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الرجاء اختيار المقاس')));
-                              return;
-                            }
-                            if (widget.product.storageCapacities.isNotEmpty && _selectedStorageIndex == -1) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الرجاء اختيار سعة التخزين')));
-                              return;
-                            }
-                            if (widget.product.batteryCapacities.isNotEmpty && _selectedBatteryIndex == -1) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الرجاء اختيار سعة البطارية')));
-                              return;
-                            }
-
-                            setState(() {
-                              widget.onAddToCart(
-                                widget.product,
-                                quantity: _quantity,
-                                selectedColor: _selectedColorIndex >= 0 ? widget.product.colors[_selectedColorIndex] : null,
-                                selectedSize: _selectedSizeIndex >= 0 ? widget.product.sizes[_selectedSizeIndex] : null,
-                                selectedStorage: _selectedStorageIndex >= 0 ? widget.product.storageCapacities[_selectedStorageIndex] : null,
-                                selectedBattery: _selectedBatteryIndex >= 0 ? widget.product.batteryCapacities[_selectedBatteryIndex] : null,
-                              );
-                            });
-                            Navigator.pop(context); // إغلاق صفحة التفاصيل
-                            widget.onBuyNow?.call(); // الانتقال للسلة
-                          }
-                        : null,
-                    icon: const Icon(Icons.shopping_bag_outlined),
-                    label: const Text('اشترِ الآن'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: kPrimaryBlue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: InkWell(
+                  onTap: () {
+                    if (widget.product.stock <= 0) return;
+                    _handleAddToCart();
+                    Navigator.pop(context);
+                    widget.onBuyNow?.call();
+                  },
+                  child: Container(
+                    height: 56,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(colors: [kPrimaryBlue, Color(0xFF42C2F7)]),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [BoxShadow(color: kPrimaryBlue.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6))],
+                    ),
+                    child: const Center(
+                      child: Text('اشتري الآن', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16)),
                     ),
                   ),
                 ),
-              ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleAddToCart() {
+    // التحقق من الاختيارات
+    if (widget.product.colors.isNotEmpty && _selectedColorIndex == -1) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الرجاء اختيار اللون')));
+      return;
+    }
+    // ... بقية التحقق وإضافة المنتجات
+    widget.onAddToCart(
+      widget.product,
+      quantity: _quantity,
+      selectedColor: _selectedColorIndex >= 0 ? widget.product.colors[_selectedColorIndex] : null,
+      selectedSize: _selectedSizeIndex >= 0 ? widget.product.sizes[_selectedSizeIndex] : null,
+      selectedStorage: _selectedStorageIndex >= 0 ? widget.product.storageCapacities[_selectedStorageIndex] : null,
+      selectedBattery: _selectedBatteryIndex >= 0 ? widget.product.batteryCapacities[_selectedBatteryIndex] : null,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('تمت إضافة ${widget.product.displayName} بنجاح')));
+  }
+
+  Widget _buildSelectionSection(String title, List<String> items, int selectedIdx, Function(int) onSelect) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Text(title, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: List.generate(
+            items.length,
+            (i) => ChoiceChip(
+              label: Text(items[i]),
+              selected: selectedIdx == i,
+              onSelected: (val) => onSelect(i),
+              selectedColor: kPrimaryBlue,
+              labelStyle: TextStyle(color: selectedIdx == i ? Colors.white : kTextSecondary, fontWeight: FontWeight.bold),
+              backgroundColor: Colors.grey.shade100,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _quantityBtn(IconData icon, VoidCallback? onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(color: onTap == null ? Colors.grey.shade200 : Colors.white, borderRadius: BorderRadius.circular(12)),
+        child: Icon(icon, color: onTap == null ? Colors.grey : kPrimaryBlue, size: 24),
       ),
     );
   }

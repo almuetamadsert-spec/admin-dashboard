@@ -37,7 +37,29 @@ class _CartScreenState extends State<CartScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        appBar: widget.showAppBar ? AppBar(title: const Text('السلة')) : null,
+        appBar: widget.showAppBar
+            ? AppBar(
+                centerTitle: true,
+                elevation: 0,
+                flexibleSpace: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                      colors: [kPrimaryBlue, Color(0xFF42C2F7)],
+                    ),
+                  ),
+                ),
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                title: const Text(
+                  'السلة',
+                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900),
+                ),
+              )
+            : null,
         body: widget.cart.isEmpty
             ? Center(
                 child: Padding(
@@ -69,17 +91,29 @@ class _CartScreenState extends State<CartScreen> {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          side: const BorderSide(color: kPrimaryBlue),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          gradient: const LinearGradient(
+                            colors: [kPrimaryBlue, Color(0xFF42C2F7)],
+                          ),
+                          boxShadow: [
+                            BoxShadow(color: kPrimaryBlue.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6)),
+                          ],
                         ),
-                        icon: const Icon(Icons.shopping_bag_outlined),
-                        label: const Text('بدء التسوق', style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                          ),
+                          icon: const Icon(Icons.shopping_bag_outlined, color: Colors.white),
+                          label: const Text('بدء التسوق', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                        ),
                       ),
                     ],
                   ),
@@ -197,23 +231,35 @@ class _CartScreenState extends State<CartScreen> {
             : SafeArea(
                 child: Container(
                   padding: const EdgeInsets.all(16),
-                  child: FilledButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => CheckoutScreen(
-                            cart: widget.cart,
-                            onOrderSent: widget.onOrderSent,
-                          ),
-                        ),
-                      );
-                    },
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: kPrimaryBlue,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: const LinearGradient(
+                        colors: [kPrimaryBlue, Color(0xFF42C2F7)],
+                      ),
+                      boxShadow: [
+                        BoxShadow(color: kPrimaryBlue.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6)),
+                      ],
                     ),
-                    child: const Text('إتمام الطلب', style: TextStyle(fontSize: 16)),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => CheckoutScreen(
+                              cart: widget.cart,
+                              onOrderSent: widget.onOrderSent,
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: const Text('إتمام الطلب', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ),
                   ),
                 ),
               ),

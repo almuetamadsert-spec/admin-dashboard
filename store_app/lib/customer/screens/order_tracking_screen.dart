@@ -49,15 +49,24 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
       child: Scaffold(
         backgroundColor: context.colors.surfaceContainerLowest,
         appBar: AppBar(
+          centerTitle: true,
           elevation: 0,
-          backgroundColor: context.theme.scaffoldBackgroundColor,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [kPrimaryBlue, Color(0xFF42C2F7)],
+              ),
+            ),
+          ),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: context.colors.onSurface),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: Text(
+          title: const Text(
             'تتبع الطلب',
-            style: context.textTheme.titleLarge?.copyWith(fontSize: 18),
+            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900),
           ),
         ),
         body: SingleChildScrollView(

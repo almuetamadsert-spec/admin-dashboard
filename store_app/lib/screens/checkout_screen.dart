@@ -173,52 +173,39 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               const SizedBox(height: 32),
               
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2))],
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 5)),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    TextField(
+                    _buildTextField(
                       controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: 'الاسم الكامل *',
-                        prefixIcon: const Icon(Icons.person_outline),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                      ),
+                      label: 'الاسم الكامل *',
+                      icon: Icons.person_outline,
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
+                    const SizedBox(height: 20),
+                    _buildTextField(
                       controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: 'رقم الهاتف *',
-                        prefixIcon: const Icon(Icons.phone_outlined),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                      ),
+                      label: 'رقم الهاتف *',
+                      icon: Icons.phone_outlined,
+                      type: TextInputType.phone,
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
+                    const SizedBox(height: 20),
+                    _buildTextField(
                       controller: _phoneAltController,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: 'رقم هاتف آخر (اختياري)',
-                        prefixIcon: const Icon(Icons.phone_android_outlined),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                      ),
+                      label: 'رقم هاتف آخر (اختياري)',
+                      icon: Icons.phone_android_outlined,
+                      type: TextInputType.phone,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     if (_loadingCities)
-                      const LinearProgressIndicator()
+                      const LinearProgressIndicator(color: kPrimaryBlue)
                     else if (_citiesError)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -238,25 +225,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         value: _selectedCityId,
                         decoration: InputDecoration(
                           labelText: 'المدينة *',
-                          prefixIcon: const Icon(Icons.location_city_outlined),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          labelStyle: const TextStyle(fontSize: 14, color: kTextSecondary),
+                          prefixIcon: const Icon(Icons.location_city_outlined, color: kPrimaryBlue, size: 20),
                           filled: true,
-                          fillColor: Colors.grey.shade50,
+                          fillColor: kPrimaryBlue.withOpacity(0.03),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.all(16),
                         ),
                         items: _cities.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
                         onChanged: (v) => setState(() => _selectedCityId = v),
                       ),
-                    const SizedBox(height: 16),
-                    TextField(
+                    const SizedBox(height: 20),
+                    _buildTextField(
                       controller: _addressController,
+                      label: 'الحي / العنوان بالتفصيل *',
+                      icon: Icons.home_outlined,
                       maxLines: 2,
-                      decoration: InputDecoration(
-                        labelText: 'الحي / العنوان بالتفصيل *',
-                        prefixIcon: const Icon(Icons.home_outlined),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                      ),
                     ),
                   ],
                 ),
@@ -306,4 +293,40 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
     );
   }
+
+  Widget _buildTextField({
+
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType type = TextInputType.text,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: type,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(fontSize: 14, color: kTextSecondary),
+        prefixIcon: Icon(icon, color: kPrimaryBlue, size: 20),
+        filled: true,
+        fillColor: kPrimaryBlue.withOpacity(0.03),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: kPrimaryBlue, width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+    );
+  }
 }
+

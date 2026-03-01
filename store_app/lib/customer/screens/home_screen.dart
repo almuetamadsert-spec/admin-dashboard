@@ -205,83 +205,75 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final logo = _sliderData?.logoSettings;
     final hasLogo = logo != null && logo.url.isNotEmpty;
     
-    // Logo position logic
-    Widget? logoWidget;
-    if (hasLogo) {
-      logoWidget = Padding(
-        padding: EdgeInsets.only(
-          top: logo.marginTop.toDouble(),
-          bottom: logo.marginBottom.toDouble(),
-          left: logo.marginLeft.toDouble(),
-          right: logo.marginRight.toDouble(),
-        ),
-        child: Image.network(
-          logo.url,
-          height: 60 * (logo.size / 100), // Slightly increased base size for better control
-          fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-      child: Column(
-        children: [
-          Row(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey.shade100, width: 1)),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Column(
             children: [
-              // Left Section: Back/Menu or Logo
-              if (logo?.position == 'left' && logoWidget != null)
-                logoWidget
-              else
-                const SizedBox(width: 48), // Space for balance
-
-              // Center Section: Logo (if top) or Text (if no logo)
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (logo?.position == 'top' && logoWidget != null)
-                      logoWidget
-                    else if (!hasLogo || (logo?.position != 'left' && logo?.position != 'right'))
-                      Text(
-                        'المعتمد',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: kGold,
-                          shadows: [
-                            Shadow(color: kSilver.withOpacity(0.6), offset: const Offset(0, 1), blurRadius: 2),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-
-              // Right Section: Logo or Cart
               Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (logo?.position == 'right' && logoWidget != null)
-                    logoWidget,
-                  const SizedBox(width: 8),
+                  // Left: Menu
+                  InkWell(
+                    onTap: widget.onOpenMenu,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.grid_view_rounded, color: Colors.black87, size: 24),
+                    ),
+                  ),
+
+                  // Center: Logo or Text
+                  if (hasLogo)
+                    Image.network(
+                      logo.url,
+                      height: 40 * (logo.size / 100),
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => const Text(
+                        'المعتمد',
+                        style: TextStyle(color: Colors.black87, fontSize: 20, fontWeight: FontWeight.w900),
+                      ),
+                    )
+                  else
+                    const Text(
+                      'المعتمد',
+                      style: TextStyle(color: Colors.black87, fontSize: 20, fontWeight: FontWeight.w900),
+                    ),
+
+                  // Right: Cart
                   Stack(
                     clipBehavior: Clip.none,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.shopping_cart_outlined),
-                        onPressed: widget.onOpenCart,
+                      InkWell(
+                        onTap: widget.onOpenCart,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.shopping_bag_outlined, color: Colors.black87, size: 24),
+                        ),
                       ),
                       if (widget.cart.isNotEmpty)
                         Positioned(
-                          right: 8,
-                          top: 8,
+                          right: -4,
+                          top: -4,
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: const BoxDecoration(
-                              color: Colors.red,
+                              color: kDanger,
                               shape: BoxShape.circle,
                             ),
                             constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
@@ -292,75 +284,85 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             ),
                           ),
                         ),
-                    ],
+                     ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // Location / Greeting row
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: kPrimaryBlue.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.location_on_rounded, color: kPrimaryBlue, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _greeting,
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 12, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'التوصيل إلى $_deliveryCity',
+                          style: const TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w800),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ],
           ),
-          if (logo?.position == 'bottom' && logoWidget != null)
-            Padding(padding: const EdgeInsets.only(top: 4), child: logoWidget),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLocation() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Text(
-              _greeting,
-              style: context.textTheme.titleMedium?.copyWith(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Row(
-            children: [
-              const Icon(Icons.location_on_outlined, size: 18, color: kTextSecondary),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  'العنوان $_deliveryCity',
-                  style: context.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, fontSize: 13),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 4),
-              const Icon(Icons.keyboard_arrow_down, size: 20, color: kTextSecondary),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
       child: Container(
-        height: 44,
+        height: 56,
         decoration: BoxDecoration(
-          color: context.isDark ? kDarkSurface : kSectionBg,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: context.isDark ? kDarkBorder : kCardBorder, width: 1),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            )
+          ],
+          border: Border.all(color: Colors.grey.shade100, width: 1),
         ),
         child: TextField(
+          textAlignVertical: TextAlignVertical.center,
           decoration: InputDecoration(
-            hintText: 'ابحث عن منتجك المفضل...',
-            hintStyle: TextStyle(color: context.isDark ? kDarkTextSecondary : kTextSecondary, fontSize: 14),
-            prefixIcon: Icon(Icons.search, color: context.isDark ? kDarkTextSecondary : kTextSecondary, size: 22),
+            hintText: 'عن ماذا تبحث اليوم؟',
+            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14, fontWeight: FontWeight.w500),
+            prefixIcon: const Icon(Icons.search_rounded, color: kPrimaryBlue, size: 24),
+            suffixIcon: Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [kPrimaryBlue, Color(0xFF42C2F7)]),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.tune_rounded, color: Colors.white, size: 20),
+              ),
+            ),
             border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
           ),
         ),
       ),
@@ -706,7 +708,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(child: _buildHeader()),
-            SliverToBoxAdapter(child: _buildLocation()),
             SliverToBoxAdapter(child: _buildSearchBar()),
             SliverToBoxAdapter(child: _buildSlider()),
             const SliverToBoxAdapter(child: SizedBox(height: 8)),

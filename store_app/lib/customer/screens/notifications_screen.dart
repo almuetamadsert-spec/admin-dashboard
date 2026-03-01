@@ -12,11 +12,25 @@ class NotificationsScreen extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
+          centerTitle: true,
+          elevation: 0,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [kPrimaryBlue, Color(0xFF42C2F7)],
+              ),
+            ),
+          ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_forward),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: const Text('الإشعارات', style: TextStyle(fontSize: 18)),
+          title: const Text(
+            'الإشعارات',
+            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900),
+          ),
         ),
         body: Padding(
           padding: const EdgeInsets.all(24),

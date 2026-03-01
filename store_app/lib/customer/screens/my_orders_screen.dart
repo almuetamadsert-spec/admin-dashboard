@@ -94,7 +94,25 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('طلباتي', style: TextStyle(fontSize: 18)),
+          centerTitle: true,
+          elevation: 0,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [kPrimaryBlue, Color(0xFF42C2F7)],
+              ),
+            ),
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: const Text(
+            'طلباتي',
+            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900),
+          ),
         ),
         body: _loading
             ? const Center(child: CircularProgressIndicator())
@@ -181,11 +199,19 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                           itemBuilder: (context, i) {
                             final order = _orders![i];
                             final imageUrl = _imageUrl(order);
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              clipBehavior: Clip.antiAlias,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: Colors.grey.shade100),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.03),
+                                    blurRadius: 15,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
                               ),
                               child: InkWell(
                                 onTap: () {
@@ -195,59 +221,52 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                                     ),
                                   );
                                 },
+                                borderRadius: BorderRadius.circular(20),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(12),
+                                  padding: const EdgeInsets.all(16),
                                   child: Row(
                                     children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
+                                      Container(
+                                        width: 80,
+                                        height: 80,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade50,
+                                          borderRadius: BorderRadius.circular(16),
+                                          border: Border.all(color: Colors.grey.shade100),
+                                        ),
+                                        clipBehavior: Clip.antiAlias,
                                         child: imageUrl.isEmpty
-                                            ? Container(
-                                                width: 72,
-                                                height: 72,
-                                                color: Colors.grey.shade200,
-                                                child: const Icon(Icons.image_not_supported, size: 32),
-                                              )
+                                            ? const Icon(Icons.inventory_2_rounded, size: 30, color: Colors.grey)
                                             : Image.network(
                                                 imageUrl,
-                                                width: 72,
-                                                height: 72,
                                                 fit: BoxFit.cover,
-                                                errorBuilder: (_, __, ___) => Container(
-                                                  width: 72,
-                                                  height: 72,
-                                                  color: Colors.grey.shade200,
-                                                  child: const Icon(Icons.broken_image),
-                                                ),
+                                                errorBuilder: (_, __, ___) => const Icon(Icons.broken_image_outlined),
                                               ),
                                       ),
-                                      const SizedBox(width: 12),
+                                      const SizedBox(width: 16),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              'طلب #${order.orderNumber}',
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 15,
-                                              ),
+                                              'الطلب #${order.orderNumber}',
+                                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, height: 1.2),
                                             ),
-                                            const SizedBox(height: 4),
+                                            const SizedBox(height: 6),
                                             Text(
                                               _dateText(order),
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey.shade600,
-                                              ),
+                                              style: TextStyle(fontSize: 12, color: Colors.grey.shade500, fontWeight: FontWeight.w500),
                                             ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              _statusLabel(order.status),
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: kPrimaryBlue,
-                                                fontWeight: FontWeight.w500,
+                                            const SizedBox(height: 8),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                              decoration: BoxDecoration(
+                                                color: kPrimaryBlue.withOpacity(0.08),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                _statusLabel(order.status),
+                                                style: const TextStyle(fontSize: 11, color: kPrimaryBlue, fontWeight: FontWeight.w900),
                                               ),
                                             ),
                                           ],
@@ -257,15 +276,15 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                                         crossAxisAlignment: CrossAxisAlignment.end,
                                         children: [
                                           Text(
-                                            '${order.totalAmount.toStringAsFixed(2)} د.ل',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                              color: kPrimaryBlue,
-                                            ),
+                                            '${order.totalAmount.toStringAsFixed(0)}',
+                                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: kPrimaryBlue),
                                           ),
-                                          const SizedBox(height: 4),
-                                          const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+                                          const Text(
+                                            'د.ل',
+                                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: kPrimaryBlue),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
                                         ],
                                       ),
                                     ],

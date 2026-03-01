@@ -1,370 +1,512 @@
 <%- include('../partials/head', { title: 'واجهة المتجر — إعلانات السلايدر' }) %>
   <%- include('../partials/sidebar', { adminUsername }) %>
 
-    <h4 class="mb-4">واجهة المتجر — إعلانات السلايدر</h4>
-    <p class="text-muted small mb-4">الصور تظهر في أعلى تطبيق المتجر (هاتف/تابلت). أبعاد مناسبة: عرض 1200×400 تقريباً أو
-      نسبة 3:1.</p>
+    <style>
+      .banner-img-preview {
+        height: 180px;
+        object-fit: cover;
+        border-radius: 12px;
+        transition: transform 0.3s ease;
+      }
 
-    <% if (locals.query && query.error==='no_image' ) { %>
-      <div class="alert alert-warning">اختر صورة عند الإضافة.</div>
-      <% } %>
+      .banner-card:hover .banner-img-preview {
+        transform: scale(1.02);
+      }
 
-        <!-- إعداد وقت تحرك الصور وشكل شبكة البطاقات -->
-        <div class="card mb-4" style="position:relative; z-index: 2; overflow: visible;">
-          <div class="card-body" style="overflow: visible;">
-            <h6 class="card-title mb-3"><i class="bi bi-gear"></i> تصميم بطاقة المنتج</h6>
-            <form method="post" action="/admin/store-ui/settings" class="row g-3 align-items-end">
-              <input type="hidden" name="interval" value="<%= interval %>">
-              <div class="col-auto">
-                <label class="form-label small">شكل شبكة بطاقات المنتجات</label>
-                <select name="product_layout" class="form-select" style="width:auto">
-                  <option value="grid_2" <%=(locals.productLayout || 'grid_2' )==='grid_2' ? 'selected' : '' %>>صفان
-                    أفقي (2 بطاقات)</option>
-                  <option value="grid_3" <%=(locals.productLayout || 'grid_2' )==='grid_3' ? 'selected' : '' %>>3 بطاقات
-                    أفقية</option>
-                  <option value="slider" <%=(locals.productLayout || 'grid_2' )==='slider' ? 'selected' : '' %>>سلايدر
-                    أفقي</option>
-                </select>
+      .settings-section-title {
+        position: relative;
+        padding-right: 15px;
+      }
+
+      .settings-section-title::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--bs-primary);
+        border-radius: 2px;
+      }
+    </style>
+
+    <div class="container-fluid py-4 px-4">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold m-0 text-dark">تخصيص واجهة المتجر</h4>
+          <p class="text-muted small mb-0">تعديل بنرات الإعلانات، الشعار، وتنسيقات بطاقات المنتجات في التطبيق</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-primary px-4" data-bs-toggle="collapse"
+            data-bs-target="#addSlideCollapse">
+            <i class="bi bi-plus-lg ms-2"></i> إضافة إعلان جديد
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm h-100 p-3">
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-collection-play-fill fs-4"></i>
               </div>
-              <div class="w-100"></div>
-              <div class="col-12 mt-2">
-                <h6 class="small text-muted mb-2">تعديل بطاقة المنتج</h6>
+              <div>
+                <small class="text-muted d-block">إجمالي الشرائح</small>
+                <h4 class="fw-bold m-0">
+                  <%= stats.totalSlides %>
+                </h4>
               </div>
-              <div class="col-md-3">
-                <label class="form-label small">لون خلفية البطاقة</label>
-                <input type="color" name="product_card_bg" class="form-control form-control-color"
-                  value="<%= (locals.cardBg || '#ffffff') %>" title="اختر لون الخلفية">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small">زوايا البطاقة</label>
-                <select name="product_card_radius" class="form-select">
-                  <% cornerStyles.forEach(function(s) { %>
-                    <option value="<%= s.value %>" <%=(locals.cardRadius || 'rounded' )===s.value ? 'selected' : '' %>>
-                      <%= s.label %>
-                    </option>
-                    <% }); %>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <div class="form-check mt-3">
-                  <input class="form-check-input" type="checkbox" name="product_card_show_add_to_cart" value="1"
-                    id="cardShowAdd" <%=locals.showAddToCart ? 'checked' : '' %>>
-                  <label class="form-check-label small" for="cardShowAdd">إظهار زر إضافة للسلة</label>
-                </div>
-                <div class="form-check mt-3">
-                  <input class="form-check-input" type="checkbox" name="product_card_show_buy_now" value="1"
-                    id="cardShowBuyNow" <%=locals.showBuyNow ? 'checked' : '' %>>
-                  <label class="form-check-label small" for="cardShowBuyNow">إظهار زر اشتري الآن</label>
-                </div>
-              </div>
-              <div class="col-md-5">
-                <label class="form-label small">إظهار حالة المخزون</label>
-                <select name="product_card_stock_style" class="form-select" style="min-width:180px">
-                  <option value="none" <%=(locals.stockStyle==='none' || !locals.stockStyle) ? 'selected' : '' %>>إخفاء
-                  </option>
-                  <option value="text" <%=(locals.stockStyle==='text' ) ? 'selected' : '' %>>إظهار كـ (متوفر / نفد)
-                  </option>
-                  <option value="number" <%=(locals.stockStyle==='number' ) ? 'selected' : '' %>>إظهار الكمية برقم
-                  </option>
-                </select>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small">لون حالة المخزون (متوفر)</label>
-                <input type="color" name="product_card_stock_color_av" class="form-control form-control-color"
-                  value="<%= (locals.stockColorAv || '#4caf50') %>" title="لون نص متوفر">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small">لون حالة المخزون (نفد)</label>
-                <input type="color" name="product_card_stock_color_out" class="form-control form-control-color"
-                  value="<%= (locals.stockColorOut || '#f44336') %>" title="لون نص نفد">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small">لون السعر</label>
-                <input type="color" name="product_card_price_color" class="form-control form-control-color"
-                  value="<%= (locals.priceColor || '#0ea5e9') %>" title="لون نص السعر">
-              </div>
-              <div class="w-100"></div>
-              <div class="col-md-3">
-                <label class="form-label small">مكان البراند (الشركة) عمودياً</label>
-                <select name="card_brand_position" class="form-select" style="min-width:120px">
-                  <option value="left" <%=(locals.cardBrandPos || 'left' )==='left' ? 'selected' : '' %>>يسار (بجانب
-                    الصورة)</option>
-                  <option value="right" <%=(locals.cardBrandPos || 'left' )==='right' ? 'selected' : '' %>>يمين (بجانب
-                    الصورة)</option>
-                  <option value="top" <%=(locals.cardBrandPos || 'left' )==='top' ? 'selected' : '' %>>فوق الاسم
-                  </option>
-                  <option value="bottom" <%=(locals.cardBrandPos || 'left' )==='bottom' ? 'selected' : '' %>>تحت السعر
-                  </option>
-                </select>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small">محاذاة البراند أفقياً</label>
-                <select name="card_brand_align" class="form-select" style="min-width:120px">
-                  <option value="left" <%=(locals.cardBrandAlign || 'right' )==='left' ? 'selected' : '' %>>يسار
-                  </option>
-                  <option value="center" <%=(locals.cardBrandAlign || 'right' )==='center' ? 'selected' : '' %>>وسط
-                  </option>
-                  <option value="right" <%=(locals.cardBrandAlign || 'right' )==='right' ? 'selected' : '' %>>يمين
-                  </option>
-                </select>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small">محاذاة اسم المنتج</label>
-                <select name="card_name_align" class="form-select" style="min-width:120px">
-                  <option value="left" <%=(locals.cardNameAlign || 'right' )==='left' ? 'selected' : '' %>>يسار</option>
-                  <option value="center" <%=(locals.cardNameAlign || 'right' )==='center' ? 'selected' : '' %>>وسط
-                  </option>
-                  <option value="right" <%=(locals.cardNameAlign || 'right' )==='right' ? 'selected' : '' %>>يمين
-                  </option>
-                </select>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small">محاذاة السعر</label>
-                <select name="card_price_align" class="form-select" style="min-width:120px">
-                  <option value="left" <%=(locals.cardPriceAlign || 'right' )==='left' ? 'selected' : '' %>>يسار
-                  </option>
-                  <option value="center" <%=(locals.cardPriceAlign || 'right' )==='center' ? 'selected' : '' %>>وسط
-                  </option>
-                  <option value="right" <%=(locals.cardPriceAlign || 'right' )==='right' ? 'selected' : '' %>>يمين
-                  </option>
-                </select>
-              </div>
-              <div class="w-100"></div>
-              <div class="col-md-3">
-                <label class="form-label small">شكل زر أضف إلى السلة</label>
-                <select name="card_add_btn_style" class="form-select" style="min-width:180px">
-                  <option value="small_rounded" <%=(locals.cardAddBtnStyle || 'small_rounded' )==='small_rounded'
-                    ? 'selected' : '' %>>زر صغير زوايا دائرية</option>
-                  <option value="full_rounded" <%=(locals.cardAddBtnStyle || 'small_rounded' )==='full_rounded'
-                    ? 'selected' : '' %>>زر كامل دائري</option>
-                  <option value="sharp" <%=(locals.cardAddBtnStyle || 'small_rounded' )==='sharp' ? 'selected' : '' %>
-                    >زر زوايا حادة</option>
-                </select>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small">موقع الزر في البطاقة</label>
-                <select name="card_add_btn_position" class="form-select">
-                  <option value="left" <%=(locals.cardAddBtnPosition || 'right' )==='left' ? 'selected' : '' %>>يسار
-                  </option>
-                  <option value="right" <%=(locals.cardAddBtnPosition || 'right' )==='right' ? 'selected' : '' %>>يمين
-                  </option>
-                </select>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small">لون زر أضف إلى السلة</label>
-                <input type="color" name="card_add_btn_color" class="form-control form-control-color"
-                  value="<%= (locals.cardAddBtnColor || '#06A3E7') %>" title="لون الزر">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small">لون زر اشتري الآن</label>
-                <input type="color" name="card_buy_now_color" class="form-control form-control-color"
-                  value="<%= (locals.cardBuyNowColor || '#ff9800') %>" title="لون رز اشتري الآن">
-              </div>
-              <div class="col-auto mt-4">
-                <button type="submit" class="btn btn-primary">حفظ</button>
-              </div>
-            </form>
+            </div>
           </div>
         </div>
-
-        <!-- تصميم بطاقة المنتج للتاجر (تطبيق التاجر) -->
-        <div class="card mb-4">
-          <div class="card-body">
-            <h6 class="card-title mb-3"><i class="bi bi-palette"></i> تصميم بطاقة المنتج للتاجر</h6>
-            <p class="text-muted small mb-3">إعدادات شكل بطاقة المنتج في تطبيق التاجر (تبويب المخزون وغيرها).</p>
-            <form method="post" action="/admin/store-ui/settings" class="row g-3 align-items-end">
-              <div class="col-md-3">
-                <label class="form-label small">لون خلفية البطاقة</label>
-                <input type="color" name="merchant_product_card_bg" class="form-control form-control-color"
-                  value="<%= (locals.merchantCardBg || '#ffffff') %>" title="لون خلفية بطاقة المنتج للتاجر">
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm h-100 p-3 border-start border-success border-4">
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-clock-history fs-4"></i>
               </div>
-              <div class="col-md-3">
-                <label class="form-label small">شكل البطاقة (الزوايا)</label>
-                <select name="merchant_product_card_radius" class="form-select">
-                  <% cornerStyles.forEach(function(s) { %>
-                    <option value="<%= s.value %>" <%=(locals.merchantCardRadius || 'rounded' )===s.value ? 'selected'
-                      : '' %>><%= s.label %>
-                    </option>
-                    <% }); %>
-                </select>
+              <div>
+                <small class="text-muted d-block">تبديل تلقائي</small>
+                <h4 class="fw-bold m-0 text-success">
+                  <%= stats.activeInterval %> ث
+                </h4>
               </div>
-              <div class="col-auto">
-                <button type="submit" class="btn btn-primary">حفظ</button>
-              </div>
-            </form>
+            </div>
           </div>
         </div>
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm h-100 p-3 border-start border-info border-4">
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-image-fill fs-4"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block">حالة الشعار</small>
+                <h4 class="fw-bold m-0 text-info">
+                  <%= stats.hasLogo ? 'مرفوع' : 'غير محدد' %>
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm h-100 p-3 border-start border-warning border-4">
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-grid-3x3-gap-fill fs-4"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block">تنسيق العرض</small>
+                <h4 class="fw-bold m-0 text-warning">
+                  <%= stats.layoutType==='grid_2' ? 'شبكة (2)' : stats.layoutType==='grid_3' ? 'شبكة (3)' : 'سلايدر' %>
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <!-- إعداد شعار المتجر -->
-        <div class="card mb-4">
-          <div class="card-body">
-            <h6 class="card-title mb-3"><i class="bi bi-image"></i> شعار المتجر</h6>
-            <form method="post" action="/admin/store-ui/logo" enctype="multipart/form-data">
-              <div class="row g-4 align-items-start">
-                <div class="col-md-5">
-                  <div class="p-3 border rounded bg-light mb-3">
-                    <label class="form-label d-block fw-bold mb-2"><i class="bi bi-upload"></i> تحديث صورة
-                      الشعار</label>
-                    <input type="file" name="logo" class="form-control mb-2"
-                      accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml">
-                    <% if (locals.logoUrl) { %>
-                      <div class="mt-2 text-center p-3 border rounded white-bg" style="background: white;">
-                        <img src="/uploads/<%= logoUrl %>" alt="شعار المتجر" style="max-height: 80px; width: auto;">
-                        <div class="small text-muted mt-2">الشعار الحالي</div>
+      <!-- Error Messages -->
+      <% if (locals.query && query.error==='no_image' ) { %>
+        <div class="alert alert-warning border-0 shadow-sm mb-4 d-flex align-items-center gap-2">
+          <i class="bi bi-exclamation-triangle-fill"></i> يرجى اختيار صورة صالحة عند الإضافة.
+        </div>
+        <% } %>
+
+          <div class="row g-4">
+            <!-- Main Content (Left) -->
+            <div class="col-lg-8">
+              <!-- Add Slide Collapse -->
+              <div class="collapse mb-4" id="addSlideCollapse">
+                <div class="card border-0 shadow-sm border-start border-primary border-4">
+                  <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3">إضافة شريحة إعلانية جديدة</h6>
+                    <p class="text-muted small mb-4">الأبعاد المقترحة: 1200×400 بكسل (نسبة 3:1) لظهور مثالي على كافة
+                      الشاشات.</p>
+                    <form method="post" action="/admin/store-ui/slide" enctype="multipart/form-data" class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label small text-muted">صورة البنر *</label>
+                        <input type="file" name="image" class="form-control" accept="image/*" required>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label small text-muted">شكل الزوايا</label>
+                        <select name="corner_style" class="form-select">
+                          <% cornerStyles.forEach(function(s) { %>
+                            <option value="<%= s.value %>">
+                              <%= s.label %>
+                            </option>
+                            <% }); %>
+                        </select>
+                      </div>
+                      <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100 py-2">إضافة</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slides List -->
+              <div class="card border-0 shadow-sm mb-4 overflow-hidden">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                  <h5 class="fw-bold m-0"><i class="bi bi-images ms-2 text-primary"></i>شرائح الإعلانات الحالية</h5>
+                  <div class="d-flex align-items-center gap-3">
+                    <form method="post" action="/admin/store-ui/settings" class="d-flex align-items-center gap-2">
+                      <label class="small text-muted text-nowrap">وقت التحويل:</label>
+                      <input type="number" name="interval" class="form-control form-control-sm" style="width: 60px;"
+                        value="<%= interval %>" min="2" max="60">
+                      <button type="submit" class="btn btn-light btn-sm border">حفظ</button>
+                    </form>
+                  </div>
+                </div>
+                <div class="card-body p-4">
+                  <% if (slides.length===0) { %>
+                    <div class="text-center py-5 text-muted opacity-50">
+                      <i class="bi bi-image display-1 d-block mb-3"></i>
+                      <p>لا توجد شرائح إعلانية حالياً. ابدأ بإضافة صور لزيادة المبيعات!</p>
+                    </div>
+                    <% } else { %>
+                      <div class="row g-4" id="slidesGrid">
+                        <% slides.forEach(function(s, idx) { %>
+                          <div class="col-md-6">
+                            <div class="card border-0 shadow-sm banner-card overflow-hidden h-100">
+                              <div class="position-relative">
+                                <img src="/uploads/<%= s.image_path %>" class="card-img-top banner-img-preview"
+                                  alt="Banner <%= s.id %>">
+                                <div class="position-absolute top-0 start-0 m-2">
+                                  <span class="badge bg-dark bg-opacity-75 rounded-pill px-3">#<%= idx + 1 %></span>
+                                </div>
+                                <div class="position-absolute bottom-0 end-0 m-2 d-flex gap-1">
+                                  <a href="/admin/store-ui/slide/edit/<%= s.id %>"
+                                    class="btn btn-white btn-sm shadow-sm rounded-circle"
+                                    style="width:32px; height:32px; padding:0; display:flex; align-items:center; justify-content:center;">
+                                    <i class="bi bi-pencil text-primary"></i>
+                                  </a>
+                                  <form action="/admin/store-ui/slide/delete/<%= s.id %>" method="post" class="d-inline"
+                                    onsubmit="return confirm('حذف هذه الشريحة نهائياً؟');">
+                                    <button type="submit" class="btn btn-white btn-sm shadow-sm rounded-circle"
+                                      style="width:32px; height:32px; padding:0; display:flex; align-items:center; justify-content:center;">
+                                      <i class="bi bi-trash text-danger"></i>
+                                    </button>
+                                  </form>
+                                </div>
+                              </div>
+                              <div class="card-body py-2 px-3 bg-light bg-opacity-50">
+                                <div class="d-flex justify-content-between align-items-center">
+                                  <small class="text-muted">الزوايا: <strong>
+                                      <%= (cornerStyles.find(c=> c.value===s.corner_style) || {label:
+                                        s.corner_style}).label %>
+                                    </strong></small>
+                                  <span class="text-primary small fw-bold">إعلان نشط</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <% }); %>
                       </div>
                       <% } %>
-                  </div>
                 </div>
+              </div>
 
-                <div class="col-md-7">
-                  <div class="row g-3">
-                    <!-- الحجم والموقع -->
-                    <div class="col-md-6">
-                      <label class="form-label small fw-bold">حجم الشعار (%)</label>
-                      <div class="d-flex align-items-center gap-2">
-                        <input type="range" name="logo_size" class="form-range flex-grow-1" min="10" max="300" step="1"
-                          value="<%= (locals.logoSize || '100') %>"
-                          oninput="this.nextElementSibling.value = this.value">
-                        <output class="badge bg-primary" style="min-width: 45px;">
-                          <%= (locals.logoSize || '100' ) %>
-                        </output>
+              <!-- Product Card Settings -->
+              <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-0">
+                  <h5 class="fw-bold m-0"><i class="bi bi-palette ms-2 text-primary"></i>تنسيق بطاقات المنتجات</h5>
+                </div>
+                <div class="card-body p-4 pt-0">
+                  <form method="post" action="/admin/store-ui/settings">
+                    <input type="hidden" name="interval" value="<%= interval %>">
+
+                    <!-- Layout & Geometry -->
+                    <div class="mb-4">
+                      <h6 class="settings-section-title fw-bold mb-3 text-dark small">تخطيط الشبكة والزوايا</h6>
+                      <div class="row g-3">
+                        <div class="col-md-4">
+                          <label class="form-label small text-muted">شكل عرض المنتجات في الواجهة</label>
+                          <select name="product_layout" class="form-select">
+                            <option value="grid_2" <%=(productLayout==='grid_2' ) ? 'selected' : '' %>>بطاقتان أفقياً
+                              (Grid 2)</option>
+                            <option value="grid_3" <%=(productLayout==='grid_3' ) ? 'selected' : '' %>>3 بطاقات أفقياً
+                              (Grid 3)</option>
+                            <option value="slider" <%=(productLayout==='slider' ) ? 'selected' : '' %>>عرض سلايدر
+                              (Horizontal)</option>
+                          </select>
+                        </div>
+                        <div class="col-md-4">
+                          <label class="form-label small text-muted">زوايا بطاقة المنتج لمتجر العميل</label>
+                          <select name="product_card_radius" class="form-select">
+                            <% cornerStyles.forEach(function(s) { %>
+                              <option value="<%= s.value %>" <%=(cardRadius===s.value) ? 'selected' : '' %>><%= s.label
+                                  %>
+                              </option>
+                              <% }); %>
+                          </select>
+                        </div>
+                        <div class="col-md-4">
+                          <label class="form-label small text-muted">زوايا بطاقة المنتج في لوحة التاجر</label>
+                          <select name="merchant_product_card_radius" class="form-select">
+                            <% cornerStyles.forEach(function(s) { %>
+                              <option value="<%= s.value %>" <%=(merchantCardRadius===s.value) ? 'selected' : '' %>><%=
+                                  s.label %>
+                              </option>
+                              <% }); %>
+                          </select>
+                        </div>
                       </div>
                     </div>
-                    <div class="col-md-6">
-                      <label class="form-label small fw-bold">موقع الشعار</label>
-                      <select name="logo_position" class="form-select">
-                        <% logoPositions.forEach(function(p) { %>
-                          <option value="<%= p.value %>" <%=(locals.logoPosition===p.value) ? 'selected' : '' %>>
-                            <%= p.label %>
-                          </option>
-                          <% }); %>
+
+                    <!-- Visibility & Buttons -->
+                    <div class="mb-4">
+                      <h6 class="settings-section-title fw-bold mb-3 text-dark small">الأزرار والتفاعل</h6>
+                      <div class="row g-3">
+                        <div class="col-md-3">
+                          <div class="form-check form-switch mt-1">
+                            <input class="form-check-input shadow-none" type="checkbox"
+                              name="product_card_show_add_to_cart" value="1" id="cardShowAdd" <%=showAddToCart
+                              ? 'checked' : '' %>>
+                            <label class="form-check-label small" for="cardShowAdd">زر "إضافة للسلة"</label>
+                          </div>
+                          <div class="form-check form-switch mt-3">
+                            <input class="form-check-input shadow-none" type="checkbox" name="product_card_show_buy_now"
+                              value="1" id="cardShowBuyNow" <%=showBuyNow ? 'checked' : '' %>>
+                            <label class="form-label small" for="cardShowBuyNow">زر "اشتري الآن"</label>
+                          </div>
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label small text-muted">شكل زر الإضافة</label>
+                          <select name="card_add_btn_style" class="form-select">
+                            <% addBtnStyles.forEach(s=> { %>
+                              <option value="<%= s.value %>" <%=(cardAddBtnStyle===s.value) ? 'selected' : '' %>><%=
+                                  s.label %>
+                              </option>
+                              <% }) %>
+                          </select>
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label small text-muted">موقع الزر</label>
+                          <select name="card_add_btn_position" class="form-select">
+                            <option value="left" <%=(cardAddBtnPosition==='left' ) ? 'selected' : '' %>>يسار</option>
+                            <option value="right" <%=(cardAddBtnPosition==='right' ) ? 'selected' : '' %>>يمين</option>
+                          </select>
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label small text-muted">عرض المخزون</label>
+                          <select name="product_card_stock_style" class="form-select">
+                            <option value="none" <%=(stockStyle==='none' ) ? 'selected' : '' %>>إخفاء</option>
+                            <option value="text" <%=(stockStyle==='text' ) ? 'selected' : '' %>>متوفر / نفد</option>
+                            <option value="number" <%=(stockStyle==='number' ) ? 'selected' : '' %>>كمية المخزون
+                            </option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Colors -->
+                    <div class="mb-4">
+                      <h6 class="settings-section-title fw-bold mb-3 text-dark small">الألوان والثيم</h6>
+                      <div class="row g-3">
+                        <div class="col-md-3">
+                          <label class="form-label small text-muted">خلفية البطاقة (عميل)</label>
+                          <input type="color" name="product_card_bg"
+                            class="form-control form-control-color w-100 border-0" value="<%= cardBg %>"
+                            style="height: 38px;">
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label small text-muted">خلفية البطاقة (تاجر)</label>
+                          <input type="color" name="merchant_product_card_bg"
+                            class="form-control form-control-color w-100 border-0" value="<%= merchantCardBg %>"
+                            style="height: 38px;">
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label small text-muted">لون أضف للسلة</label>
+                          <input type="color" name="card_add_btn_color"
+                            class="form-control form-control-color w-100 border-0" value="<%= cardAddBtnColor %>"
+                            style="height: 38px;">
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label small text-muted">لون اشتري الآن</label>
+                          <input type="color" name="card_buy_now_color"
+                            class="form-control form-control-color w-100 border-0" value="<%= cardBuyNowColor %>"
+                            style="height: 38px;">
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label small text-muted">لون السعر</label>
+                          <input type="color" name="product_card_price_color"
+                            class="form-control form-control-color w-100 border-0" value="<%= priceColor %>"
+                            style="height: 38px;">
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label small text-muted">متوفر بالمخزون</label>
+                          <input type="color" name="product_card_stock_color_av"
+                            class="form-control form-control-color w-100 border-0" value="<%= stockColorAv %>"
+                            style="height: 38px;">
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label small text-muted">نفد المخزون</label>
+                          <input type="color" name="product_card_stock_color_out"
+                            class="form-control form-control-color w-100 border-0" value="<%= stockColorOut %>"
+                            style="height: 38px;">
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="text-end">
+                      <hr class="mt-0">
+                      <button type="submit" class="btn btn-primary px-5 py-2">حفظ كافة إعدادات البطاقة</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sidebar Settings (Right) -->
+            <div class="col-lg-4">
+              <!-- Logo Settings -->
+              <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 border-0">
+                  <h5 class="fw-bold m-0"><i class="bi bi-person-badge ms-2 text-primary"></i>هوية المتجر والشعار</h5>
+                </div>
+                <div class="card-body p-4 pt-0">
+                  <form method="post" action="/admin/store-ui/logo" enctype="multipart/form-data">
+                    <div class="text-center mb-4 p-4 border dashed-border rounded bg-light">
+                      <% if (logoUrl) { %>
+                        <div class="mb-3">
+                          <img src="/uploads/<%= logoUrl %>" alt="Current Logo" style="max-height: 100px; width: auto;"
+                            class="img-fluid rounded shadow-sm bg-white">
+                        </div>
+                        <small class="text-muted d-block">الشعار الحالي للمتجر</small>
+                        <% } else { %>
+                          <i class="bi bi-cloud-arrow-up display-4 text-muted opacity-25"></i>
+                          <p class="small text-muted mb-0">لم يتم رفع شعار بعد</p>
+                          <% } %>
+                            <div class="mt-3">
+                              <label for="logo_file" class="btn btn-outline-primary btn-sm px-4">اختيار شعار
+                                جديد</label>
+                              <input type="file" id="logo_file" name="logo" class="d-none" accept="image/*"
+                                onchange="this.form.submit()">
+                            </div>
+                    </div>
+
+                    <div class="row g-3">
+                      <div class="col-12">
+                        <label class="form-label small text-muted">مكان الشعار في الرأس</label>
+                        <select name="logo_position" class="form-select">
+                          <% logoPositions.forEach(p=> { %>
+                            <option value="<%= p.value %>" <%=(logoPosition===p.value) ? 'selected' : '' %>><%= p.label
+                                %>
+                            </option>
+                            <% }) %>
+                        </select>
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label small text-muted d-flex justify-content-between">
+                          <span>حجم الشعار</span>
+                          <span class="text-primary fw-bold">
+                            <%= logoSize %>%
+                          </span>
+                        </label>
+                        <input type="range" name="logo_size" class="form-range" min="10" max="300"
+                          value="<%= logoSize %>">
+                      </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h6 class="fw-bold small mb-3 text-dark">هوامش الموقع (Margins)</h6>
+                    <div class="row g-2">
+                      <div class="col-6">
+                        <div class="input-group input-group-sm">
+                          <span class="input-group-text bg-light border-end-0">أعلى</span>
+                          <input type="number" name="logo_margin_top" class="form-control" value="<%= logoMarginTop %>">
+                        </div>
+                      </div>
+                      <div class="col-6">
+                        <div class="input-group input-group-sm">
+                          <span class="input-group-text bg-light border-end-0">أسفل</span>
+                          <input type="number" name="logo_margin_bottom" class="form-control"
+                            value="<%= logoMarginBottom %>">
+                        </div>
+                      </div>
+                      <div class="col-6">
+                        <div class="input-group input-group-sm">
+                          <span class="input-group-text bg-light border-end-0">يسار</span>
+                          <input type="number" name="logo_margin_left" class="form-control"
+                            value="<%= logoMarginLeft %>">
+                        </div>
+                      </div>
+                      <div class="col-6">
+                        <div class="input-group input-group-sm">
+                          <span class="input-group-text bg-light border-end-0">يمين</span>
+                          <input type="number" name="logo_margin_right" class="form-control"
+                            value="<%= logoMarginRight %>">
+                        </div>
+                      </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mt-4 py-2">حفظ إعدادات الهوية</button>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Alignment Settings -->
+              <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-0">
+                  <h5 class="fw-bold m-0"><i class="bi bi-text-right ms-2 text-primary"></i>محاذاة النصوص والتفاصيل</h5>
+                </div>
+                <div class="card-body p-4 pt-0">
+                  <form method="post" action="/admin/store-ui/settings">
+                    <input type="hidden" name="interval" value="<%= interval %>">
+                    <div class="mb-3">
+                      <label class="form-label small text-muted">محاذاة البراند (أفقياً)</label>
+                      <select name="card_brand_align" class="form-select">
+                        <option value="left" <%=(cardBrandAlign==='left' ) ? 'selected' : '' %>>يسار</option>
+                        <option value="center" <%=(cardBrandAlign==='center' ) ? 'selected' : '' %>>وسط</option>
+                        <option value="right" <%=(cardBrandAlign==='right' ) ? 'selected' : '' %>>يمين</option>
                       </select>
                     </div>
-
-                    <!-- الهوامش -->
-                    <div class="col-12 mt-3">
-                      <label class="form-label small fw-bold text-primary"><i class="bi bi-arrows-move"></i> التحكم
-                        الدقيق في الموقع (الهوامش بالبكسل)</label>
-                      <div class="row g-2">
-                        <div class="col-6">
-                          <div class="input-group input-group-sm">
-                            <span class="input-group-text">أعلى</span>
-                            <input type="number" name="logo_margin_top" class="form-control"
-                              value="<%= (locals.logoMarginTop || '0') %>">
-                          </div>
-                        </div>
-                        <div class="col-6">
-                          <div class="input-group input-group-sm">
-                            <span class="input-group-text">أسفل</span>
-                            <input type="number" name="logo_margin_bottom" class="form-control"
-                              value="<%= (locals.logoMarginBottom || '0') %>">
-                          </div>
-                        </div>
-                        <div class="col-6">
-                          <div class="input-group input-group-sm">
-                            <span class="input-group-text">يسار</span>
-                            <input type="number" name="logo_margin_left" class="form-control"
-                              value="<%= (locals.logoMarginLeft || '0') %>">
-                          </div>
-                        </div>
-                        <div class="col-6">
-                          <div class="input-group input-group-sm">
-                            <span class="input-group-text">يمين</span>
-                            <input type="number" name="logo_margin_right" class="form-control"
-                              value="<%= (locals.logoMarginRight || '0') %>">
-                          </div>
-                        </div>
-                      </div>
+                    <div class="mb-3">
+                      <label class="form-label small text-muted">مكان البراند (عمودياً)</label>
+                      <select name="card_brand_position" class="form-select">
+                        <option value="left" <%=(cardBrandPos==='left' ) ? 'selected' : '' %>>يسار (بجانب الصورة)
+                        </option>
+                        <option value="right" <%=(cardBrandPos==='right' ) ? 'selected' : '' %>>يمين (بجانب الصورة)
+                        </option>
+                        <option value="top" <%=(cardBrandPos==='top' ) ? 'selected' : '' %>>أعلى اسم المنتج</option>
+                        <option value="bottom" <%=(cardBrandPos==='bottom' ) ? 'selected' : '' %>>تحت السعر</option>
+                      </select>
                     </div>
-                  </div>
-                </div>
-
-                <div class="col-12 text-end">
-                  <hr>
-                  <button type="submit" class="btn btn-primary px-4">
-                    <i class="bi bi-check2-circle"></i> حفظ إعدادات الشعار بالكامل
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        <!-- إضافة شريحة جديدة -->
-        <div class="card mb-4">
-          <div class="card-body">
-            <h6 class="card-title mb-3"><i class="bi bi-plus-circle"></i> إضافة صورة إعلان</h6>
-            <form method="post" action="/admin/store-ui/settings" class="row g-3 align-items-end mb-4">
-              <div class="col-auto">
-                <label class="form-label small">وقت تحرك صور السلايدر (ثانية، 2–60)</label>
-                <input type="number" name="interval" class="form-control" style="width:100px" min="2" max="60"
-                  value="<%= interval %>" required>
-              </div>
-              <div class="col-auto">
-                <button type="submit" class="btn btn-outline-primary">حفظ</button>
-              </div>
-            </form>
-            <form method="post" action="/admin/store-ui/slide" enctype="multipart/form-data"
-              class="row g-3 align-items-end">
-              <div class="col-md-4">
-                <label class="form-label small">الصورة</label>
-                <input type="file" name="image" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp"
-                  required>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small">شكل الزوايا</label>
-                <select name="corner_style" class="form-select">
-                  <% cornerStyles.forEach(function(s) { %>
-                    <option value="<%= s.value %>">
-                      <%= s.label %>
-                    </option>
-                    <% }); %>
-                </select>
-              </div>
-              <div class="col-md-2">
-                <button type="submit" class="btn btn-success w-100">إضافة</button>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        <!-- قائمة الشرائح -->
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <span>شرائح الإعلانات (<%= slides.length %>)</span>
-          </div>
-          <div class="card-body">
-            <% if (slides.length===0) { %>
-              <p class="text-muted mb-0">لا توجد شرائح. أضف صورة أعلاه.</p>
-              <% } else { %>
-                <div class="row g-3">
-                  <% slides.forEach(function(s, idx) { %>
-                    <div class="col-md-6 col-lg-4">
-                      <div class="card h-100">
-                        <img src="/uploads/<%= s.image_path %>" class="card-img-top" alt="شريحة <%= s.id %>"
-                          style="height:140px;object-fit:cover;border-radius:var(--radius, 8px)">
-                        <div class="card-body py-2">
-                          <p class="small mb-1"><strong>الزوايا:</strong>
-                            <%= (cornerStyles.find(function(c){ return c.value===s.corner_style; }) || { label:
-                              s.corner_style }).label %>
-                          </p>
-                          <p class="small text-muted mb-2">الترتيب: <%= idx + 1 %>
-                          </p>
-                          <div class="d-flex gap-1">
-                            <a href="/admin/store-ui/slide/edit/<%= s.id %>"
-                              class="btn btn-sm btn-outline-primary">تعديل</a>
-                            <form action="/admin/store-ui/slide/delete/<%= s.id %>" method="post" class="d-inline"
-                              onsubmit="return confirm('حذف هذه الشريحة؟');">
-                              <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
-                            </form>
-                          </div>
-                        </div>
-                      </div>
+                    <div class="mb-3">
+                      <label class="form-label small text-muted">محاذاة اسم المنتج</label>
+                      <select name="card_name_align" class="form-select">
+                        <option value="left" <%=(cardNameAlign==='left' ) ? 'selected' : '' %>>يسار</option>
+                        <option value="center" <%=(cardNameAlign==='center' ) ? 'selected' : '' %>>وسط</option>
+                        <option value="right" <%=(cardNameAlign==='right' ) ? 'selected' : '' %>>يمين</option>
+                      </select>
                     </div>
-                    <% }); %>
+                    <div class="mb-4">
+                      <label class="form-label small text-muted">محاذاة السعر</label>
+                      <select name="card_price_align" class="form-select">
+                        <option value="left" <%=(cardPriceAlign==='left' ) ? 'selected' : '' %>>يسار</option>
+                        <option value="center" <%=(cardPriceAlign==='center' ) ? 'selected' : '' %>>وسط</option>
+                        <option value="right" <%=(cardPriceAlign==='right' ) ? 'selected' : '' %>>يمين</option>
+                      </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2">تحديث المحاذاة</button>
+                  </form>
                 </div>
-                <% } %>
+              </div>
+            </div>
           </div>
-        </div>
+    </div>
 
-        <%- include('../partials/scripts') %>
+    <%- include('../partials/scripts') %>

@@ -174,6 +174,7 @@ app.use('/admin/activity', requireAuth, require('./routes/activity'));
 app.use('/admin/cms', requireAuth, require('./routes/cms'));
 app.use('/admin/coupons', requireAuth, require('./routes/coupons'));
 app.use('/admin/merchants', requireAuth, require('./routes/merchants'));
+app.use('/admin/merchant-stats', requireAuth, require('./routes/merchant_stats'));
 app.use('/admin/app-users', requireAuth, require('./routes/app_users'));
 app.use('/admin/store-ui', requireAuth, require('./routes/store_ui'));
 app.use('/admin/inventory', requireAuth, require('./routes/inventory'));

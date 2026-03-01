@@ -6,9 +6,19 @@ router.get('/', async (req, res) => {
     const db = req.db;
     const sections = await db.prepare('SELECT * FROM home_sections ORDER BY sort_order ASC').all();
     const categories = await db.prepare('SELECT id, name_ar FROM categories').all();
+
+    // Stats Logic
+    const stats = {
+        total: sections.length,
+        active: sections.filter(s => s.is_active === 1).length,
+        sliders: sections.filter(s => s.section_type === 'slider').length,
+        grv: sections.filter(s => s.section_type === 'grid' || s.section_type === 'list').length
+    };
+
     res.render('home_sections/list', {
         sections,
         categories,
+        stats,
         title: 'إدارة الصفحة الرئيسية',
         adminUsername: req.session.adminUsername
     });

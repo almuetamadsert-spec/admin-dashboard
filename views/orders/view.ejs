@@ -1,119 +1,334 @@
-<%- include('../partials/head', { title: 'تفاصيل الطلب' }) %>
+<%- include('../partials/head', { title: 'تفاصيل واستعراض الطلب' }) %>
   <%- include('../partials/sidebar', { adminUsername }) %>
 
-    <h4 class="mb-4">طلب #<%= order.order_number %>
-    </h4>
-    <div class="row">
-      <div class="col-md-8">
-        <div class="card mb-3">
-          <div class="card-body">
-            <h6>بيانات العميل</h6>
-            <p class="mb-1"><strong>الاسم:</strong>
-              <%= order.customer_name || '—' %>
+    <style>
+      .invoice-card {
+        border-radius: 1.25rem;
+        border: none;
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.05);
+      }
+
+      .invoice-header {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        color: white;
+        border-radius: 1.25rem 1.25rem 0 0;
+        padding: 2.5rem;
+      }
+
+      .table-premium-items th {
+        background-color: #f8fafc;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        padding: 1rem;
+        border-bottom: 2px solid #e2e8f0;
+      }
+
+      .table-premium-items td {
+        padding: 1.25rem 1rem;
+        vertical-align: middle;
+      }
+
+      .status-badge-lg {
+        padding: 0.6rem 1.25rem;
+        border-radius: 50rem;
+        font-weight: 700;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .info-label {
+        color: #64748b;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+        display: block;
+      }
+
+      .info-value {
+        color: #1e293b;
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+
+      @media print {
+
+        .sidebar,
+        .btn-print-hide,
+        .status-update-card {
+          display: none !important;
+        }
+
+        main {
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+
+        .invoice-card {
+          box-shadow: none !important;
+          border: 1px solid #e2e8f0 !important;
+        }
+      }
+    </style>
+
+    <div class="container-fluid py-4 px-4 pb-5">
+      <!-- Action Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4 btn-print-hide">
+        <a href="/admin/orders" class="btn btn-light border shadow-sm fw-bold">
+          <i class="bi bi-arrow-right-circle ms-1"></i> العودة للسجل
+        </a>
+        <div class="d-flex gap-2">
+          <button onclick="window.print()" class="btn btn-dark shadow-sm fw-bold">
+            <i class="bi bi-printer-fill ms-1"></i> طباعة الفاتورة
+          </button>
+          <a href="/admin/orders/edit/<%= order.id %>" class="btn btn-primary shadow-sm fw-bold">
+            <i class="bi bi-pencil-square ms-1"></i> تعديل الطلب
+          </a>
+        </div>
+      </div>
+
+      <div class="invoice-card bg-white overflow-hidden mb-4">
+        <!-- Invoice Header -->
+        <div class="invoice-header d-flex justify-content-between align-items-start">
+          <div>
+            <h2 class="fw-bold mb-1">فاتورة طلب بيع</h2>
+            <p class="mb-0 opacity-75">رقم المرجع الموحد: #<%= order.order_number %>
             </p>
-            <p class="mb-1"><strong>رقم الهاتف:</strong>
-              <%= order.customer_phone || '—' %>
-            </p>
-            <p class="mb-1"><strong>رقم هاتف اخر:</strong>
-              <%= (order.customer_phone_alt || order.CUSTOMER_PHONE_ALT || '' ) || '—' %>
-            </p>
-            <p class="mb-1"><strong>الايميل:</strong>
-              <%= order.customer_email || '—' %>
-            </p>
-            <p class="mb-1"><strong>المدينة:</strong>
-              <%= (typeof cityName !=='undefined' && cityName) ? cityName : (order.city_name || '—' ) %>
-            </p>
-            <p class="mb-0"><strong>العنوان:</strong>
-              <%= order.customer_address || '—' %>
-            </p>
+          </div>
+          <div class="text-start">
+            <% let badgeClass='bg-warning text-dark' ; let statusLabel=STATUS_LABELS[order.status] || order.status;
+              if(order.status==='delivered' ) badgeClass='bg-success text-white' ; else if(order.status==='cancelled' ||
+              order.status==='customer_refused' ) badgeClass='bg-danger text-white' ; else if(order.status==='shipped' )
+              badgeClass='bg-info text-white' ; else if(order.status==='confirmed' ) badgeClass='bg-primary text-white'
+              ; %>
+              <div class="status-badge-lg <%= badgeClass %> shadow-lg mb-3">
+                <i class="bi bi-patch-check-fill"></i>
+                <%= statusLabel %>
+              </div>
+              <div class="small opacity-75">تاريخ التوثيق: <%= new Date(order.created_at).toLocaleDateString('ar-LY', {
+                  year: 'numeric' , month: 'long' , day: 'numeric' , hour: '2-digit' , minute: '2-digit' }) %>
+              </div>
           </div>
         </div>
-        <% if (typeof merchant !=='undefined' && merchant) { %>
-          <div class="card mb-3">
-            <div class="card-body">
-              <h6>التاجر المستهدف</h6>
-              <p class="mb-1"><strong>الاسم:</strong>
-                <%= merchant.name || '—' %>
-              </p>
-              <p class="mb-1"><strong>اسم المتجر:</strong>
-                <%= merchant.store_name || '—' %>
-              </p>
-              <p class="mb-0"><strong>الإيميل:</strong>
-                <%= merchant.email || '—' %>
-              </p>
+
+        <div class="card-body p-5">
+          <div class="row mb-5 g-4">
+            <!-- Customer Details -->
+            <div class="col-md-4">
+              <div class="p-4 rounded-4 bg-light h-100">
+                <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                  <i class="bi bi-person-circle text-primary"></i> بيانات العميل
+                </h6>
+                <div class="mb-3">
+                  <span class="info-label">الاسم الكامل</span>
+                  <span class="info-value">
+                    <%= order.customer_name || '—' %>
+                  </span>
+                </div>
+                <div class="mb-3">
+                  <span class="info-label">رقم الهاتف</span>
+                  <span class="info-value font-monospace" dir="ltr">
+                    <%= order.customer_phone || '—' %>
+                  </span>
+                </div>
+                <% if (order.customer_phone_alt || order.CUSTOMER_PHONE_ALT) { %>
+                  <div class="mb-3">
+                    <span class="info-label">هاتف بديل</span>
+                    <span class="info-value font-monospace" dir="ltr">
+                      <%= order.customer_phone_alt || order.CUSTOMER_PHONE_ALT %>
+                    </span>
+                  </div>
+                  <% } %>
+                    <div>
+                      <span class="info-label">البريد الإلكتروني</span>
+                      <span class="info-value">
+                        <%= order.customer_email || '—' %>
+                      </span>
+                    </div>
+              </div>
+            </div>
+
+            <!-- Shipping Details -->
+            <div class="col-md-4">
+              <div class="p-4 rounded-4 bg-light h-100 border-start border-info border-4">
+                <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                  <i class="bi bi-geo-alt-fill text-info"></i> وجهة التوصيل
+                </h6>
+                <div class="mb-3">
+                  <span class="info-label">المدينة / المنطقة</span>
+                  <span class="info-value">
+                    <%= (typeof cityName !=='undefined' && cityName) ? cityName : (order.city_name || '—' ) %>
+                  </span>
+                </div>
+                <div>
+                  <span class="info-label">العنوان التفصيلي</span>
+                  <span class="info-value">
+                    <%= order.customer_address || '—' %>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Assignment Details -->
+            <div class="col-md-4">
+              <div class="p-4 rounded-4 bg-light h-100 border-start border-warning border-4">
+                <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                  <i class="bi bi-shop text-warning"></i> تنفيذ الطلب
+                </h6>
+                <% if (typeof merchant !=='undefined' && merchant) { %>
+                  <div class="mb-3">
+                    <span class="info-label">التاجر المسند إليه</span>
+                    <span class="info-value">
+                      <%= merchant.store_name || merchant.name %>
+                    </span>
+                  </div>
+                  <div>
+                    <span class="info-label">تواصل التاجر</span>
+                    <span class="info-value small text-muted">
+                      <%= merchant.email %>
+                    </span>
+                  </div>
+                  <% } else { %>
+                    <div class="d-flex align-items-center justify-content-center h-75 text-muted small">
+                      <i class="bi bi-shield-lock ms-2"></i> تنفيذ بواسطة الإدارة المركزية
+                    </div>
+                    <% } %>
+              </div>
             </div>
           </div>
-          <% } %>
-            <div class="card">
-              <div class="card-header">المنتجات</div>
-              <table class="table mb-0">
-                <thead>
+
+          <!-- Items Table -->
+          <div class="table-responsive mb-5">
+            <table class="table table-premium-items align-middle">
+              <thead>
+                <tr>
+                  <th class="ps-4">المنتج والوصف</th>
+                  <th class="text-center">سعر الوحدة</th>
+                  <th class="text-center">الكمية</th>
+                  <th class="text-end pe-4">الإجمالي الفرعي</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% items.forEach(function(i) { %>
                   <tr>
-                    <th>المنتج</th>
-                    <th>الكمية</th>
-                    <th>السعر</th>
-                    <th>الإجمالي</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% items.forEach(function(i) { %>
-                    <tr>
-                      <td>
+                    <td class="ps-4">
+                      <div class="d-flex align-items-center gap-3">
                         <% var imgSrc=i.image_url || (i.image_path ? ('/uploads/' + (i.image_path + ''
-                          ).replace(/\\/g, '/' ).replace(/^\/+/, '' )) : '' ); if (imgSrc) { %><img src="<%= imgSrc %>"
-                            alt="" class="rounded me-2" style="width:48px;height:48px;object-fit:cover">
-                          <% } %>
-                            <%= i.product_name %>
-                      </td>
-                      <td>
-                        <%= i.quantity %>
-                      </td>
-                      <td>
-                        <%= Number(i.unit_price).toFixed(2) %> د.ل
-                      </td>
-                      <td>
-                        <%= Number(i.total_price).toFixed(2) %> د.ل
-                      </td>
-                    </tr>
-                    <% }); %>
-                </tbody>
-              </table>
-              <div class="card-footer text-end"><strong>المجموع: <%= Number(order.total_amount).toFixed(2) %>
-                    د.ل</strong></div>
-            </div>
-            <% if (order.notes) { %>
-              <p class="text-muted mt-2">ملاحظات: <%= order.notes %>
-              </p>
-              <% } %>
-      </div>
-      <div class="col-md-4">
-        <div class="card">
-          <div class="card-body">
-            <h6>تحديث الحالة</h6>
-            <form method="post" action="/admin/orders/status/<%= order.id %>">
-              <select name="status" class="form-select mb-2">
-                <option value="pending" <%=order.status==='pending' ? 'selected' : '' %>>قيد الانتظار</option>
-                <option value="confirmed" <%=order.status==='confirmed' ? 'selected' : '' %>>مؤكد</option>
-                <option value="shipped" <%=order.status==='shipped' ? 'selected' : '' %>>تم الشحن</option>
-                <option value="delivered" <%=order.status==='delivered' ? 'selected' : '' %>>تم التوصيل</option>
-                <option value="cancelled" <%=order.status==='cancelled' ? 'selected' : '' %>>ملغي</option>
-                <option value="customer_refused" <%=order.status==='customer_refused' ? 'selected' : '' %>>العميل رفض
-                </option>
-              </select>
-              <button type="submit" class="btn btn-primary w-100">حفظ</button>
-            </form>
-            <hr>
-            <p class="small text-muted mb-0">تاريخ: <% var _d=new Date(order.created_at); var
-                _dd=String(_d.getDate()).padStart(2,'0'); var _mm=String(_d.getMonth()+1).padStart(2,'0'); var
-                _yy=_d.getFullYear(); var _hh=String(_d.getHours()).padStart(2,'0'); var
-                _min=String(_d.getMinutes()).padStart(2,'0'); %>
-                <%= _dd %>/<%= _mm %>/<%= _yy %>
-                      <%= _hh %>:<%= _min %>
-            </p>
+                          ).replace(/\\/g, '/' ).replace(/^\/+/, '' )) : '' ); %>
+                          <% if (imgSrc) { %>
+                            <img src="<%= imgSrc %>" alt="" class="rounded-3 shadow-sm border"
+                              style="width:54px;height:54px;object-fit:cover">
+                            <% } else { %>
+                              <div
+                                class="rounded-3 bg-light border d-flex align-items-center justify-content-center text-muted"
+                                style="width:54px;height:54px;">
+                                <i class="bi bi-image"></i>
+                              </div>
+                              <% } %>
+                                <div>
+                                  <span class="fw-bold text-dark d-block">
+                                    <%= i.product_name %>
+                                  </span>
+                                  <small class="text-muted">
+                                    <%= i.sku || 'SKU: ' + i.product_id %>
+                                  </small>
+                                </div>
+                      </div>
+                    </td>
+                    <td class="text-center fw-bold text-dark">
+                      <%= Number(i.unit_price).toFixed(2) %> <small class="text-muted">د.ل</small>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge bg-light text-dark border px-3 py-2 rounded-3 fw-bold">x <%= i.quantity %>
+                          </span>
+                    </td>
+                    <td class="text-end pe-4 fw-bold text-primary fs-6">
+                      <%= Number(i.total_price).toFixed(2) %> <small class="text-muted">د.ل</small>
+                    </td>
+                  </tr>
+                  <% }); %>
+              </tbody>
+            </table>
           </div>
+
+          <!-- Totals and Notes -->
+          <div class="row align-items-start g-4">
+            <div class="col-md-7">
+              <% if (order.notes) { %>
+                <div class="p-4 rounded-4 bg-light border-dashed border-2">
+                  <span class="info-label text-muted d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-chat-left-text"></i> ملاحظات إضافية على الطلب
+                  </span>
+                  <p class="mb-0 text-dark small fw-bold" style="line-height: 1.6;">
+                    <%= order.notes %>
+                  </p>
+                </div>
+                <% } %>
+            </div>
+            <div class="col-md-5">
+              <div class="card border-0 bg-primary bg-opacity-10 p-4 rounded-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-primary fw-bold">إجمالي المشتريات</span>
+                  <span class="text-dark fw-bold">
+                    <%= Number(order.total_amount).toFixed(2) %> د.ل
+                  </span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-primary fw-bold">رسوم التوصيل</span>
+                  <span class="text-dark fw-bold">0.00 د.ل</span>
+                </div>
+                <hr class="my-3 opacity-25 border-primary">
+                <div class="d-flex justify-content-between align-items-center">
+                  <h4 class="fw-bold text-primary mb-0">الإجمالي الكلي</h4>
+                  <h4
+                    class="fw-bold text-dark mb-0 font-monospace badge bg-white text-primary p-3 fs-3 border border-primary border-opacity-25 shadow-sm">
+                    <%= Number(order.total_amount).toFixed(2) %> <span class="fs-6 fw-normal">د.ل</span>
+                  </h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer bg-light p-4 text-center border-0 small text-muted">
+          <i class="bi bi-info-circle ms-1"></i> هذه الوثيقة تم إنشاؤها وتوثيقها إلكترونياً عبر مركز عمليات المبيعات.
+        </div>
+      </div>
+
+      <!-- Status Update Form (Hidden in print) -->
+      <div class="card invoice-card status-update-card btn-print-hide">
+        <div class="card-body p-4">
+          <h6 class="fw-bold mb-4 d-flex align-items-center gap-2">
+            <i class="bi bi-ui-checks text-primary"></i> تحديث الحالة الإرسالية
+          </h6>
+          <form method="post" action="/admin/orders/status/<%= order.id %>" class="row g-3 align-items-end">
+            <div class="col-md-8">
+              <label class="form-label small fw-bold text-muted">اختر الحالة الجديدة لمزامنتها مع العميل والتاجر</label>
+              <select name="status" class="form-select form-select-lg fw-bold border-2">
+                <option value="pending" <%=order.status==='pending' ? 'selected' : '' %>>🟡 قيد الانتظار</option>
+                <option value="confirmed" <%=order.status==='confirmed' ? 'selected' : '' %>>🔵 مؤكد / جاري التجهيز
+                </option>
+                <option value="shipped" <%=order.status==='shipped' ? 'selected' : '' %>>🚚 تم الشحن / التسليم للمندوب
+                </option>
+                <option value="delivered" <%=order.status==='delivered' ? 'selected' : '' %>>🟢 تم التوصيل بنجاح
+                </option>
+                <option value="cancelled" <%=order.status==='cancelled' ? 'selected' : '' %>>🔴 ملغي</option>
+                <option value="customer_refused" <%=order.status==='customer_refused' ? 'selected' : '' %>>⛔ رفض
+                  الاستلام</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm">
+                تحديث الحالة الآن <i class="bi bi-arrow-left-circle me-1"></i>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
-    <a href="/admin/orders" class="btn btn-outline-secondary mt-3">← العودة للطلبات</a>
 
     <%- include('../partials/scripts') %>

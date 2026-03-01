@@ -1,193 +1,414 @@
-<%- include('../partials/head', { title: 'تصنيفات البراندات' }) %>
+<%- include('../partials/head', { title: 'إدارة الماركات' }) %>
+  <style>
+    .brand-logo-preview {
+      width: 48px;
+      height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      overflow: hidden;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+
+    .brand-logo-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  </style>
   <%- include('../partials/sidebar', { adminUsername }) %>
 
-    <h4 class="mb-4">تصنيفات البراندات</h4>
-    <p class="text-muted small mb-4">البراندات تظهر في التطبيق ضمن "تصنيفات البراندات". الأيقونة تُرفع من الجهاز. اسم
-      البراند يجب أن يطابق حقل "الشركة" في المنتجات لعرض منتجات هذا البراند.</p>
+    <div class="container-fluid py-4 px-4">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold m-0 text-dark">ماركات المنتجات</h4>
+          <p class="text-muted small mb-0">إدارة العلامات التجارية للشركات والمنتجات المتاحة في المتجر</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-primary px-4" data-bs-toggle="collapse"
+            data-bs-target="#addBrandCollapse">
+            <i class="bi bi-plus-lg ms-2"></i> براند جديد
+          </button>
+        </div>
+      </div>
 
-    <div class="card mb-3">
-      <div class="card-body">
-        <form id="brandCatForm" class="row g-3 align-items-end" enctype="multipart/form-data">
-          <input type="hidden" id="brandCatId" name="id" value="">
-          <div class="col-md-2">
-            <label class="form-label">اسم البراند *</label>
-            <input type="text" id="name_ar" name="name_ar" class="form-control" required placeholder="مثال: Anker">
+      <!-- Stats Cards -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 p-3">
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-award-fill fs-4"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block">إجمالي الماركات</small>
+                <h4 class="fw-bold m-0">
+                  <%= stats.total %>
+                </h4>
+              </div>
+            </div>
           </div>
-          <div class="col-md-2">
-            <label class="form-label">أيقونة (من الجهاز)</label>
-            <input type="file" id="icon_file" name="icon" class="form-control" accept="image/*">
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 p-3 border-start border-success border-4">
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-box-seam fs-4"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block">إجمالي المنتجات</small>
+                <h4 class="fw-bold m-0 text-success">
+                  <%= stats.totalProducts %>
+                </h4>
+              </div>
+            </div>
           </div>
-          <div class="col-md-2">
-            <label class="form-label">حجم الأيقونة</label>
-            <select id="icon_size" name="icon_size" class="form-select">
-              <% (iconSizes || []).forEach(function(s) { %>
-                <option value="<%= s.value %>">
-                  <%= s.label %>
-                </option>
-                <% }); %>
-            </select>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 p-3 border-start border-info border-4">
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-star-fill fs-4"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block">ماركات بارزة (بيرة)</small>
+                <h4 class="fw-bold m-0 text-info">
+                  <%= stats.prominentBrands %>
+                </h4>
+              </div>
+            </div>
           </div>
-          <div class="col-md-2">
-            <label class="form-label">زوايا الأيقونة</label>
-            <select id="icon_corner" name="icon_corner" class="form-select">
-              <% (iconCorners || []).forEach(function(s) { %>
-                <option value="<%= s.value %>">
-                  <%= s.label %>
-                </option>
-                <% }); %>
-            </select>
+        </div>
+      </div>
+
+      <!-- Add Brand Form -->
+      <div class="collapse mb-4" id="addBrandCollapse">
+        <div class="card border-0 shadow-sm border-start border-primary border-4">
+          <div class="card-body p-4">
+            <h6 class="fw-bold mb-3 text-dark">إضافة علامة تجارية جديدة</h6>
+            <form id="addBrandForm" class="row g-3" enctype="multipart/form-data">
+              <div class="col-md-3">
+                <label class="form-label small text-muted">اسم البراند (بالعربية) *</label>
+                <input type="text" name="name_ar" class="form-control" placeholder="مثال: سامسونج" required>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small text-muted">حجم الأيقونة</label>
+                <select name="icon_size" class="form-select">
+                  <% iconSizes.forEach(s=> { %>
+                    <option value="<%= s.value %>" <%=s.value==='medium' ? 'selected' : '' %>><%= s.label %>
+                    </option>
+                    <% }) %>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small text-muted">شكل الزوايا</label>
+                <select name="icon_corner" class="form-select">
+                  <% iconCorners.forEach(c=> { %>
+                    <option value="<%= c.value %>" <%=c.value==='rounded' ? 'selected' : '' %>><%= c.label %>
+                    </option>
+                    <% }) %>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small text-muted">نوع الإطار</label>
+                <select name="icon_shape" class="form-select">
+                  <% iconShapes.forEach(h=> { %>
+                    <option value="<%= h.value %>" <%=h.value==='square' ? 'selected' : '' %>><%= h.label %>
+                    </option>
+                    <% }) %>
+                </select>
+              </div>
+              <div class="col-md-1">
+                <label class="form-label small text-muted">اللون</label>
+                <input type="color" name="icon_color" class="form-control form-control-color border-0 w-100"
+                  value="#14acec" style="height: 35px;">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small text-muted">الترتيب</label>
+                <input type="number" name="sort_order" class="form-control" value="0">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small text-muted">شعار البراند (صورة) *</label>
+                <input type="file" name="icon" class="form-control" accept="image/*" required>
+              </div>
+              <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100 py-2">إضافة البراند</button>
+              </div>
+            </form>
           </div>
-          <div class="col-md-2">
-            <label class="form-label">شكل الأيقونة</label>
-            <select id="icon_shape" name="icon_shape" class="form-select">
-              <% (iconShapes || []).forEach(function(s) { %>
-                <option value="<%= s.value %>">
-                  <%= s.label %>
-                </option>
-                <% }); %>
-            </select>
+        </div>
+      </div>
+
+      <!-- Brands Table -->
+      <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="card-header bg-white py-3 border-0 d-flex align-items-center justify-content-between">
+          <h5 class="fw-bold m-0"><i class="bi bi-award ms-2 text-primary"></i>قائمة الماركات الحالية</h5>
+          <span class="text-muted small">عرض <%= list.length %> ماركة</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light bg-opacity-50">
+              <tr>
+                <th class="ps-4" style="width: 100px;">الشعار</th>
+                <th>اسم البراند</th>
+                <th class="text-center">الحجم</th>
+                <th class="text-center">الزوايا</th>
+                <th class="text-center">الإطار</th>
+                <th class="text-center">الترتيب</th>
+                <th class="text-end pe-4">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="brandsTable">
+              <% list.forEach(function(b) { %>
+                <% const radius=b.icon_corner==='sharp' ? '0' : (b.icon_corner==='medium' ? '12px' : '50%' ); const
+                  ratio=b.icon_shape==='rectangle' ? '1.5 / 1' : '1 / 1' ; const size=b.icon_size==='small' ? '36px' :
+                  (b.icon_size==='large' ? '64px' : '48px' ); %>
+                  <tr data-id="<%= b.id %>" data-name-ar="<%= b.name_ar %>" data-icon-size="<%= b.icon_size %>"
+                    data-icon-corner="<%= b.icon_corner %>" data-icon-shape="<%= b.icon_shape %>"
+                    data-icon-color="<%= b.icon_color %>" data-sort-order="<%= b.sort_order %>">
+                    <td class="ps-4">
+                      <div class="brand-logo-preview"
+                        style="width: <%= size %>; height: <%= b.icon_shape === 'rectangle' ? 'auto' : size %>; aspect-ratio: <%= ratio %>; border-radius: <%= radius %>; border-color: <%= b.icon_color %>;">
+                        <% if (b.icon_path) { %>
+                          <img src="/uploads/<%= b.icon_path %>" alt="<%= b.name_ar %>">
+                          <% } else { %>
+                            <i class="bi bi-image text-muted opacity-25"></i>
+                            <% } %>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="fw-bold text-dark">
+                        <%= b.name_ar %>
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge bg-light text-dark fw-normal border">
+                        <%= iconSizes.find(s=> s.value === b.icon_size)?.label || b.icon_size %>
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge bg-light text-dark fw-normal border">
+                        <%= iconCorners.find(c=> c.value === b.icon_corner)?.label || b.icon_corner %>
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge bg-light text-dark fw-normal border">
+                        <%= iconShapes.find(s=> s.value === b.icon_shape)?.label || b.icon_shape %>
+                      </span>
+                    </td>
+                    <td class="text-center fw-bold">
+                      <%= b.sort_order %>
+                    </td>
+                    <td class="text-end pe-4">
+                      <div class="dropdown">
+                        <button class="btn btn-light btn-sm rounded-circle" type="button" data-bs-toggle="dropdown"
+                          style="width: 32px; height: 32px; padding: 0;">
+                          <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                          <li><button class="dropdown-item py-2 btn-edit" type="button"><i
+                                class="bi bi-pencil ms-2 text-info"></i> تعديل</button></li>
+                          <li>
+                            <hr class="dropdown-divider">
+                          </li>
+                          <li><button class="dropdown-item py-2 text-danger btn-delete" type="button"><i
+                                class="bi bi-trash ms-2"></i> حذف نهائي</button></li>
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                  <% }); %>
+                    <% if (!list.length) { %>
+                      <tr>
+                        <td colspan="7" class="text-center py-5">
+                          <div class="text-muted opacity-50">
+                            <i class="bi bi-award-fill fs-1 d-block mb-3"></i>
+                            <p class="m-0">لا توجد ماركات حالياً</p>
+                          </div>
+                        </td>
+                      </tr>
+                      <% } %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Footer -->
+        <% if (totalPages> 1) { %>
+          <div class="card-footer bg-white border-0 py-4 d-flex justify-content-between align-items-center">
+            <div class="text-muted small">
+              عرض الصفحة <strong>
+                <%= currentPage %>
+              </strong> من <strong>
+                <%= totalPages %>
+              </strong> (إجمالي <strong>
+                <%= totalCount %>
+              </strong> ماركة)
+            </div>
+            <nav>
+              <ul class="pagination pagination-sm m-0 gap-1">
+                <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                  <a class="page-link rounded-pill px-3 border-0 shadow-none bg-light text-dark"
+                    href="?page=<%= currentPage - 1 %>">السابق</a>
+                </li>
+                <% for(let i=1; i <=totalPages; i++) { %>
+                  <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                    <a class="page-link rounded-circle border-0 shadow-none d-flex align-items-center justify-content-center"
+                      style="width: 32px; height: 32px;" href="?page=<%= i %>">
+                      <%= i %>
+                    </a>
+                  </li>
+                  <% } %>
+                    <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                      <a class="page-link rounded-pill px-3 border-0 shadow-none bg-light text-dark"
+                        href="?page=<%= currentPage + 1 %>">التالي</a>
+                    </li>
+              </ul>
+            </nav>
           </div>
-          <div class="col-md-2">
-            <label class="form-label">لون الخلفية</label>
-            <input type="color" id="icon_color" name="icon_color" class="form-control form-control-color"
-              value="#14acec">
-          </div>
-          <div class="col-md-1">
-            <label class="form-label">ترتيب</label>
-            <input type="number" id="sort_order" name="sort_order" class="form-control" value="0" min="0">
-          </div>
-          <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100" id="brandCatSubmitBtn">إضافة</button>
-            <button type="button" class="btn btn-secondary w-100 mt-1 d-none" id="brandCatCancelBtn">إلغاء</button>
-          </div>
-        </form>
+          <% } %>
       </div>
     </div>
 
-    <div class="card">
-      <div class="table-responsive">
-        <table class="table table-hover mb-0">
-          <thead>
-            <tr>
-              <th>الأيقونة</th>
-              <th>اسم البراند</th>
-              <th>الحجم</th>
-              <th>الزوايا</th>
-              <th>الشكل</th>
-              <th>الترتيب</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="brandCatTable">
-            <% (list || []).forEach(function(b) { %>
-              <tr data-id="<%= b.id %>">
-                <td>
-                  <% if (b.icon_path) { %>
-                    <img src="/uploads/<%= b.icon_path %>" alt=""
-                      style="width:36px;height:36px;object-fit:cover;border-radius:6px;background:<%= b.icon_color || '#eee' %>">
-                    <% } else { %>
-                      <span class="text-muted small">—</span>
-                      <% } %>
-                </td>
-                <td>
-                  <%= b.name_ar %>
-                </td>
-                <td>
-                  <%= (iconSizes || []).find(function(s){ return s.value===b.icon_size; }) ?
-                    (iconSizes.find(function(s){ return s.value===b.icon_size; })).label : b.icon_size %>
-                </td>
-                <td>
-                  <%= (iconCorners || []).find(function(s){ return s.value===b.icon_corner; }) ?
-                    (iconCorners.find(function(s){ return s.value===b.icon_corner; })).label : b.icon_corner %>
-                </td>
-                <td>
-                  <%= (iconShapes || []).find(function(s){ return s.value===b.icon_shape; }) ?
-                    (iconShapes.find(function(s){ return s.value===b.icon_shape; })).label : b.icon_shape %>
-                </td>
-                <td>
-                  <%= b.sort_order !=null ? b.sort_order : 0 %>
-                </td>
-                <td>
-                  <button type="button" class="btn btn-sm btn-outline-primary me-1 edit-brand-cat" data-id="<%= b.id %>"
-                    data-name="<%= b.name_ar %>" data-size="<%= b.icon_size || 'medium' %>"
-                    data-corner="<%= b.icon_corner || 'rounded' %>" data-shape="<%= b.icon_shape || 'square' %>"
-                    data-color="<%= b.icon_color || '#14acec' %>"
-                    data-sort="<%= b.sort_order != null ? b.sort_order : 0 %>">تعديل</button>
-                  <button type="button" class="btn btn-sm btn-outline-danger delete-brand-cat" data-id="<%= b.id %>"
-                    data-name="<%= b.name_ar %>">حذف</button>
-                </td>
-              </tr>
-              <% }); %>
-          </tbody>
-        </table>
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header border-0 pt-4 px-4">
+            <h5 class="fw-bold m-0">تعديل الماركة</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <form id="editBrandForm">
+              <input type="hidden" id="edit_id">
+              <div class="mb-3">
+                <label class="form-label small text-muted">اسم البراند (بالعربية)</label>
+                <input type="text" id="edit_name_ar" class="form-control" required>
+              </div>
+              <div class="row g-3 mb-3">
+                <div class="col-6">
+                  <label class="form-label small text-muted">حجم الأيقونة</label>
+                  <select id="edit_icon_size" class="form-select">
+                    <% iconSizes.forEach(s=> { %>
+                      <option value="<%= s.value %>">
+                        <%= s.label %>
+                      </option>
+                      <% }) %>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label class="form-label small text-muted">شكل الزوايا</label>
+                  <select id="edit_icon_corner" class="form-select">
+                    <% iconCorners.forEach(c=> { %>
+                      <option value="<%= c.value %>">
+                        <%= c.label %>
+                      </option>
+                      <% }) %>
+                  </select>
+                </div>
+              </div>
+              <div class="row g-3 mb-3">
+                <div class="col-6">
+                  <label class="form-label small text-muted">نوع الإطار</label>
+                  <select id="edit_icon_shape" class="form-select">
+                    <% iconShapes.forEach(h=> { %>
+                      <option value="<%= h.value %>">
+                        <%= h.label %>
+                      </option>
+                      <% }) %>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label class="form-label small text-muted">اللون</label>
+                  <input type="color" id="edit_icon_color" class="form-control form-control-color border-0 w-100"
+                    style="height: 35px;">
+                </div>
+              </div>
+              <div class="row g-3 mb-0">
+                <div class="col-6">
+                  <label class="form-label small text-muted">الترتيب</label>
+                  <input type="number" id="edit_sort_order" class="form-control" value="0">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small text-muted">تغيير الشعار (ملف)</label>
+                  <input type="file" id="edit_icon_file" class="form-control" accept="image/*">
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer border-0 pb-4 px-4">
+            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">إلغاء</button>
+            <button type="button" class="btn btn-primary px-4" id="editSaveBtn">حفظ التغييرات</button>
+          </div>
+        </div>
       </div>
     </div>
 
     <script>
-      (function () {
-        const form = document.getElementById('brandCatForm');
-        const idInput = document.getElementById('brandCatId');
-        const submitBtn = document.getElementById('brandCatSubmitBtn');
-        const cancelBtn = document.getElementById('brandCatCancelBtn');
+      document.addEventListener('DOMContentLoaded', () => {
+        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
 
-        function resetForm() {
-          idInput.value = '';
-          document.getElementById('name_ar').value = '';
-          document.getElementById('icon_file').value = '';
-          document.getElementById('icon_size').value = 'medium';
-          document.getElementById('icon_corner').value = 'rounded';
-          document.getElementById('icon_shape').value = 'square';
-          document.getElementById('icon_color').value = '#14acec';
-          document.getElementById('sort_order').value = '0';
-          submitBtn.textContent = 'إضافة';
-          cancelBtn.classList.add('d-none');
-        }
-
-        form.addEventListener('submit', function (e) {
+        // Add Brand
+        document.getElementById('addBrandForm').addEventListener('submit', async (e) => {
           e.preventDefault();
-          const id = idInput.value.trim();
-          const fd = new FormData(form);
-          if (!id) {
-            fetch('/admin/brand-categories', { method: 'POST', body: fd })
-              .then(r => r.json())
-              .then(() => { location.reload(); })
-              .catch(err => alert('خطأ: ' + (err.message || 'فشل الإضافة')));
-          } else {
-            fetch('/admin/brand-categories/' + id, { method: 'POST', body: fd })
-              .then(r => r.json())
-              .then(() => { location.reload(); })
-              .catch(err => alert('خطأ: ' + (err.message || 'فشل التعديل')));
+          const fd = new FormData(e.target);
+          const res = await fetch('/admin/brand-categories', { method: 'POST', body: fd });
+          if (res.ok) location.reload();
+          else alert('حدث خطأ أثناء الإضافة');
+        });
+
+        // Table Actions
+        document.getElementById('brandsTable').addEventListener('click', async (e) => {
+          const tr = e.target.closest('tr');
+          if (!tr) return;
+          const id = tr.dataset.id;
+
+          if (e.target.classList.contains('btn-delete')) {
+            if (!confirm('هل أنت متأكد من حذف هذه الماركة؟')) return;
+            const res = await fetch(`/admin/brand-categories/${id}`, { method: 'DELETE' });
+            if (res.ok) tr.remove();
+          }
+
+          if (e.target.classList.contains('btn-edit')) {
+            document.getElementById('edit_id').value = id;
+            document.getElementById('edit_name_ar').value = tr.dataset.nameAr;
+            document.getElementById('edit_icon_size').value = tr.dataset.iconSize;
+            document.getElementById('edit_icon_corner').value = tr.dataset.iconCorner;
+            document.getElementById('edit_icon_shape').value = tr.dataset.iconShape;
+            document.getElementById('edit_icon_color').value = tr.dataset.iconColor;
+            document.getElementById('edit_sort_order').value = tr.dataset.sortOrder;
+            editModal.show();
           }
         });
 
-        cancelBtn.addEventListener('click', resetForm);
+        // Save Edit
+        document.getElementById('editSaveBtn').addEventListener('click', async () => {
+          const id = document.getElementById('edit_id').value;
+          const fd = new FormData();
+          fd.append('name_ar', document.getElementById('edit_name_ar').value);
+          fd.append('icon_size', document.getElementById('edit_icon_size').value);
+          fd.append('icon_corner', document.getElementById('edit_icon_corner').value);
+          fd.append('icon_shape', document.getElementById('edit_icon_shape').value);
+          fd.append('icon_color', document.getElementById('edit_icon_color').value);
+          fd.append('sort_order', document.getElementById('edit_sort_order').value);
 
-        document.querySelectorAll('.edit-brand-cat').forEach(function (btn) {
-          btn.addEventListener('click', function () {
-            idInput.value = this.dataset.id;
-            document.getElementById('name_ar').value = this.dataset.name || '';
-            document.getElementById('icon_size').value = this.dataset.size || 'medium';
-            document.getElementById('icon_corner').value = this.dataset.corner || 'rounded';
-            document.getElementById('icon_shape').value = this.dataset.shape || 'square';
-            document.getElementById('icon_color').value = this.dataset.color || '#14acec';
-            document.getElementById('sort_order').value = this.dataset.sort || '0';
-            document.getElementById('icon_file').value = '';
-            submitBtn.textContent = 'حفظ التعديل';
-            cancelBtn.classList.remove('d-none');
-          });
-        });
+          const file = document.getElementById('edit_icon_file').files[0];
+          if (file) fd.append('icon', file);
 
-        document.querySelectorAll('.delete-brand-cat').forEach(function (btn) {
-          btn.addEventListener('click', function () {
-            if (!confirm('حذف براند "' + (this.dataset.name || '') + '"؟')) return;
-            const id = this.dataset.id;
-            fetch('/admin/brand-categories/' + id, { method: 'DELETE' })
-              .then(r => r.json())
-              .then(() => { location.reload(); })
-              .catch(err => alert('خطأ: ' + (err.message || 'فشل الحذف')));
-          });
+          const res = await fetch(`/admin/brand-categories/${id}`, { method: 'PUT', body: fd });
+          if (res.ok) location.reload();
+          else alert('حدث خطأ أثناء التعديل');
         });
-      })();
+      });
     </script>
 
     <%- include('../partials/scripts') %>

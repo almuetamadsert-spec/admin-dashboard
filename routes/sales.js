@@ -7,31 +7,62 @@ const isMaria = (db) => (db.driver === 'mariadb');
 router.get('/', async (req, res) => {
   const db = req.db;
   const maria = isMaria(db);
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const date_from = req.query.date_from || '';
+  const date_to = req.query.date_to || '';
+  const limit = 50;
+  const offset = (page - 1) * limit;
+
+  let whereDaily = " status != 'cancelled' ";
+  const paramsDaily = [];
+  if (date_from.trim()) {
+    whereDaily += maria ? ' AND DATE(created_at) >= ?' : ' AND date(created_at) >= ?';
+    paramsDaily.push(date_from.trim());
+  }
+  if (date_to.trim()) {
+    whereDaily += maria ? ' AND DATE(created_at) <= ?' : ' AND date(created_at) <= ?';
+    paramsDaily.push(date_to.trim());
+  }
+
+  // Pagination for Daily Sales
+  const sqlCountDaily = maria
+    ? `SELECT COUNT(DISTINCT DATE(created_at)) as total FROM orders WHERE ${whereDaily}`
+    : `SELECT COUNT(DISTINCT date(created_at)) as total FROM orders WHERE ${whereDaily}`;
+
+  const countRow = await db.prepare(sqlCountDaily).get(...paramsDaily);
+  const totalCount = countRow ? countRow.total : 0;
+  const totalPages = Math.ceil(totalCount / limit);
 
   const sqlDaily = maria
-    ? `SELECT DATE(created_at) as day, SUM(total_amount) as total, COUNT(*) as count FROM orders WHERE status != 'cancelled' GROUP BY DATE(created_at) ORDER BY day DESC LIMIT 31`
-    : `SELECT date(created_at) as day, SUM(total_amount) as total, COUNT(*) as count FROM orders WHERE status != 'cancelled' GROUP BY date(created_at) ORDER BY day DESC LIMIT 31`;
+    ? `SELECT DATE(created_at) as day, SUM(total_amount) as total, COUNT(*) as count FROM orders WHERE ${whereDaily} GROUP BY DATE(created_at) ORDER BY day DESC LIMIT ? OFFSET ?`
+    : `SELECT date(created_at) as day, SUM(total_amount) as total, COUNT(*) as count FROM orders WHERE ${whereDaily} GROUP BY date(created_at) ORDER BY day DESC LIMIT ? OFFSET ?`;
+
   const sqlMonthly = maria
     ? `SELECT DATE_FORMAT(created_at, '%Y-%m') as month, SUM(total_amount) as total, COUNT(*) as count FROM orders WHERE status != 'cancelled' GROUP BY DATE_FORMAT(created_at, '%Y-%m') ORDER BY month DESC LIMIT 12`
     : `SELECT strftime('%Y-%m', created_at) as month, SUM(total_amount) as total, COUNT(*) as count FROM orders WHERE status != 'cancelled' GROUP BY strftime('%Y-%m', created_at) ORDER BY month DESC LIMIT 12`;
+
   const sqlYearly = maria
     ? `SELECT DATE_FORMAT(created_at, '%Y') as year, SUM(total_amount) as total, COUNT(*) as count FROM orders WHERE status != 'cancelled' GROUP BY DATE_FORMAT(created_at, '%Y') ORDER BY year DESC LIMIT 5`
     : `SELECT strftime('%Y', created_at) as year, SUM(total_amount) as total, COUNT(*) as count FROM orders WHERE status != 'cancelled' GROUP BY strftime('%Y', created_at) ORDER BY year DESC LIMIT 5`;
+
   const sqlToday = maria
     ? `SELECT COALESCE(SUM(total_amount), 0) as total FROM orders WHERE DATE(created_at) = CURDATE() AND status != 'cancelled'`
     : `SELECT COALESCE(SUM(total_amount), 0) as total FROM orders WHERE date(created_at) = date('now', 'localtime') AND status != 'cancelled'`;
+
   const sqlWeek = maria
     ? `SELECT COALESCE(SUM(total_amount), 0) as total, COUNT(*) as count FROM orders WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND status != 'cancelled'`
     : `SELECT COALESCE(SUM(total_amount), 0) as total, COUNT(*) as count FROM orders WHERE created_at >= datetime('now', 'localtime', '-7 days') AND status != 'cancelled'`;
+
   const sqlMonth = maria
     ? `SELECT COALESCE(SUM(total_amount), 0) as total FROM orders WHERE DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m') AND status != 'cancelled'`
     : `SELECT COALESCE(SUM(total_amount), 0) as total FROM orders WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now', 'localtime') AND status != 'cancelled'`;
+
   const sqlYear = maria
     ? `SELECT COALESCE(SUM(total_amount), 0) as total FROM orders WHERE YEAR(created_at) = YEAR(NOW()) AND status != 'cancelled'`
     : `SELECT COALESCE(SUM(total_amount), 0) as total FROM orders WHERE strftime('%Y', created_at) = strftime('%Y', 'now', 'localtime') AND status != 'cancelled'`;
 
   const [daily, monthly, yearly, todayRow, weekRow, monthRow, yearRow, ordersByStatus, topProducts] = await Promise.all([
-    db.prepare(sqlDaily).all(),
+    db.prepare(sqlDaily).all(...paramsDaily, limit, offset),
     db.prepare(sqlMonthly).all(),
     db.prepare(sqlYearly).all(),
     db.prepare(sqlToday).get(),
@@ -46,6 +77,7 @@ router.get('/', async (req, res) => {
       GROUP BY oi.product_id ORDER BY total_qty DESC LIMIT 15
     `).all()
   ]);
+
   const todayTotal = (todayRow && todayRow.total != null) ? Number(todayRow.total) : 0;
   const weekTotal = (weekRow && weekRow.total != null) ? Number(weekRow.total) : 0;
   const weekCount = (weekRow && weekRow.count != null) ? Number(weekRow.count) : 0;
@@ -65,6 +97,11 @@ router.get('/', async (req, res) => {
     ordersByStatus,
     STATUS_LABELS,
     topProducts,
+    currentPage: page,
+    totalPages,
+    totalCount,
+    filters: { date_from, date_to },
+    queryString: [date_from && 'date_from=' + date_from, date_to && 'date_to=' + date_to].filter(Boolean).join('&'),
     adminUsername: req.session.adminUsername
   });
 });

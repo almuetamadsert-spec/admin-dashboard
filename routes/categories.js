@@ -46,9 +46,35 @@ router.get('/', async (req, res) => {
 
 router.get('/page', async (req, res) => {
   const db = req.db;
-  const list = await db.prepare('SELECT * FROM categories ORDER BY sort_order ASC, name_ar').all();
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const perPage = 20;
+
+  // Stats Logic
+  const stats = await db.prepare(`
+    SELECT 
+      COUNT(*) as total,
+      (SELECT COUNT(*) FROM products) as totalProducts,
+      (SELECT COUNT(*) FROM categories WHERE sort_order < 10) as highPriority
+    FROM categories
+  `).get();
+
+  const totalRow = await db.prepare('SELECT COUNT(*) as c FROM categories').get();
+  const total = totalRow ? totalRow.c : 0;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  const offset = (page - 1) * perPage;
+
+  const list = await db.prepare('SELECT * FROM categories ORDER BY sort_order ASC, name_ar LIMIT ? OFFSET ?').all(perPage, offset);
+
   res.render('categories/list', {
     categories: list,
+    totalCount: total,
+    totalPages,
+    currentPage: page,
+    stats: {
+      total: stats.total || 0,
+      totalProducts: stats.totalProducts || 0,
+      highPriority: stats.highPriority || 0
+    },
     adminUsername: req.session.adminUsername,
     iconPresets: ICON_PRESETS,
   });

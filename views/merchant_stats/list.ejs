@@ -1,49 +1,238 @@
-<%- include('../partials/head', { title: 'إحصائيات الأداء — التجار' }) %>
-<%- include('../partials/sidebar', { adminUsername }) %>
+<%- include('../partials/head', { title: 'إحصائيات أداء التجار' }) %>
+  <%- include('../partials/sidebar', { adminUsername }) %>
 
-<div class="main-content">
-  <div class="d-flex align-items-center justify-content-between mb-4">
-    <div>
-      <h4 class="page-title mb-1">إحصائيات الأداء</h4>
-      <p class="text-muted small mb-0">عدد الطلبات، تم التسليم، ملغي، إجمالي المبيعات لكل تاجر.</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h4 class="fw-bold m-0 text-dark">تحليل أداء التجار</h4>
+        <p class="text-muted small mb-0">مراقبة دقيقة لعمليات التسليم والتحصيل لكل متجر</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="/admin/merchants" class="btn btn-light border px-4">
+          <i class="bi bi-shop ms-2"></i> إدارة التجار
+        </a>
+      </div>
     </div>
-    <a href="/admin/merchants" class="btn btn-outline-secondary"><i class="bi bi-arrow-right me-1"></i> رجوع — إدارة التجار</a>
-  </div>
 
-  <div class="card">
-    <div class="card-header"><i class="bi bi-graph-up me-2"></i> أداء التجار</div>
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead>
-          <tr>
-            <th>التاجر</th>
-            <th>المتجر</th>
-            <th>المدينة</th>
-            <th>عدد الطلبات</th>
-            <th>تم التسليم</th>
-            <th>ملغي</th>
-            <th>إجمالي المبيعات (د.ل)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% list.forEach(function(r) { %>
-          <tr>
-            <td><strong><%= r.name %></strong></td>
-            <td><%= r.store_name || '—' %></td>
-            <td><%= r.city_name || '—' %></td>
-            <td><%= r.total %></td>
-            <td><span class="badge bg-success"><%= r.delivered %></span></td>
-            <td><%= r.cancelled %></td>
-            <td><%= (r.totalSales || 0).toFixed(2) %></td>
-          </tr>
-          <% }); %>
-          <% if (!list.length) { %>
-          <tr><td colspan="7" class="text-center text-muted py-4">لا يوجد تجار أو لا توجد طلبات.</td></tr>
-          <% } %>
-        </tbody>
-      </table>
+    <!-- Filter Bar -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-3">
+        <form method="get" action="/admin/merchant-stats" class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label small text-muted">بحث عن تاجر أو متجر</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" name="q" class="form-control border-start-0" placeholder="الاسم، البريد، أو المتجر..."
+                value="<%= filters.q %>">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small text-muted">من تاريخ</label>
+            <input type="date" name="date_from" class="form-control form-control-sm" value="<%= filters.date_from %>">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small text-muted">إلى تاريخ</label>
+            <input type="date" name="date_to" class="form-control form-control-sm" value="<%= filters.date_to %>">
+          </div>
+          <div class="col-md-2">
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary btn-sm flex-grow-1 py-1">بحث</button>
+              <a href="/admin/merchant-stats" class="btn btn-light btn-sm border py-1" title="إعادة تعيين"><i
+                  class="bi bi-arrow-counterclockwise"></i></a>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
-</div>
 
-<%- include('../partials/scripts') %>
+    <% const { totalOrders, totalDelivered, totalCancelled, totalSalesValue }=globalStats; const
+      deliveryRate=totalOrders> 0 ? ((totalDelivered / totalOrders) * 100).toFixed(1) : 0;
+      %>
+
+      <div class="row g-3 mb-4">
+        <!-- Global Performance Cards -->
+        <div class="col-md-3">
+          <div class="card stat-card p-4">
+            <div class="d-flex align-items-center gap-3">
+              <div class="stat-card-icon" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">
+                <i class="bi bi-box-seam"></i>
+              </div>
+              <div class="mt-4 pt-2">
+                <h6>إجمالي الطلبات</h6>
+                <h3>
+                  <%= totalOrders.toLocaleString('ar-LY') %>
+                </h3>
+                <p class="text-muted mb-0 small text-truncate">عبر كافة التجار</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card stat-card p-4">
+            <div class="d-flex align-items-center gap-3">
+              <div class="stat-card-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                <i class="bi bi-check2-circle"></i>
+              </div>
+              <div class="mt-4 pt-2">
+                <h6>تم التسليم</h6>
+                <h3>
+                  <%= totalDelivered.toLocaleString('ar-LY') %>
+                </h3>
+                <span class="badge bg-success bg-opacity-10 text-success small">نسبة النجاح: <%= deliveryRate %>%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card stat-card p-4">
+            <div class="d-flex align-items-center gap-3">
+              <div class="stat-card-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+                <i class="bi bi-currency-dollar"></i>
+              </div>
+              <div class="mt-4 pt-2">
+                <h6>إجمالي التحصيلات</h6>
+                <h3>
+                  <%= totalSalesValue.toLocaleString('ar-LY') %> <small class="fw-normal">د.ل</small>
+                </h3>
+                <p class="text-muted mb-0 small">مبيعات مكتملة</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card stat-card p-4">
+            <div class="d-flex align-items-center gap-3">
+              <div class="stat-card-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                <i class="bi bi-x-circle"></i>
+              </div>
+              <div class="mt-4 pt-2">
+                <h6>ملغي / متعذر</h6>
+                <h3>
+                  <%= totalCancelled.toLocaleString('ar-LY') %>
+                </h3>
+                <p class="text-muted mb-0 small">طلبات غير ناجحة</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 overflow-hidden">
+        <div class="card-body p-0">
+          <div class="p-4 border-bottom d-flex justify-content-between align-items-center bg-light bg-opacity-10">
+            <h5 class="fw-bold m-0"><i class="bi bi-list-stars ms-2 text-primary"></i>تفاصيل أداء المتاجر</h5>
+            <span class="badge bg-white text-dark border px-3 py-2">
+              إجمالي <%= totalCount %> تاجر
+            </span>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light bg-opacity-50">
+                <tr>
+                  <th class="ps-4">التاجر / المتجر</th>
+                  <th class="text-center">إجمالي الطلبات</th>
+                  <th class="text-center">تم التسليم</th>
+                  <th class="text-center">ملغي</th>
+                  <th class="text-center" width="150">نسبة الإنجاز</th>
+                  <th class="text-end pe-4">إجمالي المبيعات</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% list.forEach(function(r) { %>
+                  <% const rate=r.total> 0 ? ((r.delivered / r.total) * 100).toFixed(0) : 0; %>
+                    <tr>
+                      <td class="ps-4">
+                        <div class="d-flex flex-column">
+                          <span class="fw-bold text-dark">
+                            <%= r.name %>
+                          </span>
+                          <span class="text-muted small"><i class="bi bi-shop ms-1"></i>
+                            <%= r.store_name || '—' %> | <i class="bi bi-geo-alt ms-1"></i>
+                              <%= r.city_name || '—' %>
+                          </span>
+                        </div>
+                      </td>
+                      <td class="text-center fw-bold">
+                        <%= r.total %>
+                      </td>
+                      <td class="text-center">
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">
+                          <%= r.delivered %>
+                        </span>
+                      </td>
+                      <td class="text-center text-danger">
+                        <%= r.cancelled %>
+                      </td>
+                      <td class="text-center">
+                        <div class="d-flex align-items-center justify-content-center gap-2">
+                          <div class="progress flex-grow-1" style="height: 6px; max-width: 60px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: <%= rate %>%"></div>
+                          </div>
+                          <span class="small fw-bold">
+                            <%= rate %>%
+                          </span>
+                        </div>
+                      </td>
+                      <td class="text-end pe-4 fw-bold text-success">
+                        <%= Number(r.totalSales).toFixed(2) %> <small>د.ل</small>
+                      </td>
+                    </tr>
+                    <% }); %>
+                      <% if (!list.length) { %>
+                        <tr>
+                          <td colspan="6" class="text-center py-5">
+                            <div class="py-5 text-muted">
+                              <i class="bi bi-graph-up-arrow display-4 d-block mb-3 opacity-25"></i>
+                              <h5>لا توجد بيانات أداء متاحة حالياً</h5>
+                              <p class="small mb-0">سيتم عرض تحليل الأداء فور بدء التجار في استقبال الطلبات</p>
+                            </div>
+                          </td>
+                        </tr>
+                        <% } %>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Controls -->
+          <% if (totalPages> 1) { %>
+            <div class="p-4 border-top d-flex justify-content-between align-items-center bg-light bg-opacity-25">
+              <div class="text-muted small">
+                عرض الصفحة <strong>
+                  <%= currentPage %>
+                </strong> من <strong>
+                  <%= totalPages %>
+                </strong> (إجمالي <strong>
+                  <%= totalCount %>
+                </strong> تاجر)
+              </div>
+              <nav>
+                <ul class="pagination pagination-sm m-0 gap-1">
+                  <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                    <a class="page-link rounded-pill px-3 border-0 shadow-none"
+                      href="?<%= queryString ? queryString + '&' : '' %>page=<%= currentPage - 1 %>">السابق</a>
+                  </li>
+
+                  <% let startPage=Math.max(1, currentPage - 2); let endPage=Math.min(totalPages, startPage + 4); if
+                    (endPage - startPage < 4) startPage=Math.max(1, endPage - 4); %>
+
+                    <% for(let i=startPage; i <=endPage; i++) { %>
+                      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link rounded-circle border-0 shadow-none d-flex align-items-center justify-content-center"
+                          style="width: 32px; height: 32px;"
+                          href="?<%= queryString ? queryString + '&' : '' %>page=<%= i %>">
+                          <%= i %>
+                        </a>
+                      </li>
+                      <% } %>
+
+                        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                          <a class="page-link rounded-pill px-3 border-0 shadow-none"
+                            href="?<%= queryString ? queryString + '&' : '' %>page=<%= currentPage + 1 %>">التالي</a>
+                        </li>
+                </ul>
+              </nav>
+            </div>
+            <% } %>
+        </div>
+      </div>
+
+      <%- include('../partials/scripts') %>

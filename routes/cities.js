@@ -5,8 +5,28 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   const db = req.db;
-  const cities = await db.prepare('SELECT * FROM cities ORDER BY name').all();
-  res.render('cities/list', { cities, adminUsername: req.session.adminUsername });
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = 50;
+  const offset = (page - 1) * limit;
+
+  const totalRow = await db.prepare('SELECT COUNT(*) as total FROM cities').get();
+  const totalCount = totalRow ? totalRow.total : 0;
+  const totalPages = Math.ceil(totalCount / limit);
+
+  const activeRow = await db.prepare('SELECT COUNT(*) as count FROM cities WHERE is_active = 1').get();
+  const activeCount = activeRow ? activeRow.count : 0;
+
+  const cities = await db.prepare('SELECT * FROM cities ORDER BY name LIMIT ? OFFSET ?').all(limit, offset);
+
+  res.render('cities/list', {
+    cities,
+    currentPage: page,
+    totalPages,
+    totalCount,
+    activeCount,
+    disabledCount: totalCount - activeCount,
+    adminUsername: req.session.adminUsername
+  });
 });
 
 router.post('/', async (req, res) => {

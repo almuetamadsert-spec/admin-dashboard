@@ -1,49 +1,180 @@
 <%- include('../partials/head', { title: 'المخزون والتنبيهات' }) %>
-<%- include('../partials/sidebar', { adminUsername }) %>
+  <%- include('../partials/sidebar', { adminUsername }) %>
 
-<h4 class="mb-4">المخزون والتنبيهات</h4>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h4 class="fw-bold m-0 text-dark">إدارة المخزون والتنبيهات</h4>
+        <p class="text-muted small mb-0">متابعة حالة توفر المنتجات وتنبيهات نقص الكميات</p>
+      </div>
+    </div>
 
-<div class="card mb-3">
-  <div class="card-header bg-warning text-dark">منتجات قاربت على النفاد</div>
-  <div class="table-responsive">
-    <table class="table table-hover mb-0">
-      <thead><tr><th>المنتج</th><th>التصنيف</th><th>الكمية</th><th>حد التنبيه</th><th></th></tr></thead>
-      <tbody>
-        <% lowStock.forEach(function(p) { %>
-        <tr>
-          <td><%= p.name_ar || p.name_en %></td>
-          <td><%= p.category_name || '—' %></td>
-          <td><%= p.stock %></td>
-          <td><%= p.low_stock_alert %></td>
-          <td><a href="/admin/products/edit/<%= p.id %>" class="btn btn-sm btn-outline-primary">تعديل</a></td>
-        </tr>
-        <% }); %>
-        <% if (!lowStock.length) { %><tr><td colspan="5" class="text-center text-muted">لا توجد منتجات تحت حد التنبيه</td></tr><% } %>
-      </tbody>
-    </table>
-  </div>
-</div>
+    <div class="row g-3 mb-4">
+      <!-- Stock Summary Cards -->
+      <div class="col-md-6">
+        <div class="card stat-card p-4 border-start border-warning border-4">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <h6 class="text-muted mb-2">منتجات قاربت على النفاد</h6>
+              <h2 class="fw-bold mb-0 text-warning">
+                <%= lowStock.length %>
+              </h2>
+              <p class="small text-muted mb-0 mt-2">تحتاج لإعادة توريد قريباً</p>
+            </div>
+            <div class="stat-card-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+              <i class="bi bi-exclamation-triangle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card stat-card p-4 border-start border-danger border-4">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <h6 class="text-muted mb-2">منتجات نفدت تماماً</h6>
+              <h2 class="fw-bold mb-0 text-danger">
+                <%= outOfStock.length %>
+              </h2>
+              <p class="small text-muted mb-0 mt-2">غير متوفرة للبيع حالياً</p>
+            </div>
+            <div class="stat-card-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+              <i class="bi bi-x-octagon"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<div class="card">
-  <div class="card-header bg-danger text-white">منتجات نفدت (الكمية = 0)</div>
-  <div class="table-responsive">
-    <table class="table table-hover mb-0">
-      <thead><tr><th>المنتج</th><th>التصنيف</th><th>إخفاء عند النفاد</th><th></th></tr></thead>
-      <tbody>
-        <% outOfStock.forEach(function(p) { %>
-        <tr>
-          <td><%= p.name_ar || p.name_en %></td>
-          <td><%= p.category_name || '—' %></td>
-          <td><%= p.hide_when_out_of_stock ? 'نعم' : 'لا' %></td>
-          <td><a href="/admin/products/edit/<%= p.id %>" class="btn btn-sm btn-outline-primary">تعديل</a></td>
-        </tr>
-        <% }); %>
-        <% if (!outOfStock.length) { %><tr><td colspan="4" class="text-center text-muted">لا توجد منتجات نفدت</td></tr><% } %>
-      </tbody>
-    </table>
-  </div>
-</div>
+    <!-- Low Stock Section -->
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body p-0">
+        <div class="p-4 border-bottom d-flex justify-content-between align-items-center bg-warning bg-opacity-10">
+          <h5 class="fw-bold m-0 text-dark"><i class="bi bi-hourglass-split ms-2"></i>تحت حد التنبيه</h5>
+          <span class="badge bg-warning text-dark px-3 py-2">
+            <%= lowStock.length %> منتج
+          </span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+              <tr>
+                <th class="ps-4">المنتج والتصنيف</th>
+                <th class="text-center">الكمية الحالية</th>
+                <th class="text-center">حد التنبيه</th>
+                <th class="text-center">الحالة</th>
+                <th class="text-end pe-4">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% lowStock.forEach(function(p) { %>
+                <tr>
+                  <td class="ps-4">
+                    <div class="d-flex flex-column">
+                      <span class="fw-bold">
+                        <%= p.name_ar || p.name_en %>
+                      </span>
+                      <span class="text-muted small">
+                        <%= p.category_name || 'بدون تصنيف' %>
+                      </span>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span class="fw-bold fs-5 text-warning">
+                      <%= p.stock %>
+                    </span>
+                  </td>
+                  <td class="text-center text-muted">
+                    <%= p.low_stock_alert %>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-warning bg-opacity-10 text-warning px-2 py-1">مخزون منخفض</span>
+                  </td>
+                  <td class="text-end pe-4">
+                    <a href="/admin/products/edit/<%= p.id %>" class="btn btn-sm btn-light border">
+                      <i class="bi bi-pencil-square"></i> تعديل
+                    </a>
+                  </td>
+                </tr>
+                <% }); %>
+                  <% if (!lowStock.length) { %>
+                    <tr>
+                      <td colspan="5" class="text-center py-5 text-muted small">لا توجد منتجات منخفضة المخزون حالياً
+                      </td>
+                    </tr>
+                    <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-<p class="text-muted small mt-3">لتحديد حد التنبيه: عدّل المنتج وأضف قيمة في "حد التنبيه عند النفاد". لإخفاء المنتج عند وصول الكمية لـ 0: فعّل "إخفاء عند نفاد الكمية".</p>
+    <!-- Out of Stock Section -->
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-0">
+        <div class="p-4 border-bottom d-flex justify-content-between align-items-center bg-danger bg-opacity-10">
+          <h5 class="fw-bold m-0 text-dark"><i class="bi bi-archive ms-2"></i>منتجات غير متوفرة</h5>
+          <span class="badge bg-danger text-white px-3 py-2">
+            <%= outOfStock.length %> منتج
+          </span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+              <tr>
+                <th class="ps-4">المنتج والتصنيف</th>
+                <th class="text-center">إخفاء عند النفاد</th>
+                <th class="text-center">حالة العرض</th>
+                <th class="text-end pe-4">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% outOfStock.forEach(function(p) { %>
+                <tr>
+                  <td class="ps-4">
+                    <div class="d-flex flex-column">
+                      <span class="fw-bold text-muted">
+                        <%= p.name_ar || p.name_en %>
+                      </span>
+                      <span class="text-muted small">
+                        <%= p.category_name || 'بدون تصنيف' %>
+                      </span>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span
+                      class="badge <%= p.hide_when_out_of_stock ? 'bg-info' : 'bg-secondary' %> bg-opacity-10 text-dark border-0">
+                      <%= p.hide_when_out_of_stock ? 'نعم' : 'لا' %>
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1">نفدت الكمية</span>
+                  </td>
+                  <td class="text-end pe-4">
+                    <a href="/admin/products/edit/<%= p.id %>" class="btn btn-sm btn-light border">
+                      <i class="bi bi-pencil-square text-primary"></i> تعديل
+                    </a>
+                  </td>
+                </tr>
+                <% }); %>
+                  <% if (!outOfStock.length) { %>
+                    <tr>
+                      <td colspan="4" class="text-center py-5 text-muted small">لا توجد منتجات نافدة حالياً</td>
+                    </tr>
+                    <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-<%- include('../partials/scripts') %>
+    <div class="mt-4 p-4 rounded-4 bg-light text-muted border border-dashed">
+      <div class="d-flex">
+        <i class="bi bi-info-circle ms-3 mt-1 fs-5"></i>
+        <div class="small">
+          <strong>تلميح سريع:</strong> لتفعيل التنبيهات، قم بتحرير المنتج وتحديد قيمة "حد التنبيه عند النفاد". سيظهر
+          المنتج هنا تلقائياً عند وصول مخزونه لهذه القيمة أو أقل. يمكنك أيضاً تفعيل خيار "إخفاء عند نفاد الكمية" لإزالة
+          المنتج من المتجر مؤقتاً عند وصول مخزونه للصفر.
+        </div>
+      </div>
+    </div>
+
+    <%- include('../partials/scripts') %>

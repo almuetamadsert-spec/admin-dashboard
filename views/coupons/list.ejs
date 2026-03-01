@@ -1,34 +1,181 @@
-<%- include('../partials/head', { title: 'الكوبونات' }) %>
-<%- include('../partials/sidebar', { adminUsername }) %>
+<%- include('../partials/head', { title: 'إدارة الكوبونات' }) %>
+  <%- include('../partials/sidebar', { adminUsername }) %>
 
-<h4 class="mb-4">الكوبونات والخصومات</h4>
-<div class="mb-3"><a href="/admin/coupons/new" class="btn btn-primary">كوبون جديد</a></div>
-<div class="card">
-  <div class="table-responsive">
-    <table class="table table-hover mb-0">
-      <thead>
-        <tr><th>الكود</th><th>نوع الخصم</th><th>القيمة</th><th>الحد الأدنى</th><th>المستخدم</th><th>ينتهي</th><th>الحالة</th><th></th></tr>
-      </thead>
-      <tbody>
-        <% coupons.forEach(function(c) { %>
-        <tr>
-          <td><strong><%= c.code %></strong></td>
-          <td><%= c.discount_type === 'percent' ? 'نسبة مئوية' : 'مبلغ ثابت' %></td>
-          <td><%= c.discount_type === 'percent' ? c.discount_value + '%' : c.discount_value + ' د.ل' %></td>
-          <td><%= Number(c.min_order) > 0 ? c.min_order + ' د.ل' : '—' %></td>
-          <td><%= c.used_count %> / <%= c.max_uses || '∞' %></td>
-          <td><%= c.expires_at ? new Date(c.expires_at).toLocaleDateString('ar-LY') : '—' %></td>
-          <td><%= c.is_active ? 'نشط' : 'معطل' %></td>
-          <td>
-            <a href="/admin/coupons/edit/<%= c.id %>" class="btn btn-sm btn-outline-primary">تعديل</a>
-            <form action="/admin/coupons/delete/<%= c.id %>" method="post" class="d-inline" onsubmit="return confirm('حذف الكوبون؟');"><button type="submit" class="btn btn-sm btn-outline-danger">حذف</button></form>
-          </td>
-        </tr>
-        <% }); %>
-        <% if (!coupons.length) { %><tr><td colspan="8" class="text-center text-muted">لا توجد كوبونات</td></tr><% } %>
-      </tbody>
-    </table>
-  </div>
-</div>
+    <div class="container-fluid py-4 px-4">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold m-0 text-dark">الكوبونات والخصومات</h4>
+          <p class="text-muted small mb-0">إدارة أكواد الخصم، العروض الترويجية، وصلاحية الكوبونات</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/admin/coupons/new" class="btn btn-primary px-4">
+            <i class="bi bi-plus-lg ms-2"></i> إضافة كوبون
+          </a>
+        </div>
+      </div>
 
-<%- include('../partials/scripts') %>
+      <!-- Coupons Summary Cards -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 p-3">
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-percent fs-4"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block">إجمالي الكوبونات</small>
+                <h4 class="fw-bold m-0">
+                  <%= coupons.length %>
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 p-3 border-start border-success border-4">
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-check-circle fs-4"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block">الكوبونات النشطة</small>
+                <h4 class="fw-bold m-0 text-success">
+                  <%= coupons.filter(c=> c.is_active).length %>
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 p-3 border-start border-danger border-4">
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-x-circle fs-4"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block">منتهية / معطلة</small>
+                <h4 class="fw-bold m-0 text-danger">
+                  <%= coupons.filter(c=> !c.is_active).length %>
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coupons Table -->
+      <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="card-header bg-white py-3 border-0 d-flex align-items-center justify-content-between">
+          <h5 class="fw-bold m-0"><i class="bi bi-tag ms-2 text-primary"></i>قائمة العروض النشطة</h5>
+          <span class="text-muted small">عرض جميع الأكواد المتاحة</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light bg-opacity-50">
+              <tr>
+                <th class="ps-4">الكود والوصف</th>
+                <th class="text-center">قيمة الخصم</th>
+                <th class="text-center">الحد الأدنى</th>
+                <th class="text-center">الاستخدام</th>
+                <th class="text-center">تاريخ الانتهاء</th>
+                <th class="text-center">الحالة</th>
+                <th class="text-end pe-4">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% coupons.forEach(function(c) { %>
+                <tr>
+                  <td class="ps-4">
+                    <div class="d-flex align-items-center gap-3">
+                      <div
+                        class="avatar-sm bg-light text-dark border rounded d-flex align-items-center justify-content-center fw-bold"
+                        style="width: 42px; height: 42px; font-size: 11px;">
+                        CODE
+                      </div>
+                      <div>
+                        <span class="fw-bold text-dark d-block">
+                          <%= c.code %>
+                        </span>
+                        <small class="text-muted">
+                          <%= c.discount_type==='percent' ? 'نسبة مئوية' : 'خصم مباشر' %>
+                        </small>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-center fw-bold text-success">
+                    <%= c.discount_type==='percent' ? c.discount_value + '%' : Number(c.discount_value).toFixed(2)
+                      + ' د.ل' %>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-light text-dark fw-normal border">
+                      <%= Number(c.min_order)> 0 ? c.min_order + ' د.ل' : 'بدون حد' %>
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <div class="d-flex flex-column align-items-center">
+                      <span class="small fw-bold">
+                        <%= c.used_count %> / <%= c.max_uses || '∞' %>
+                      </span>
+                      <div class="progress mt-1" style="height: 4px; width: 60px;">
+                        <% let usagePercent=c.max_uses ? (c.used_count / c.max_uses * 100) : 0; if (usagePercent> 100)
+                          usagePercent = 100;
+                          %>
+                          <div class="progress-bar bg-info" role="progressbar" style="width: <%= usagePercent %>%">
+                          </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span class="small text-muted">
+                      <%= c.expires_at ? new Date(c.expires_at).toLocaleDateString('ar-LY') : '—' %>
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <% if (c.is_active) { %>
+                      <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill"><i
+                          class="bi bi-circle-fill ms-1" style="font-size: 6px;"></i> نشط</span>
+                      <% } else { %>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 rounded-pill">معطل</span>
+                        <% } %>
+                  </td>
+                  <td class="text-end pe-4">
+                    <div class="d-flex justify-content-end gap-2">
+                      <a href="/admin/coupons/edit/<%= c.id %>" class="btn btn-light btn-sm rounded-circle"
+                        title="تعديل">
+                        <i class="bi bi-pencil text-info"></i>
+                      </a>
+                      <form action="/admin/coupons/delete/<%= c.id %>" method="post" class="m-0"
+                        onsubmit="return confirm('هل أنت متأكد من حذف هذا الكوبون؟');">
+                        <button type="submit" class="btn btn-light btn-sm rounded-circle" title="حذف">
+                          <i class="bi bi-trash text-danger"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                <% }); %>
+                  <% if (!coupons.length) { %>
+                    <tr>
+                      <td colspan="7" class="text-center py-5">
+                        <div class="text-muted opacity-50">
+                          <i class="bi bi-ticket fs-1 d-block mb-3"></i>
+                          <p class="m-0">لا توجد كوبونات خصم متاحة</p>
+                        </div>
+                      </td>
+                    </tr>
+                    <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <%- include('../partials/scripts') %>

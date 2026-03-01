@@ -1,76 +1,254 @@
-<%- include('../partials/head', { title: 'توثيق API' }) %>
-<%- include('../partials/sidebar', { adminUsername }) %>
+<%- include('../partials/head', { title: 'توثيق API للمطورين' }) %>
+  <%- include('../partials/sidebar', { adminUsername }) %>
 
-<h4 class="mb-4">توثيق API للتطبيقات</h4>
-<p class="text-muted">استخدم هذه المسارات من تطبيق Flutter / iOS / Android مع المصادقة بالمفتاحين.</p>
+    <style>
+      .code-block {
+        background-color: #1e1e1e;
+        color: #e4e4e4;
+        border-radius: 8px;
+        padding: 1.25rem;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.875rem;
+        direction: ltr;
+        text-align: left;
+        white-space: pre-wrap;
+        word-break: break-all;
+        position: relative;
+        border: 1px solid #333;
+      }
 
-<div class="card mb-4">
-  <div class="card-header">المصادقة (مطلوبة لجميع الطلبات)</div>
-  <div class="card-body">
-    <p>أرسل أحد الخيارين:</p>
-    <ol>
-      <li><strong>هيدرين:</strong><br>
-        <code>X-Consumer-Key: ck_xxxx...</code><br>
-        <code>X-Consumer-Secret: cs_xxxx...</code>
-      </li>
-      <li><strong>أو Basic:</strong><br>
-        <code>Authorization: Basic base64(consumer_key:consumer_secret)</code>
-      </li>
-    </ol>
-    <p class="mb-0 small text-muted">المفاتيح تُنشأ من الإعدادات → مفاتيح API. استخدم مفتاحاً بصلاحية "قراءة وكتابة" لإنشاء الطلبات.</p>
-  </div>
-</div>
+      .code-block .keyword {
+        color: #569cd6;
+      }
 
-<div class="card mb-4">
-  <div class="card-header">قائمة المسارات</div>
-  <div class="table-responsive">
-    <table class="table table-sm mb-0">
-      <thead><tr><th>الطريقة</th><th>المسار</th><th>الوصف</th><th>الصلاحية</th></tr></thead>
-      <tbody>
-        <tr><td><code>GET</code></td><td><code>/api/status</code></td><td>حالة السيرفر وقاعدة البيانات</td><td>بدون مفتاح</td></tr>
-        <tr><td><code>GET</code></td><td><code>/api/cities</code></td><td>قائمة مدن التوصيل النشطة</td><td>قراءة</td></tr>
-        <tr><td><code>GET</code></td><td><code>/api/products</code></td><td>قائمة المنتجات النشطة</td><td>قراءة</td></tr>
-        <tr><td><code>GET</code></td><td><code>/api/cms/:slug</code></td><td>صفحة محتوى (about, privacy, terms)</td><td>قراءة</td></tr>
-        <tr><td><code>POST</code></td><td><code>/api/orders</code></td><td>إنشاء طلب جديد (من التطبيق)</td><td>قراءة وكتابة</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
+      .code-block .string {
+        color: #ce9178;
+      }
 
-<div class="card mb-4">
-  <div class="card-header">أمثلة طلبات</div>
-  <div class="card-body">
-    <h6>1. جلب المدن</h6>
-    <pre class="bg-dark text-light p-3 rounded small"><code>GET <%= baseUrl %>/api/cities
-X-Consumer-Key: ck_xxxx
-X-Consumer-Secret: cs_xxxx</code></pre>
-    <p class="small text-muted">الاستجابة: <code>{ "ok": true, "cities": [ { "id": 1, "name": "طرابلس", "delivery_fee": 5 } ] }</code></p>
+      .code-block .property {
+        color: #9cdcfe;
+      }
 
-    <h6 class="mt-4">2. إنشاء طلب</h6>
-    <pre class="bg-dark text-light p-3 rounded small"><code>POST <%= baseUrl %>/api/orders
-Content-Type: application/json
-X-Consumer-Key: ck_xxxx
-X-Consumer-Secret: cs_xxxx
+      .badge-get {
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+        border: 1px solid #0d6efd;
+      }
 
-{
-  "city_id": 1,
-  "customer_name": "أحمد",
-  "customer_phone": "0912345678",
-  "customer_address": "طرابلس",
-  "items": [
-    { "product_id": 5, "quantity": 2 }
-  ]
-}</code></pre>
-    <p class="small text-muted">الاستجابة (201): <code>{ "ok": true, "order_id": 12, "order_number": "1005#", "total_amount": 150.5 }</code></p>
+      .badge-post {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: #198754;
+        border: 1px solid #198754;
+      }
+    </style>
 
-    <h6 class="mt-4">3. جلب صفحة محتوى</h6>
-    <pre class="bg-dark text-light p-3 rounded small"><code>GET <%= baseUrl %>/api/cms/about
-X-Consumer-Key: ck_xxxx
-X-Consumer-Secret: cs_xxxx</code></pre>
-  </div>
-</div>
+    <div class="container-fluid py-4 px-4">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold m-0 text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-braces text-primary"></i> توثيق مسارات الواجهة البرمجية (API)
+          </h4>
+          <p class="text-muted small mt-1 mb-0">المسارات المستخدمة لربط تطبيقات الهواتف الذكية (Flutter / iOS / Android)
+            مع المتجر.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/admin/settings#api-keys" class="btn btn-primary px-4 shadow-sm border"><i
+              class="bi bi-key ms-2"></i> إدارة مفاتيح API</a>
+        </div>
+      </div>
 
-<p class="text-muted small">لإنشاء مفاتيح API أو تعديلها: <a href="/admin/settings#api-keys">الإعدادات → مفاتيح API</a>.</p>
-<p class="text-muted small">لاختبار الطلبات من المتصفح: <a href="/store/" target="_blank">متجر تجريبي <i class="bi bi-box-arrow-up-right"></i></a>.</p>
+      <!-- Auth Card -->
+      <div class="card border-0 shadow-sm mb-4 border-start border-warning border-4">
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+          <h5 class="fw-bold m-0 text-warning d-flex align-items-center gap-2">
+            <i class="bi bi-shield-lock-fill"></i> طريقة المصادقة (Authentication)
+          </h5>
+        </div>
+        <div class="card-body p-4 pt-0">
+          <p class="mb-3">جميع الطلبات المرسلة للمسارات <strong>يجب</strong> أن تحتوى على مفاتيح مصادقة صالحة. يمكنك
+            إرسال المفاتيح بإحدى الطريقتين التاليتين:</p>
 
-<%- include('../partials/scripts') %>
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="bg-light p-3 rounded h-100 border">
+                <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-1-circle"></i> طريقة الهيدرات (Headers Custom)
+                </h6>
+                <ul class="list-unstyled mb-0" dir="ltr">
+                  <li class="mb-2 font-monospace small"><span class="text-muted fw-bold">X-Consumer-Key:</span> <span
+                      class="text-primary">ck_xxxxxxxxxxx</span></li>
+                  <li class="font-monospace small"><span class="text-muted fw-bold">X-Consumer-Secret:</span> <span
+                      class="text-primary">cs_xxxxxxxxxxx</span></li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="bg-light p-3 rounded h-100 border">
+                <h6 class="fw-bold mb-3 text-success"><i class="bi bi-2-circle"></i> طريقة المصادقة الأساسية (Basic
+                  Auth)</h6>
+                <ul class="list-unstyled mb-0" dir="ltr">
+                  <li class="font-monospace small"><span class="text-muted fw-bold">Authorization:</span> <span
+                      class="text-success">Basic <span
+                        class="opacity-75">base64(consumer_key:consumer_secret)</span></span></li>
+                </ul>
+                <p class="small text-muted mt-2 mb-0 text-end">وهي الطريقة المفضلة للمكتبات الجاهزة.</p>
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-light border shadow-sm mt-4 mb-0 d-flex align-items-center gap-2">
+            <i class="bi bi-info-circle-fill text-info fs-5"></i>
+            <span class="small">ملاحظة: تأكد من إعطاء المفتاح صلاحية "قراءة وكتابة" إذا كنت تنوي إرسال أو تعديل بيانات
+              كالطلبات (POST).</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Endpoints Table -->
+      <div class="card border-0 shadow-sm overflow-hidden mb-4">
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+          <h5 class="fw-bold m-0"><i class="bi bi-hdd-network ms-2 text-primary"></i> قائمة مسارات النظام (Endpoints)
+          </h5>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light bg-opacity-50">
+              <tr>
+                <th class="ps-4">الطريقة</th>
+                <th dir="ltr" class="text-end">Endpoint</th>
+                <th>الوصف والاستخدام</th>
+                <th class="text-center pe-4">الصلاحية المطلوبة</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="ps-4"><span class="badge badge-get rounded-pill px-3 py-1 fw-bold">GET</span></td>
+                <td dir="ltr" class="text-end font-monospace text-dark fw-bold">/api/status</td>
+                <td>فحص حالة تجاوب السيرفر وقاعدة البيانات</td>
+                <td class="text-center pe-4"><span
+                    class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 fw-normal">لا
+                    يتطلب المصادقة</span></td>
+              </tr>
+              <tr>
+                <td class="ps-4"><span class="badge badge-get rounded-pill px-3 py-1 fw-bold">GET</span></td>
+                <td dir="ltr" class="text-end font-monospace text-dark fw-bold">/api/cities</td>
+                <td>جلب قائمة كاملة بمدن التوصيل المعرفة بالنظام</td>
+                <td class="text-center pe-4"><span
+                    class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 fw-normal">قراءة
+                    البيانات</span></td>
+              </tr>
+              <tr>
+                <td class="ps-4"><span class="badge badge-get rounded-pill px-3 py-1 fw-bold">GET</span></td>
+                <td dir="ltr" class="text-end font-monospace text-dark fw-bold">/api/products</td>
+                <td>استعراض كافة المنتجات النشطة مع أسعارها وصورها</td>
+                <td class="text-center pe-4"><span
+                    class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 fw-normal">قراءة
+                    البيانات</span></td>
+              </tr>
+              <tr>
+                <td class="ps-4"><span class="badge badge-get rounded-pill px-3 py-1 fw-bold">GET</span></td>
+                <td dir="ltr" class="text-end font-monospace text-dark fw-bold">/api/cms/:slug</td>
+                <td>تحميل صفحة سياسة معينة (about, privacy, terms)</td>
+                <td class="text-center pe-4"><span
+                    class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 fw-normal">قراءة
+                    البيانات</span></td>
+              </tr>
+              <tr>
+                <td class="ps-4"><span class="badge badge-post rounded-pill px-3 py-1 fw-bold">POST</span></td>
+                <td dir="ltr" class="text-end font-monospace text-dark fw-bold">/api/orders</td>
+                <td>إنشاء طلب شراء جديد، وإرسال البيانات لحفظها في المتجر</td>
+                <td class="text-center pe-4"><span
+                    class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-2 fw-bold"><i
+                      class="bi bi-pencil-square ms-1"></i> كتابة وقراءة</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Examples Cards -->
+      <h5 class="fw-bold mb-3 mt-5"><i class="bi bi-journal-code text-primary ms-2"></i> أمثلة تطبيقية للطلبات
+        (Examples)</h5>
+      <div class="row g-4 mb-4">
+
+        <!-- Example 1 -->
+        <div class="col-lg-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-light py-3 border-0">
+              <h6 class="fw-bold m-0 text-dark"><span class="badge badge-get me-2">GET</span> استدعاء قائمة المدن النشطة
+              </h6>
+            </div>
+            <div class="card-body p-0">
+              <div class="code-block rounded-0 border-0 border-bottom"><span class="keyword">GET</span>
+                <%= baseUrl %>/api/cities
+                  <span class="property">X-Consumer-Key:</span> ck_xxxx
+                  <span class="property">X-Consumer-Secret:</span> cs_xxxx
+              </div>
+              <div class="p-3 bg-light bg-opacity-50">
+                <p class="small text-muted fw-bold mb-2">الاستجابة المتوقعة (Response 200 OK)</p>
+                <div class="code-block" style="background-color: #f8f9fa; color: #333; border-color: #dee2e6;">{
+                  <span style="color: #0d6efd">"ok"</span>: <span style="color: #198754">true</span>,
+                  <span style="color: #0d6efd">"cities"</span>: [
+                  { <span style="color: #0d6efd">"id"</span>: <span style="color: #0dcaf0">1</span>, <span
+                    style="color: #0d6efd">"name"</span>: <span style="color: #dc3545">"طرابلس"</span>, <span
+                    style="color: #0d6efd">"delivery_fee"</span>: <span style="color: #0dcaf0">5</span> }
+                  ]
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Example 2 -->
+        <div class="col-lg-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-light py-3 border-0">
+              <h6 class="fw-bold m-0 text-dark"><span class="badge badge-post me-2">POST</span> إرسال وإنشاء طلب للمتجر
+              </h6>
+            </div>
+            <div class="card-body p-0">
+              <div class="code-block rounded-0 border-0 border-bottom"><span class="keyword">POST</span>
+                <%= baseUrl %>/api/orders
+                  <span class="property">Content-Type:</span> application/json
+                  <span class="property">X-Consumer-Key:</span> ck_xxxx
+                  <span class="property">X-Consumer-Secret:</span> cs_xxxx
+
+                  {
+                  <span class="property">"city_id"</span>: <span class="string">1</span>,
+                  <span class="property">"customer_name"</span>: <span class="string">"أحمد محمد"</span>,
+                  <span class="property">"customer_phone"</span>: <span class="string">"0912345678"</span>,
+                  <span class="property">"customer_address"</span>: <span class="string">"حي الأندلس، طرابلس"</span>,
+                  <span class="property">"items"</span>: [
+                  { <span class="property">"product_id"</span>: <span class="string">5</span>, <span
+                    class="property">"quantity"</span>: <span class="string">2</span> }
+                  ]
+                  }
+              </div>
+              <div class="p-3 bg-light bg-opacity-50">
+                <p class="small text-muted fw-bold mb-2">الاستجابة المتوقعة (Response 201 Created)</p>
+                <div class="code-block" style="background-color: #f8f9fa; color: #333; border-color: #dee2e6;">{
+                  <span style="color: #0d6efd">"ok"</span>: <span style="color: #198754">true</span>,
+                  <span style="color: #0d6efd">"order_id"</span>: <span style="color: #0dcaf0">12</span>,
+                  <span style="color: #0d6efd">"order_number"</span>: <span style="color: #dc3545">"1005#"</span>,
+                  <span style="color: #0d6efd">"total_amount"</span>: <span style="color: #0dcaf0">150.5</span>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Helpers -->
+      <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+        <a href="/store/" target="_blank" class="btn btn-outline-secondary btn-sm shadow-sm rounded-pill px-3"><i
+            class="bi bi-box-arrow-up-right ms-1"></i> اختبار الطلبات عبر المتجر التجريبي المباشر</a>
+        <div class="d-flex align-items-center gap-2">
+          <img src="https://img.icons8.com/color/48/000000/flutter.png" alt="Flutter" style="height: 24px;">
+          <img src="https://img.icons8.com/color/48/000000/apple-app-store--v1.png" alt="iOS" style="height: 24px;">
+          <img src="https://img.icons8.com/color/48/000000/google-play.png" alt="Android" style="height: 24px;">
+        </div>
+      </div>
+    </div>
+
+    <%- include('../partials/scripts') %>

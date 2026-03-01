@@ -1,125 +1,319 @@
 <%- include('../partials/head', { title: 'المبيعات والتقارير' }) %>
-<%- include('../partials/sidebar', { adminUsername }) %>
+  <%- include('../partials/sidebar', { adminUsername }) %>
 
-<h4 class="mb-4">تقارير المبيعات</h4>
-<div class="row g-3 mb-4">
-  <div class="col-md-2">
-    <div class="card stat-card h-100">
-      <div class="card-body">
-        <h6 class="text-muted">مبيعات اليوم</h6>
-        <h3><%= Number(todayTotal).toFixed(2) %> د.ل</h3>
-      </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="fw-bold m-0 text-dark">تقارير المبيعات والأداء</h4>
+      <div class="text-muted small">تحديث تلقائي للمبيعات</div>
     </div>
-  </div>
-  <div class="col-md-2">
-    <div class="card stat-card h-100">
-      <div class="card-body">
-        <h6 class="text-muted">مبيعات الأسبوع</h6>
-        <h3><%= Number(weekTotal).toFixed(2) %> د.ل</h3>
-        <small><%= weekCount %> طلب</small>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-2">
-    <div class="card stat-card h-100">
-      <div class="card-body">
-        <h6 class="text-muted">مبيعات الشهر</h6>
-        <h3><%= Number(monthTotal).toFixed(2) %> د.ل</h3>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-2">
-    <div class="card stat-card h-100">
-      <div class="card-body">
-        <h6 class="text-muted">مبيعات السنة</h6>
-        <h3><%= Number(yearTotal).toFixed(2) %> د.ل</h3>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div class="row mb-3">
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-header">عدد الطلبات حسب الحالة</div>
-      <div class="table-responsive">
-        <table class="table table-sm mb-0">
-          <thead><tr><th>الحالة</th><th>العدد</th></tr></thead>
-          <tbody>
-            <% (ordersByStatus || []).forEach(function(r) { %>
-            <tr><td><%= STATUS_LABELS[r.status] || r.status %></td><td><%= r.count %></td></tr>
-            <% }); %>
-            <% if (!ordersByStatus || !ordersByStatus.length) { %><tr><td colspan="2" class="text-center text-muted">لا توجد بيانات</td></tr><% } %>
-          </tbody>
-        </table>
+    <div class="row g-3 mb-4">
+      <!-- Sales Stat Cards -->
+      <div class="col-md-3">
+        <div class="card stat-card p-4">
+          <div class="stat-card-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+            <i class="bi bi-calendar-event"></i>
+          </div>
+          <div class="mt-4 pt-2">
+            <h6>مبيعات اليوم</h6>
+            <h3>
+              <%= Number(todayTotal).toLocaleString('ar-LY') %> <small class="fw-normal">د.ل</small>
+            </h3>
+            <p class="text-muted mb-0 small">إجمالي مبيعات اليوم</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card p-4">
+          <div class="stat-card-icon" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">
+            <i class="bi bi-calendar-range"></i>
+          </div>
+          <div class="mt-4 pt-2">
+            <h6>مبيعات الأسبوع</h6>
+            <h3>
+              <%= Number(weekTotal).toLocaleString('ar-LY') %> <small class="fw-normal">د.ل</small>
+            </h3>
+            <span class="badge bg-light text-dark border small">
+              <%= weekCount %> طلبيات
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card p-4">
+          <div class="stat-card-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+            <i class="bi bi-calendar-month"></i>
+          </div>
+          <div class="mt-4 pt-2">
+            <h6>مبيعات الشهر</h6>
+            <h3>
+              <%= Number(monthTotal).toLocaleString('ar-LY') %> <small class="fw-normal">د.ل</small>
+            </h3>
+            <p class="text-muted mb-0 small">الشهر الجاري</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card p-4">
+          <div class="stat-card-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+            <i class="bi bi-graph-up-arrow"></i>
+          </div>
+          <div class="mt-4 pt-2">
+            <h6>مبيعات السنة</h6>
+            <h3>
+              <%= Number(yearTotal).toLocaleString('ar-LY') %> <small class="fw-normal">د.ل</small>
+            </h3>
+            <p class="text-muted mb-0 small">إجمالي العام</p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-header">أكثر المنتجات مبيعاً (15 الأوائل)</div>
-      <div class="table-responsive">
-        <table class="table table-sm mb-0">
-          <thead><tr><th>المنتج</th><th>الكمية</th><th>المبيعات</th></tr></thead>
-          <tbody>
-            <% (topProducts || []).forEach(function(p) { %>
-            <tr><td><%= p.product_name %></td><td><%= p.total_qty %></td><td><%= Number(p.total_sales).toFixed(2) %> د.ل</td></tr>
-            <% }); %>
-            <% if (!topProducts || !topProducts.length) { %><tr><td colspan="3" class="text-center text-muted">لا توجد بيانات</td></tr><% } %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div class="row">
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-header">المبيعات اليومية (آخر 31 يوم)</div>
-      <div class="table-responsive">
-        <table class="table table-sm mb-0">
-          <thead><tr><th>التاريخ</th><th>عدد الطلبات</th><th>المبلغ</th></tr></thead>
-          <tbody>
-            <% daily.forEach(function(d) { %>
-            <tr><td><%= d.day %></td><td><%= d.count %></td><td><%= Number(d.total).toFixed(2) %> د.ل</td></tr>
-            <% }); %>
-            <% if (!daily.length) { %><tr><td colspan="3" class="text-center text-muted">لا توجد بيانات</td></tr><% } %>
-          </tbody>
-        </table>
+    <div class="row g-4 mb-4">
+      <!-- Top Selling Products -->
+      <div class="col-lg-8">
+        <div class="card h-100 shadow-sm border-0">
+          <div class="card-body p-0">
+            <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+              <h5 class="fw-bold m-0"><i class="bi bi-star ms-2 text-warning"></i>أكثر المنتجات مبيعاً</h5>
+              <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">أعلى 15 منتج</span>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light bg-opacity-50">
+                  <tr>
+                    <th class="ps-4">المنتج</th>
+                    <th class="text-center">الكمية المباعة</th>
+                    <th class="text-end pe-4">إجمالي المبيعات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% (topProducts || []).forEach(function(p) { %>
+                    <tr>
+                      <td class="ps-4">
+                        <div class="fw-500">
+                          <%= p.product_name %>
+                        </div>
+                      </td>
+                      <td class="text-center">
+                        <span class="badge bg-light text-dark border">
+                          <%= p.total_qty %>
+                        </span>
+                      </td>
+                      <td class="text-end pe-4 fw-bold text-success">
+                        <%= Number(p.total_sales).toFixed(2) %> <small>د.ل</small>
+                      </td>
+                    </tr>
+                    <% }); %>
+                      <% if (!topProducts || !topProducts.length) { %>
+                        <tr>
+                          <td colspan="3" class="text-center py-5 text-muted">لا توجد منتجات مباعة حالياً</td>
+                        </tr>
+                        <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-header">المبيعات الشهرية</div>
-      <div class="table-responsive">
-        <table class="table table-sm mb-0">
-          <thead><tr><th>الشهر</th><th>عدد الطلبات</th><th>المبلغ</th></tr></thead>
-          <tbody>
-            <% monthly.forEach(function(m) { %>
-            <tr><td><%= m.month %></td><td><%= m.count %></td><td><%= Number(m.total).toFixed(2) %> د.ل</td></tr>
-            <% }); %>
-            <% if (!monthly.length) { %><tr><td colspan="3" class="text-center text-muted">لا توجد بيانات</td></tr><% } %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="card mt-3">
-  <div class="card-header">المبيعات السنوية</div>
-  <div class="table-responsive">
-    <table class="table mb-0">
-      <thead><tr><th>السنة</th><th>عدد الطلبات</th><th>المبلغ</th></tr></thead>
-      <tbody>
-        <% yearly.forEach(function(y) { %>
-        <tr><td><%= y.year %></td><td><%= y.count %></td><td><%= Number(y.total).toFixed(2) %> د.ل</td></tr>
-        <% }); %>
-        <% if (!yearly.length) { %><tr><td colspan="3" class="text-center text-muted">لا توجد بيانات</td></tr><% } %>
-      </tbody>
-    </table>
-  </div>
-</div>
 
-<%- include('../partials/scripts') %>
+      <!-- Orders Status Summary -->
+      <div class="col-lg-4">
+        <div class="card h-100 shadow-sm border-0">
+          <div class="card-body">
+            <h5 class="fw-bold mb-4"><i class="bi bi-pie-chart ms-2 text-info"></i>حالة الطلبات</h5>
+            <div class="list-group list-group-flush">
+              <% (ordersByStatus || []).forEach(function(r) { %>
+                <div class="list-group-item border-0 d-flex justify-content-between align-items-center px-0 py-3">
+                  <div class="d-flex align-items-center">
+                    <% let dotClass='bg-warning' ; if(r.status==='delivered' ) dotClass='bg-success' ; else
+                      if(r.status==='cancelled' ) dotClass='bg-danger' ; else if(r.status==='shipped' )
+                      dotClass='bg-primary' ; %>
+                      <span class="rounded-circle ms-3"
+                        style="width: 10px; height: 10px; background-color: var(--brand-<%= r.status === 'pending' ? 'warning' : (r.status === 'delivered' ? 'success' : (r.status === 'cancelled' ? 'danger' : 'primary')) %>);"></span>
+                      <span class="fw-500">
+                        <%= STATUS_LABELS[r.status] || r.status %>
+                      </span>
+                  </div>
+                  <span class="badge bg-light text-dark fw-bold px-3">
+                    <%= r.count %>
+                  </span>
+                </div>
+                <% }); %>
+                  <% if (!ordersByStatus || !ordersByStatus.length) { %>
+                    <div class="text-center py-4 text-muted small">لا توجد بيانات</div>
+                    <% } %>
+            </div>
+
+            <div class="mt-4 p-4 rounded-4 bg-light border border-dashed text-center">
+              <p class="small mb-2 text-muted">إجمالي الطلبات المسجلة</p>
+              <h4 class="fw-bold mb-0 text-dark">
+                <%= (ordersByStatus || []).reduce((acc, r)=> acc + r.count, 0) %>
+              </h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <!-- Daily Sales Table -->
+      <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100 overflow-hidden">
+          <div class="card-body p-0 d-flex flex-column">
+            <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="fw-bold m-0"><i class="bi bi-clock-history ms-2 text-secondary"></i>المبيعات اليومية</h5>
+                <small class="text-muted">السجل الكامل للنشاط اليومي</small>
+              </div>
+              <span class="badge bg-light text-dark border">إجمالي <%= totalCount %> يوم</span>
+            </div>
+            <div class="px-4 py-3 border-bottom bg-light bg-opacity-10">
+              <form method="get" action="/admin/sales" class="row g-2 align-items-end">
+                <div class="col-md-5">
+                  <label class="form-label small text-muted mb-1">من تاريخ</label>
+                  <input type="date" name="date_from" class="form-control form-control-sm"
+                    value="<%= filters.date_from %>">
+                </div>
+                <div class="col-md-5">
+                  <label class="form-label small text-muted mb-1">إلى تاريخ</label>
+                  <input type="date" name="date_to" class="form-control form-control-sm" value="<%= filters.date_to %>">
+                </div>
+                <div class="col-md-2">
+                  <button type="submit" class="btn btn-primary btn-sm w-100 py-1" title="تصفية"><i
+                      class="bi bi-filter"></i></button>
+                </div>
+              </form>
+            </div>
+            <div class="table-responsive flex-grow-1">
+              <table class="table table-sm table-hover mb-0">
+                <thead class="bg-light bg-opacity-50">
+                  <tr>
+                    <th class="ps-4 py-3">التاريخ</th>
+                    <th class="text-center py-3">الطلبات</th>
+                    <th class="text-end pe-4 py-3">المبلغ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% daily.forEach(function(d) { %>
+                    <tr>
+                      <td class="ps-4 text-muted">
+                        <%= d.day %>
+                      </td>
+                      <td class="text-center fw-bold">
+                        <%= d.count %>
+                      </td>
+                      <td class="text-end pe-4 fw-bold text-success">
+                        <%= Number(d.total).toFixed(2) %> <small>د.ل</small>
+                      </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <% if (totalPages> 1) { %>
+              <div
+                class="p-3 border-top d-flex justify-content-between align-items-center bg-light bg-opacity-25 mt-auto">
+                <div class="text-muted small">
+                  صفحة <strong>
+                    <%= currentPage %>
+                  </strong> من <strong>
+                    <%= totalPages %>
+                  </strong>
+                </div>
+                <nav>
+                  <ul class="pagination pagination-sm m-0 gap-1">
+                    <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                      <a class="page-link rounded-pill px-2 border-0 shadow-none"
+                        href="?<%= queryString ? queryString + '&' : '' %>page=<%= currentPage - 1 %>">السابق</a>
+                    </li>
+
+                    <% let startPageDaily=Math.max(1, currentPage - 1); let endPageDaily=Math.min(totalPages,
+                      startPageDaily + 2); %>
+
+                      <% for(let i=startPageDaily; i <=endPageDaily; i++) { %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                          <a class="page-link rounded-circle border-0 shadow-none d-flex align-items-center justify-content-center"
+                            style="width: 28px; height: 28px;"
+                            href="?<%= queryString ? queryString + '&' : '' %>page=<%= i %>">
+                            <%= i %>
+                          </a>
+                        </li>
+                        <% } %>
+
+                          <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                            <a class="page-link rounded-pill px-2 border-0 shadow-none"
+                              href="?<%= queryString ? queryString + '&' : '' %>page=<%= currentPage + 1 %>">التالي</a>
+                          </li>
+                  </ul>
+                </nav>
+              </div>
+              <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly & Yearly Summary -->
+      <div class="col-md-6">
+        <div class="card shadow-sm border-0 mb-4 text-primary">
+          <div class="card-body p-0">
+            <div class="p-4 border-bottom">
+              <h5 class="fw-bold m-0 text-dark">المبيعات الشهرية والسنوية</h5>
+            </div>
+            <div class="p-0">
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="bg-light">
+                    <tr>
+                      <th class="ps-4">الفترة</th>
+                      <th class="text-center">العدد</th>
+                      <th class="text-end pe-4">المبيعات</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% monthly.forEach(function(m) { %>
+                      <tr>
+                        <td class="ps-4 fw-bold">
+                          <%= m.month %>
+                        </td>
+                        <td class="text-center">
+                          <%= m.count %>
+                        </td>
+                        <td class="text-end pe-4 fw-bold text-primary">
+                          <%= Number(m.total).toFixed(2) %> <small>د.ل</small>
+                        </td>
+                      </tr>
+                      <% }); %>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-responsive mt-3 border-top">
+                <table class="table table-hover align-middle mb-0">
+                  <tbody>
+                    <% yearly.forEach(function(y) { %>
+                      <tr>
+                        <td class="ps-4 fw-bold text-dark fs-5">
+                          <%= y.year %>
+                        </td>
+                        <td class="text-center fw-bold">
+                          <%= y.count %> طلبات
+                        </td>
+                        <td class="text-end pe-4 fw-bold text-dark fs-5">
+                          <%= Number(y.total).toFixed(2) %> <small>د.ل</small>
+                        </td>
+                      </tr>
+                      <% }); %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%- include('../partials/scripts') %>
+
+
+      <%- include('../partials/scripts') %>

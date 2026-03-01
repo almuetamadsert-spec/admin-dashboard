@@ -31,16 +31,54 @@ router.post('/edit/:id', async (req, res) => {
 
 router.get('/', async (req, res) => {
   const db = req.db;
+
+  // Pagination
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = 50;
+  const offset = (page - 1) * limit;
+
+  // Search logic (optional, keeping it simple as before, but supporting standard pagination)
+  let baseQuery = 'FROM app_users u LEFT JOIN merchants m ON m.id = u.merchant_id';
+  let queryParams = [];
+
+  // Stats
+  const statsRow = await db.prepare(`
+    SELECT 
+      COUNT(u.id) as total_users,
+      SUM(CASE WHEN u.role = 'customer' THEN 1 ELSE 0 END) as total_customers,
+      SUM(CASE WHEN u.role = 'merchant' THEN 1 ELSE 0 END) as total_merchants
+    FROM app_users u
+  `).get();
+
+  const stats = {
+    total: statsRow.total_users || 0,
+    customers: statsRow.total_customers || 0,
+    merchants: statsRow.total_merchants || 0
+  };
+
+  const totalUsersCount = statsRow.total_users || 0;
+  const totalPages = Math.ceil(totalUsersCount / limit);
+
   const [users, merchants] = await Promise.all([
     db.prepare(`
       SELECT u.id, u.email, u.role, u.merchant_id, u.created_at, m.name as merchant_name, m.store_name
-      FROM app_users u
-      LEFT JOIN merchants m ON m.id = u.merchant_id
+      ${baseQuery}
       ORDER BY u.created_at DESC
-    `).all(),
+      LIMIT ? OFFSET ?
+    `).all(limit, offset),
     db.prepare('SELECT id, name, store_name FROM merchants WHERE is_active = 1 ORDER BY name').all()
   ]);
-  res.render('app_users/list', { users, merchants, query: req.query, adminUsername: req.session.adminUsername });
+
+  res.render('app_users/list', {
+    users,
+    merchants,
+    stats,
+    page,
+    totalPages,
+    query: req.query,
+    adminUsername: req.session.adminUsername,
+    title: 'مستخدمو التطبيق'
+  });
 });
 
 router.post('/', async (req, res) => {

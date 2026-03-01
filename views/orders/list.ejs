@@ -1,256 +1,489 @@
-<%- include('../partials/head', { title: 'الطلبات' }) %>
+<%- include('../partials/head', { title: 'سجل المبيعات والطلبات' }) %>
   <%- include('../partials/sidebar', { adminUsername }) %>
 
-    <h4 class="mb-4">الطلبات</h4>
-    <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-      <a href="/admin/orders/new" class="btn btn-primary"><i class="bi bi-plus"></i> إنشاء طلب</a>
-      <a href="/admin/orders/export<%= queryString ? '?' + queryString : '' %>" class="btn btn-outline-success"><i
-          class="bi bi-download"></i> تصدير CSV</a>
-    </div>
+    <style>
+      .table-premium th {
+        font-weight: 600;
+        color: #6c757d;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+      }
 
-    <form method="get" action="/admin/orders" class="card p-3 mb-3">
-      <div class="row g-2 align-items-end">
-        <div class="col-md-2">
-          <label class="form-label small">بحث (رقم الطلب / الهاتف / العميل)</label>
-          <input type="text" name="q" class="form-control form-control-sm"
-            value="<%= filters && filters.q ? filters.q : '' %>" placeholder="بحث...">
+      .avatar-md {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+        border-radius: 50%;
+      }
+
+      .status-badge {
+        padding: 0.45rem 1rem;
+        border-radius: 50rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .bulk-actions-wrapper {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 4px;
+        display: inline-flex;
+        align-items: center;
+      }
+    </style>
+
+    <div class="container-fluid py-4 px-4 pb-5">
+      <!-- Header (Professional Style) -->
+      <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div class="d-flex align-items-center gap-3">
+          <div
+            class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+            style="width: 50px; height: 50px;">
+            <i class="bi bi-cart-check-fill fs-3"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold m-0 text-dark">مركز عمليات المبيعات والطلبات</h4>
+            <div class="text-muted small mt-1">
+              <i class="bi bi-calendar3 ms-1"></i>
+              <%= new Date().toLocaleDateString('ar-LY', { weekday: 'long' , year: 'numeric' , month: 'long' ,
+                day: 'numeric' }) %>
+            </div>
+          </div>
         </div>
-        <div class="col-md-2">
-          <label class="form-label small">الحالة</label>
-          <select name="status" class="form-select form-select-sm">
-            <option value="">— الكل —</option>
-            <option value="pending" <%=filters && filters.status==='pending' ? 'selected' : '' %>>قيد الانتظار</option>
-            <option value="confirmed" <%=filters && filters.status==='confirmed' ? 'selected' : '' %>>مؤكد</option>
-            <option value="shipped" <%=filters && filters.status==='shipped' ? 'selected' : '' %>>تم الشحن</option>
-            <option value="delivered" <%=filters && filters.status==='delivered' ? 'selected' : '' %>>تم التوصيل
-            </option>
-            <option value="cancelled" <%=filters && filters.status==='cancelled' ? 'selected' : '' %>>ملغي</option>
-            <option value="customer_refused" <%=filters && filters.status==='customer_refused' ? 'selected' : '' %>
-              >العميل رفض</option>
-          </select>
-        </div>
-        <div class="col-md-2">
-          <label class="form-label small">من تاريخ</label>
-          <input type="date" name="date_from" class="form-control form-control-sm"
-            value="<%= filters && filters.date_from ? filters.date_from : '' %>" dir="ltr" title="يوم / شهر / سنة">
-        </div>
-        <div class="col-md-2">
-          <label class="form-label small">إلى تاريخ</label>
-          <input type="date" name="date_to" class="form-control form-control-sm"
-            value="<%= filters && filters.date_to ? filters.date_to : '' %>" dir="ltr" title="يوم / شهر / سنة">
-        </div>
-        <div class="col-md-2">
-          <button type="submit" class="btn btn-primary btn-sm w-100">بحث</button>
+        <div class="d-flex gap-2">
+          <a href="/admin/orders/export<%= queryString ? '?' + queryString : '' %>"
+            class="btn btn-light border shadow-sm px-4 fw-bold text-dark">
+            <i class="bi bi-cloud-arrow-down ms-1 text-success"></i> تصدير CSV
+          </a>
+          <a href="/admin/orders/new" class="btn btn-primary px-4 shadow-sm fw-bold">
+            <i class="bi bi-plus-lg ms-1"></i> إضافة طلب جديد
+          </a>
         </div>
       </div>
-    </form>
 
-    <div class="card">
-      <div class="card-body py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-          <select class="form-select form-select-sm" id="orderBulkAction" style="width:auto;min-width:140px">
-            <option value="">تنفيذ الأمر</option>
-            <option value="view">عرض</option>
-            <option value="edit">تعديل</option>
-            <option value="delete">حذف</option>
-            <option value="status">تغيير الحالة</option>
-            <option value="print">طباعة</option>
-          </select>
-          <select class="form-select form-select-sm" id="orderBulkStatus"
-            style="width:auto;min-width:130px;display:none">
-            <option value="pending">قيد الانتظار</option>
-            <option value="confirmed">مؤكد</option>
-            <option value="shipped">تم الشحن</option>
-            <option value="delivered">تم التوصيل</option>
-            <option value="cancelled">ملغي</option>
-            <option value="customer_refused">العميل رفض</option>
-          </select>
-          <button type="button" class="btn btn-sm btn-primary flex-shrink-0" id="btnOrderApply">تطبيق</button>
+      <!-- Performance Stats Cards (Dashboard Style) -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-3">
+          <div class="card stat-card p-4 h-100">
+            <div class="stat-card-icon" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">
+              <i class="bi bi-basket3"></i>
+            </div>
+            <div class="mt-4 pt-2">
+              <h6>الطلبات التراكمية</h6>
+              <h3>
+                <%= stats.total %>
+              </h3>
+              <p class="text-muted mb-0 small">إجمالي المسجل</p>
+            </div>
+          </div>
         </div>
-        <span class="small text-muted">عرض <%= orders.length %> من <%= total %> طلب — الصفحة <%= page %> من <%=
-                  totalPages %></span>
+        <div class="col-md-3">
+          <div class="card stat-card p-4 h-100">
+            <div class="stat-card-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+              <i class="bi bi-bag-check"></i>
+            </div>
+            <div class="mt-4 pt-2">
+              <h6>طلبات مكتملة</h6>
+              <h3 class="text-success">
+                <%= stats.delivered %>
+              </h3>
+              <p class="text-muted mb-0 small">تم تسليمها بنجاح</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card stat-card p-4 h-100">
+            <div class="stat-card-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+              <i class="bi bi-hourglass-split"></i>
+            </div>
+            <div class="mt-4 pt-2">
+              <h6>قيد المعالجة</h6>
+              <h3 class="text-warning">
+                <%= stats.pending + stats.inProgress %>
+              </h3>
+              <p class="text-muted mb-0 small">بانتظار الإجراء</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card stat-card p-4 h-100">
+            <div class="stat-card-icon" style="background: rgba(79, 70, 229, 0.1); color: #4f46e5;">
+              <i class="bi bi-cash-stack"></i>
+            </div>
+            <div class="mt-4 pt-2">
+              <h6>مبيعات اليوم</h6>
+              <h3 class="text-truncate" title="<%= stats.todaySales %> د.ل">
+                <%= Number(stats.todaySales || 0).toLocaleString('ar-LY') %> <small
+                    class="fs-6 fw-normal text-muted">د.ل</small>
+              </h3>
+              <p class="text-muted mb-0 small">خلال أخر 24 ساعة</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="table-responsive">
-        <table class="table table-hover mb-0">
-          <thead>
-            <tr>
-              <th class="text-end" style="width:2.5rem">
-                <input type="checkbox" class="form-check-input" id="orderSelectAll" title="تحديد الكل">
-              </th>
-              <th class="text-start">
-                <span class="d-inline-flex align-items-center gap-1">الطلب <i
-                    class="bi bi-arrow-down-up small text-muted"></i></span>
-              </th>
-              <th>المبلغ</th>
-              <th>الحالة</th>
-              <th>التاريخ</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% orders.forEach(function(o) { %>
+
+      <!-- Integrated Tools & Filter Bar -->
+      <div class="card border-0 shadow-sm mb-4 rounded-4 overflow-hidden">
+        <div class="p-3 bg-light bg-opacity-50 border-bottom d-flex align-items-center gap-2">
+          <i class="bi bi-sliders2-vertical text-primary ms-1"></i>
+          <span class="fw-bold text-dark small">أدوات الفرز والبحث المتقدم</span>
+        </div>
+        <div class="card-body p-4">
+          <form method="get" action="/admin/orders" class="row g-3 align-items-end">
+            <div class="col-lg-4 col-md-6">
+              <label class="form-label small fw-bold text-muted">البحث العام</label>
+              <div class="input-group border rounded-3 overflow-hidden">
+                <span class="input-group-text bg-white border-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="q" class="form-control border-0 bg-white"
+                  placeholder="رقم الطلب، اسم أو هاتف العميل..." value="<%= filters.q %>">
+              </div>
+            </div>
+            <div class="col-lg-2 col-md-6">
+              <label class="form-label small fw-bold text-muted">حالة التنفيذ</label>
+              <select name="status" class="form-select border rounded-3 bg-white">
+                <option value="">كافة الحالات</option>
+                <% Object.entries(STATUS_LABELS).forEach(([key, label])=> { %>
+                  <option value="<%= key %>" <%=filters.status===key ? 'selected' : '' %>><%= label %>
+                  </option>
+                  <% }) %>
+              </select>
+            </div>
+            <div class="col-lg-2 col-md-6">
+              <label class="form-label small fw-bold text-muted">من تاريخ</label>
+              <input type="date" name="date_from" class="form-control border rounded-3 bg-white"
+                value="<%= filters.date_from %>">
+            </div>
+            <div class="col-lg-2 col-md-6">
+              <label class="form-label small fw-bold text-muted">إلى تاريخ</label>
+              <input type="date" name="date_to" class="form-control border rounded-3 bg-white"
+                value="<%= filters.date_to %>">
+            </div>
+            <div class="col-lg-2 col-md-12 text-end">
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1 fw-bold shadow-sm">
+                  <i class="bi bi-funnel"></i> تطبيق
+                </button>
+                <a href="/admin/orders" class="btn btn-light border px-3" title="إعادة تعيين">
+                  <i class="bi bi-arrow-counterclockwise text-danger"></i>
+                </a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Orders Table Premium Container -->
+      <div class="card border-0 shadow-sm overflow-hidden rounded-4 border-top border-primary border-3">
+
+        <!-- Table Toolbar -->
+        <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-3">
+            <div class="form-check m-0 ms-1 ps-3">
+              <input type="checkbox" class="form-check-input border-secondary" id="orderSelectAll"
+                style="transform: scale(1.1); cursor: pointer;">
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="bulk-actions-wrapper">
+              <select class="form-select border-0 bg-transparent fw-bold text-secondary ps-1 pe-4 py-1"
+                id="orderBulkAction" style="width: auto; min-width: 140px; cursor: pointer;">
+                <option value="">إجراءات محددة...</option>
+                <option value="status">تحديث حالة الطلبات</option>
+                <option value="delete">حذف نهائي للطلبات</option>
+              </select>
+              <div class="vr mx-2 opacity-25"></div>
+              <select class="form-select border-0 bg-transparent ps-1 pe-4 py-1" id="orderBulkStatus"
+                style="width: 140px; display: none;">
+                <% Object.entries(STATUS_LABELS).forEach(([key, label])=> { %>
+                  <option value="<%= key %>">
+                    <%= label %>
+                  </option>
+                  <% }) %>
+              </select>
+              <button type="button" class="btn btn-dark btn-sm rounded-3 px-3 fw-bold ms-1" id="btnOrderApply">تأكيد
+                الإجراء</button>
+            </div>
+          </div>
+
+          <div>
+            <span class="badge bg-white text-dark border px-3 py-2 rounded-pill fw-bold shadow-sm">
+              <i class="bi bi-receipt text-primary ms-1"></i> إجمالي السجلات: <%= total %> طلب
+            </span>
+          </div>
+        </div>
+
+        <!-- The Main Table -->
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 table-premium">
+            <thead class="bg-light bg-opacity-75">
               <tr>
-                <td class="text-end">
-                  <input type="checkbox" class="form-check-input order-row-cb" name="order_ids" value="<%= o.id %>">
-                </td>
-                <td class="text-start">
-                  <a href="/admin/orders/view/<%= o.id %>"
-                    class="text-primary text-decoration-none d-inline-flex align-items-center gap-1" title="عرض">
-                    <i class="bi bi-eye"></i>
-                    <span>#<%= o.order_number %>
-                        <%= o.display_name || '—' %></span>
-                  </a>
-                </td>
-                <td>
-                  <%= Number(o.total_amount).toFixed(2) %> د.ل
-                </td>
-                <td>
-                  <span
-                    class="badge bg-<%= o.status === 'delivered' ? 'success' : (o.status === 'cancelled' || o.status === 'customer_refused') ? 'danger' : o.status === 'shipped' ? 'info' : o.status === 'confirmed' ? 'primary' : 'warning' %>">
-                    <%= STATUS_LABELS[o.status] || o.status %>
-                  </span>
-                </td>
-                <td>
-                  <% var _d=new Date(o.created_at); var _dd=String(_d.getDate()).padStart(2,'0'); var
-                    _mm=String(_d.getMonth()+1).padStart(2,'0'); var _yy=_d.getFullYear(); %>
-                    <%= _dd %>/<%= _mm %>/<%= _yy %>
-                </td>
+                <th style="width: 50px;" class="ps-4">
+                  <div class="form-check m-0">
+                    <input type="checkbox" class="form-check-input border-secondary" id="orderSelectAll"
+                      style="transform: scale(1.1); cursor: pointer;">
+                  </div>
+                </th>
+                <th class="ps-2">تعريف الطلب والعميل</th>
+                <th class="text-center">منطقة التوصيل</th>
+                <th class="text-center">إجمالي الفاتورة</th>
+                <th class="text-center">حالة الطلب</th>
+                <th class="text-center">تاريخ التوثيق</th>
+                <th class="text-end pe-4" style="width: 100px;">إدارة</th>
               </tr>
-              <% }); %>
-                <% if (!orders.length) { %>
-                  <tr>
-                    <td colspan="5" class="text-center text-muted">لا توجد طلبات</td>
-                  </tr>
-                  <% } %>
-          </tbody>
-        </table>
-      </div>
-      <% if (totalPages> 1) { %>
-        <div class="card-footer py-2">
-          <nav>
-            <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
-              <li class="page-item <%= page <= 1 ? 'disabled' : '' %>">
-                <% if (page <=1) { %><span class="page-link">السابق</span>
-                  <% } else { %><a class="page-link"
-                      href="?<%= queryString ? queryString + '&' : '' %>page=<%= page - 1 %>">السابق</a>
+            </thead>
+            <tbody>
+              <% orders.forEach(function(o) { %>
+                <tr>
+                  <td class="text-center ps-4">
+                    <input type="checkbox" class="form-check-input order-row-cb border-secondary" name="order_ids"
+                      value="<%= o.id %>" style="cursor:pointer;">
+                  </td>
+                  <td class="ps-2">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="avatar-md bg-light text-primary border border-primary border-opacity-25 shadow-sm">
+                        <%= (o.display_name && o.display_name.length> 0) ? (o.display_name.charAt(0).match(/[a-zA-Z]/) ?
+                          o.display_name.charAt(0).toUpperCase() : o.display_name.charAt(0)) : 'C' %>
+                      </div>
+                      <div>
+                        <a href="/admin/orders/view/<%= o.id %>"
+                          class="fw-bold text-primary text-decoration-none d-block mb-1 font-monospace"
+                          style="font-size: 0.95rem;">
+                          #<%= o.order_number %>
+                        </a>
+                        <span class="text-dark fw-bold d-block" style="font-size: 0.85rem;"><i
+                            class="bi bi-person text-muted me-1"></i>
+                          <%= o.display_name || 'زائر غير مسجل' %>
+                        </span>
+                        <% if (o.display_phone) { %>
+                          <small class="text-muted d-block mt-1"><i class="bi bi-telephone text-muted me-1"></i>
+                            <%= o.display_phone %>
+                          </small>
+                          <% } %>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <% if (o.city_name) { %>
+                      <span class="badge bg-light text-dark fw-bold border px-3 py-2 rounded-3">
+                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                        <%= o.city_name %>
+                      </span>
+                      <% } else { %>
+                        <span class="text-muted small italic">— غير محددة —</span>
+                        <% } %>
+                  </td>
+                  <td class="text-center">
+                    <div
+                      class="fw-bold text-dark fs-6 font-monospace bg-primary bg-opacity-10 text-primary rounded-3 px-3 py-1 d-inline-block border border-primary border-opacity-25">
+                      <%= Number(o.total_amount).toFixed(2) %> <small class="text-muted font-sans-serif">د.ل</small>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <% let badgeClass='bg-warning text-dark border-warning' ; let icon='bi-hourglass-split' ; if
+                      (o.status==='delivered' ) { badgeClass='bg-success text-success border-success' ;
+                      icon='bi-check2-all' ; } else if (o.status==='cancelled' ) {
+                      badgeClass='bg-danger text-danger border-danger' ; icon='bi-x-octagon' ; } else if
+                      (o.status==='customer_refused' ) { badgeClass='bg-danger text-danger border-danger' ;
+                      icon='bi-person-x' ; } else if (o.status==='shipped' ) {
+                      badgeClass='bg-info text-info border-info' ; icon='bi-truck' ; } else if (o.status==='confirmed' )
+                      { badgeClass='bg-primary text-primary border-primary' ; icon='bi-hand-thumbs-up' ; } /* Modify
+                      badgeClass to add transparency for modern look */
+                      badgeClass=badgeClass.replace('bg-', 'bg-opacity-10 bg-' ); %>
+                      <span
+                        class="status-badge border <%= badgeClass %> d-inline-flex align-items-center gap-1 shadow-sm">
+                        <i class="bi <%= icon %>"></i>
+                        <%= STATUS_LABELS[o.status] || o.status %>
+                      </span>
+                  </td>
+                  <td class="text-center">
+                    <div class="text-dark fw-bold small"><i class="bi bi-calendar4-week text-muted me-1"></i>
+                      <%= new Date(o.created_at).toLocaleDateString('ar-LY') %>
+                    </div>
+                    <div class="text-muted small mt-1" style="font-size: 0.70rem;"><i class="bi bi-clock me-1"></i>
+                      <%= new Date(o.created_at).toLocaleTimeString('ar-LY', {hour: '2-digit' , minute:'2-digit'}) %>
+                    </div>
+                  </td>
+                  <td class="text-end pe-4">
+                    <div class="dropdown">
+                      <button class="btn btn-light btn-sm rounded-circle border shadow-sm" type="button"
+                        data-bs-toggle="dropdown" style="width: 36px; height: 36px;">
+                        <i class="bi bi-three-dots-vertical"></i>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-1 rounded-3">
+                        <li>
+                          <a class="dropdown-item py-2 px-3 rounded text-dark fw-bold"
+                            href="/admin/orders/view/<%= o.id %>">
+                            <i class="bi bi-eye-fill ms-2 text-primary"></i> <span class="pt-1">عرض التفاصيل و
+                              الإيصال</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a class="dropdown-item py-2 px-3 rounded text-dark fw-bold"
+                            href="/admin/orders/edit/<%= o.id %>">
+                            <i class="bi bi-pencil-square ms-2 text-info"></i> <span class="pt-1">تحديث بيانات
+                              الطلب</span>
+                          </a>
+                        </li>
+                        <li>
+                          <hr class="dropdown-divider my-1 border-secondary border-opacity-25">
+                        </li>
+                        <li>
+                          <form action="/admin/orders/delete/<%= o.id %>" method="POST"
+                            onsubmit="return confirm('تأكيد الحذف النهائي للطلب من قاعدة البيانات؟')">
+                            <button type="submit"
+                              class="dropdown-item py-2 px-3 rounded text-danger fw-bold hover-bg-danger">
+                              <i class="bi bi-trash-fill ms-2"></i> <span class="pt-1">إلغاء أرشفة وحذف نهائي</span>
+                            </button>
+                          </form>
+                        </li>
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+                <% }); %>
+
+                  <% if (!orders.length) { %>
+                    <tr>
+                      <td colspan="7" class="text-center py-5">
+                        <div class="d-flex flex-column align-items-center justify-content-center py-4">
+                          <div
+                            class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3 text-secondary opacity-50 shadow-sm"
+                            style="width: 80px; height: 80px;">
+                            <i class="bi bi-receipt fs-1"></i>
+                          </div>
+                          <h5 class="fw-bold text-dark">لا توجد طلبات لعرضها</h5>
+                          <p class="text-muted mb-0">لم يتم العثور على أي بيانات تطابق معايير البحث أو الفلاتر الحالية.
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
                     <% } %>
-              </li>
-              <li class="page-item disabled"><span class="page-link">ص <%= page %> من <%= totalPages %></span></li>
-              <li class="page-item <%= page >= totalPages ? 'disabled' : '' %>">
-                <% if (page>= totalPages) { %><span class="page-link">التالي</span>
-                  <% } else { %><a class="page-link"
-                      href="?<%= queryString ? queryString + '&' : '' %>page=<%= page + 1 %>">التالي</a>
-                    <% } %>
-              </li>
-            </ul>
-          </nav>
+            </tbody>
+          </table>
         </div>
-        <% } %>
+
+        <!-- Modern Pagination -->
+        <% if (totalPages> 1) { %>
+          <div class="card-footer bg-white border-0 py-4 d-flex justify-content-between align-items-center px-4">
+            <div class="text-muted small fw-bold">
+              عرض الصفحة <span class="badge bg-light text-dark border px-2 mx-1">
+                <%= page %>
+              </span> من <span class="badge bg-light text-dark border px-2 mx-1">
+                <%= totalPages %>
+              </span>
+            </div>
+            <nav>
+              <ul class="pagination pagination-sm m-0 gap-2">
+                <li class="page-item <%= page <= 1 ? 'disabled' : '' %>">
+                  <a class="page-link rounded-pill px-3 py-2 fw-bold shadow-sm <%= page <= 1 ? 'bg-light text-muted border-0' : 'text-primary border-primary' %>"
+                    href="?<%= queryString ? queryString + '&' : '' %>page=<%= page - 1 %>">الصفحة السابقة</a>
+                </li>
+
+                <% let startPage=Math.max(1, page - 2); let endPage=Math.min(totalPages, startPage + 4); if (endPage -
+                  startPage < 4) startPage=Math.max(1, endPage - 4); %>
+
+                  <% for(let i=startPage; i <=endPage; i++) { %>
+                    <li class="page-item <%= i === page ? 'active' : '' %>">
+                      <a class="page-link rounded-circle fw-bold shadow-sm d-flex align-items-center justify-content-center border-0"
+                        style="width: 36px; height: 36px; <%= i === page ? 'background-color: var(--bs-primary);' : 'color: #333; background-color: #f8f9fa;' %>"
+                        href="?<%= queryString ? queryString + '&' : '' %>page=<%= i %>">
+                        <%= i %>
+                      </a>
+                    </li>
+                    <% } %>
+
+                      <li class="page-item <%= page >= totalPages ? 'disabled' : '' %>">
+                        <a class="page-link rounded-pill px-3 py-2 fw-bold shadow-sm border-0 <%= page >= totalPages ? 'bg-light text-muted' : 'bg-primary text-white' %>"
+                          href="?<%= queryString ? queryString + '&' : '' %>page=<%= page + 1 %>">الصفحة التالية</a>
+                      </li>
+              </ul>
+            </nav>
+          </div>
+          <% } %>
+      </div>
     </div>
 
+    <style>
+      .hover-bg-danger:hover {
+        background-color: #dc3545 !important;
+        color: white !important;
+      }
+
+      .order-row-cb {
+        transform: scale(1.1);
+      }
+    </style>
+
+    <!-- Functional Scripts -->
     <script>
-      (function () {
-        var base = '/admin/orders';
-        var bulkAction = document.getElementById('orderBulkAction');
-        var bulkStatus = document.getElementById('orderBulkStatus');
-        var btnApply = document.getElementById('btnOrderApply');
-        var selectAll = document.getElementById('orderSelectAll');
+      document.addEventListener('DOMContentLoaded', () => {
+        const bulkAction = document.getElementById('orderBulkAction');
+        const bulkStatus = document.getElementById('orderBulkStatus');
+        const btnApply = document.getElementById('btnOrderApply');
+        const selectAll = document.getElementById('orderSelectAll');
 
         if (bulkAction) {
-          bulkAction.addEventListener('change', function () {
-            if (bulkStatus) bulkStatus.style.display = (this.value === 'status') ? 'inline-block' : 'none';
+          bulkAction.addEventListener('change', () => {
+            bulkStatus.style.display = (bulkAction.value === 'status') ? 'block' : 'none';
+            bulkAction.classList.toggle('pe-4', bulkAction.value !== 'status');
           });
         }
+
         if (selectAll) {
-          selectAll.addEventListener('change', function () {
-            document.querySelectorAll('.order-row-cb').forEach(function (cb) { cb.checked = selectAll.checked; });
+          selectAll.addEventListener('change', () => {
+            document.querySelectorAll('.order-row-cb').forEach(cb => cb.checked = selectAll.checked);
           });
         }
+
         if (btnApply) {
-          btnApply.addEventListener('click', function () {
-            var ids = [];
-            document.querySelectorAll('.order-row-cb:checked').forEach(function (cb) { ids.push(cb.value); });
-            var action = bulkAction && bulkAction.value ? bulkAction.value : '';
-            if (!action) {
-              alert('اختر الإجراء من قائمة «تنفيذ الأمر»');
+          btnApply.addEventListener('click', async () => {
+            const ids = Array.from(document.querySelectorAll('.order-row-cb:checked')).map(cb => cb.value);
+            const action = bulkAction.value;
+
+            if (!action || ids.length === 0) {
+              alert('تنبيه: يرجى تحديد طلب واحد على الأقل واختيار الإجراء المطلوب من القائمة.');
               return;
             }
-            if (ids.length === 0) {
-              alert('حدد طلباً واحداً على الأقل');
-              return;
-            }
-            var id = ids[0];
-            if (action === 'view') {
-              window.location.href = base + '/view/' + id;
-              return;
-            }
-            if (action === 'edit') {
-              window.location.href = base + '/edit/' + id;
-              return;
-            }
-            if (action === 'print') {
-              var w = window.open(base + '/view/' + id, '_blank', 'width=900,height=700');
-              if (w) w.onload = function () { w.print(); };
-              return;
-            }
+
+            if (action === 'delete' && !confirm(`تحذير أمني: أنت على وشك حذف عدد (${ids.length}) طلبات نهائياً.\nهل أنت متأكد من رغبتك في المتابعة؟`)) return;
+
+            btnApply.disabled = true;
+            btnApply.innerHTML = '<span class="spinner-border spinner-border-sm"></span> جاري التنفيذ...';
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+
             if (action === 'delete') {
-              if (!confirm('حذف ' + (ids.length > 1 ? ids.length + ' طلبات؟' : 'هذا الطلب؟'))) return;
-              if (ids.length === 1) {
-                var f = document.createElement('form');
-                f.method = 'post';
-                f.action = base + '/delete/' + id;
-                document.body.appendChild(f);
-                f.submit();
-              } else {
-                var f = document.createElement('form');
-                f.method = 'post';
-                f.action = base + '/bulk-delete';
-                var inp = document.createElement('input');
-                inp.type = 'hidden';
-                inp.name = 'ids';
-                inp.value = ids.join(',');
-                f.appendChild(inp);
-                document.body.appendChild(f);
-                f.submit();
-              }
-              return;
+              form.action = '/admin/orders/bulk-delete';
+            } else if (action === 'status') {
+              form.action = '/admin/orders/bulk-status';
+              const statusInput = document.createElement('input');
+              statusInput.type = 'hidden';
+              statusInput.name = 'status';
+              statusInput.value = bulkStatus.value;
+              form.appendChild(statusInput);
             }
-            if (action === 'status') {
-              var newStatus = bulkStatus && bulkStatus.value ? bulkStatus.value : '';
-              if (!newStatus) {
-                alert('اختر الحالة الجديدة');
-                return;
-              }
-              if (ids.length === 1) {
-                var f = document.createElement('form');
-                f.method = 'post';
-                f.action = base + '/status/' + id;
-                var inp = document.createElement('input');
-                inp.type = 'hidden';
-                inp.name = 'status';
-                inp.value = newStatus;
-                f.appendChild(inp);
-                document.body.appendChild(f);
-                f.submit();
-              } else {
-                var f = document.createElement('form');
-                f.method = 'post';
-                f.action = base + '/bulk-status';
-                var s = document.createElement('input');
-                s.type = 'hidden';
-                s.name = 'status';
-                s.value = newStatus;
-                f.appendChild(s);
-                var inp = document.createElement('input');
-                inp.type = 'hidden';
-                inp.name = 'ids';
-                inp.value = ids.join(',');
-                f.appendChild(inp);
-                document.body.appendChild(f);
-                f.submit();
-              }
-            }
+
+            const idsInput = document.createElement('input');
+            idsInput.type = 'hidden';
+            idsInput.name = 'ids';
+            idsInput.value = ids.join(',');
+            form.appendChild(idsInput);
+
+            document.body.appendChild(form);
+            form.submit();
           });
         }
-      })();
+      });
     </script>
+
     <%- include('../partials/scripts') %>

@@ -1,299 +1,416 @@
-<%- include('../partials/head', { title: 'الإعدادات' }) %>
+<%- include('../partials/head', { title: 'إعدادات النظام ومفاتيح الربط' }) %>
   <%- include('../partials/sidebar', { adminUsername }) %>
 
-    <h4 class="mb-4">الإعدادات</h4>
+    <style>
+      .settings-card-header {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+      }
+    </style>
 
-    <!-- قسم مفاتيح API -->
-    <div class="card border-0 shadow-sm mb-4" id="api-keys">
-      <div class="card-header bg-white border-bottom py-3">
-        <h5 class="mb-0"><i class="bi bi-key-fill text-primary me-2"></i>مفاتيح API للتطبيقات</h5>
-        <p class="text-muted small mb-0 mt-1">Consumer Key + Consumer Secret — استخدم الهيدرين
-          <code>X-Consumer-Key</code> و <code>X-Consumer-Secret</code> في طلبات API.</p>
+    <div class="container-fluid py-4 px-4">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+          <h4 class="fw-bold m-0 text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-gear-fill text-primary"></i> إعدادات التشغيل والربط
+          </h4>
+          <p class="text-muted small mt-1 mb-0">إدارة مفاتيح API، الإشعارات، وتسجيل الدخول الاجتماعي.</p>
+        </div>
       </div>
-      <div class="card-body">
+
+      <!-- API KEYS SECTION -->
+      <section id="api-keys" class="mb-5">
+        <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+          <i class="bi bi-key text-warning"></i> مفاتيح API (ربط التطبيقات)
+        </h5>
+
+        <!-- Alerts for New / Regenerated Keys -->
         <% if (typeof newApiKey !=='undefined' && newApiKey) { %>
-          <div class="alert alert-success border-0 d-flex align-items-start mb-4" role="alert">
-            <i class="bi bi-check-circle-fill fs-4 me-3 mt-1"></i>
+          <div class="alert alert-success border-0 shadow-sm d-flex align-items-start mb-4" role="alert">
+            <i class="bi bi-shield-check fs-2 text-success me-3 mt-1"></i>
             <div class="flex-grow-1">
-              <h6 class="alert-heading mb-2">تم إنشاء المفتاح بنجاح</h6>
-              <p class="mb-3 text-dark">انسخ القيم الآن — Consumer Secret لن يُعرض مرة أخرى بعد مغادرة الصفحة.</p>
+              <h6 class="alert-heading fw-bold mb-2">تم إنشاء المفتاح بنجاح!</h6>
+              <p class="mb-3 text-dark small"><strong>تنبيه هام:</strong> يرجى حفظ (Consumer Secret) الآن، لن يتم عرضه
+                مجدداً لدواعي أمنية.</p>
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label small text-muted">Consumer Key</label>
+                  <label class="form-label font-monospace small text-muted fw-bold">Consumer Key</label>
                   <div class="input-group">
                     <input type="text" class="form-control font-monospace bg-white" id="newCk"
-                      value="<%= newApiKey.consumer_key %>" readonly>
-                    <button type="button" class="btn btn-outline-secondary" onclick="copyToClipboard('newCk', this)"
+                      value="<%= newApiKey.consumer_key %>" readonly dir="ltr">
+                    <button type="button" class="btn btn-outline-success" onclick="copyToClipboard('newCk', this)"
                       title="نسخ"><i class="bi bi-clipboard"></i> نسخ</button>
                   </div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label small text-muted">Consumer Secret</label>
+                  <label class="form-label font-monospace small text-muted fw-bold text-danger">Consumer Secret
+                    (سري)</label>
                   <div class="input-group">
-                    <input type="text" class="form-control font-monospace bg-white" id="newCs"
-                      value="<%= newApiKey.consumer_secret %>" readonly>
-                    <button type="button" class="btn btn-outline-secondary" onclick="copyToClipboard('newCs', this)"
-                      title="نسخ"><i class="bi bi-clipboard"></i> نسخ</button>
+                    <input type="text" class="form-control font-monospace bg-white border-success" id="newCs"
+                      value="<%= newApiKey.consumer_secret %>" readonly dir="ltr">
+                    <button type="button" class="btn btn-success" onclick="copyToClipboard('newCs', this)"
+                      title="نسخ السري"><i class="bi bi-clipboard"></i> نسخ السري</button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <% } %>
+
             <% if (typeof regeneratedSecret !=='undefined' && regeneratedSecret) { %>
-              <div class="alert alert-info border-0 d-flex align-items-start mb-4" role="alert">
-                <i class="bi bi-arrow-repeat fs-4 me-3 mt-1"></i>
+              <div class="alert alert-warning border-0 shadow-sm d-flex align-items-start mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle fs-2 text-warning me-3 mt-1"></i>
                 <div class="flex-grow-1">
-                  <h6 class="alert-heading mb-2">تم تجديد Consumer Secret</h6>
-                  <p class="mb-2 text-dark">انسخ القيمة الآن — لن تُعرض مرة أخرى.</p>
-                  <div class="input-group" style="max-width: 400px;">
-                    <input type="text" class="form-control font-monospace bg-white" id="regeneratedSecret"
-                      value="<%= regeneratedSecret %>" readonly>
-                    <button type="button" class="btn btn-outline-secondary"
-                      onclick="copyToClipboard('regeneratedSecret', this)"><i class="bi bi-clipboard"></i> نسخ</button>
+                  <h6 class="alert-heading fw-bold mb-2">تم تجديد المفتاح السري (Consumer Secret)</h6>
+                  <p class="mb-3 text-dark small">الرمز القديم أصبح غير صالح. انسخ الرمز الجديد فوراً وقم بتحديث
+                    تطبيقاتك.</p>
+                  <div class="input-group" style="max-width: 500px;">
+                    <input type="text" class="form-control font-monospace bg-white border-warning"
+                      id="regeneratedSecret" value="<%= regeneratedSecret %>" readonly dir="ltr">
+                    <button type="button" class="btn btn-warning text-dark fw-bold"
+                      onclick="copyToClipboard('regeneratedSecret', this)"><i class="bi bi-clipboard"></i> نسخ
+                      السري</button>
                   </div>
                 </div>
               </div>
               <% } %>
 
-                <!-- نموذج إنشاء مفتاح جديد -->
-                <div class="bg-light rounded-3 p-3 mb-4">
-                  <h6 class="text-dark mb-3"><i class="bi bi-plus-circle me-1"></i> إنشاء مفتاح جديد</h6>
-                  <form method="post" action="/admin/settings/api-keys" class="row g-3 align-items-end">
-                    <div class="col-md-4">
-                      <label class="form-label small">اسم المفتاح</label>
-                      <input type="text" name="name" class="form-control" placeholder="مثل: تطبيق أندرويد" required>
-                    </div>
-                    <div class="col-md-3">
-                      <label class="form-label small">الصلاحية</label>
-                      <select name="permission" class="form-select">
-                        <option value="read_only">قراءة فقط</option>
-                        <option value="read_write">قراءة وكتابة</option>
-                      </select>
-                    </div>
-                    <div class="col-md-3">
-                      <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg me-1"></i> إنشاء
-                        المفتاح</button>
-                    </div>
-                  </form>
-                </div>
+                <div class="row g-4">
+                  <!-- Add New Key Card -->
+                  <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm h-100 border-top border-primary border-4">
+                      <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-plus-circle-dotted me-1"></i> توليد مفتاح
+                          ارتباط جديد</h6>
+                        <p class="small text-muted mb-4">أنشئ مفتاحاً جديداً لربط تطبيق العميل، تطبيق التاجر، أو أي خدمة
+                          خارجية أخرى بقاعدة البيانات.</p>
 
-                <!-- جدول المفاتيح المحفوظة -->
-                <h6 class="text-secondary mb-2">المفاتيح المحفوظة</h6>
-
-                <!-- تحقق من مفتاح (للتأكد أن ما في الملف يطابق اللوحة) -->
-                <div class="alert alert-light border mb-3">
-                  <h6 class="mb-2"><i class="bi bi-shield-check text-success"></i> تحقق من المفتاح</h6>
-                  <p class="small text-muted mb-2">الصق Consumer Key و Consumer Secret من ملف test-api-keys.json للتأكد
-                    أنهما مطابقان لما في قاعدة البيانات.</p>
-                  <div class="row g-2 align-items-end">
-                    <div class="col-md-4">
-                      <label class="form-label small">Consumer Key</label>
-                      <input type="text" class="form-control form-control-sm font-monospace" id="verifyCk"
-                        placeholder="ck_...">
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label small">Consumer Secret</label>
-                      <input type="password" class="form-control form-control-sm font-monospace" id="verifyCs"
-                        placeholder="cs_...">
-                    </div>
-                    <div class="col-md-3">
-                      <button type="button" class="btn btn-sm btn-outline-success w-100" id="btnVerifyKey"><i
-                          class="bi bi-check2-circle me-1"></i> تحقق</button>
+                        <form method="post" action="/admin/settings/api-keys">
+                          <div class="mb-3">
+                            <label class="form-label small fw-bold">اسم المنصة أو التطبيق</label>
+                            <input type="text" name="name" class="form-control bg-light"
+                              placeholder="مثال: تطبيق العميل iOS" required>
+                          </div>
+                          <div class="mb-4">
+                            <label class="form-label small fw-bold">مدى الصلاحيات</label>
+                            <select name="permission" class="form-select bg-light">
+                              <option value="read_only">قراءة فقط (آمن للتطبيقات العامة)</option>
+                              <option value="read_write">قراءة وكتابة (يسمح بإرسال طلبات)</option>
+                            </select>
+                          </div>
+                          <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="bi bi-magic me-1"></i>
+                            توليد المفاتيح</button>
+                        </form>
+                      </div>
                     </div>
                   </div>
-                  <div id="verifyResult" class="mt-2 small"></div>
+
+                  <!-- Key Management & Verification -->
+                  <div class="col-lg-8">
+
+                    <!-- Key Verification Tool -->
+                    <div class="card border-0 shadow-sm mb-4">
+                      <div
+                        class="card-header bg-light py-2 px-3 border-0 d-flex justify-content-between align-items-center">
+                        <span class="small fw-bold text-muted"><i class="bi bi-shield-check text-success me-1"></i> أداة
+                          تشخيص وفحص المفتاح</span>
+                        <button class="btn btn-sm btn-link text-decoration-none" type="button" data-bs-toggle="collapse"
+                          data-bs-target="#verifyKeyForm">
+                          <i class="bi bi-chevron-down"></i> إظهار/إخفاء
+                        </button>
+                      </div>
+                      <div class="collapse" id="verifyKeyForm">
+                        <div class="card-body py-3 px-4 bg-white">
+                          <p class="small text-muted mb-2">قم بلصق المفاتيح للتأكد من صلاحيتها دون الحاجة لاستخدام
+                            Postman أو التطبيق الديمو.</p>
+                          <div class="row g-2 align-items-end">
+                            <div class="col-md-4">
+                              <input type="text" class="form-control form-control-sm font-monospace bg-light"
+                                id="verifyCk" placeholder="ck_..." dir="ltr">
+                            </div>
+                            <div class="col-md-4">
+                              <input type="password" class="form-control form-control-sm font-monospace bg-light"
+                                id="verifyCs" placeholder="cs_..." dir="ltr">
+                            </div>
+                            <div class="col-md-4">
+                              <button type="button" class="btn btn-sm btn-dark w-100" id="btnVerifyKey">فحص
+                                الاتصال</button>
+                            </div>
+                          </div>
+                          <div id="verifyResult" class="mt-2 small font-monospace" dir="rtl"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Existing Keys Table -->
+                    <div class="card border-0 shadow-sm overflow-hidden">
+                      <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold m-0"><i class="bi bi-list-check ms-2"></i> المفاتيح النشطة (Consumer Keys)
+                        </h6>
+                      </div>
+                      <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                          <thead class="bg-light bg-opacity-50">
+                            <tr>
+                              <th class="ps-3">تفاصيل التطبيق</th>
+                              <th>مفتاح العميل (Key)</th>
+                              <th class="text-end pe-4">خيارات</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <% if (!apiKeys || apiKeys.length===0) { %>
+                              <tr>
+                                <td colspan="3" class="text-center text-muted py-5">
+                                  <i class="bi bi-key-fill display-4 d-block mb-3 opacity-25"></i>
+                                  لا توجد مفاتيح وصول حالياً.
+                                </td>
+                              </tr>
+                              <% } else { %>
+                                <% apiKeys.forEach(function(k) { %>
+                                  <tr>
+                                    <td class="ps-3">
+                                      <form method="post" action="/admin/settings/api-keys/edit/<%= k.id %>"
+                                        class="d-flex align-items-center gap-2">
+                                        <input type="text" name="name"
+                                          class="form-control form-control-sm fw-bold border-0 bg-transparent px-1 py-0 shadow-none text-dark focus-ring focus-ring-light"
+                                          value="<%= k.name %>" style="width: 140px;" onchange="this.form.submit()"
+                                          title="اضغط للتعديل ثم انتر">
+                                        <% if (k.permission==='read_write' ) { %>
+                                          <span
+                                            class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-2 py-0 fw-normal small"
+                                            title="صلاحية كتابة"><i class="bi bi-pencil-fill"
+                                              style="font-size:0.6rem;"></i> كتابة</span>
+                                          <input type="hidden" name="permission" value="read_write">
+                                          <% } else { %>
+                                            <span
+                                              class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-0 fw-normal small"
+                                              title="قراءة فقط"><i class="bi bi-eye-fill" style="font-size:0.6rem;"></i>
+                                              قراءة</span>
+                                            <input type="hidden" name="permission" value="read_only">
+                                            <% } %>
+                                      </form>
+                                    </td>
+                                    <td>
+                                      <div class="d-flex flex-column">
+                                        <code class="text-primary small font-monospace"><%= k.consumer_key %></code>
+                                        <small class="text-muted" style="font-size: 0.65rem;">
+                                          <i class="bi bi-clock"></i> أنشئ: <%= new
+                                            Date(k.created_at).toLocaleDateString('en-GB') %>
+                                        </small>
+                                      </div>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                      <div class="dropdown">
+                                        <button class="btn btn-light btn-sm rounded-circle shadow-sm border"
+                                          type="button" data-bs-toggle="dropdown">
+                                          <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                          <li>
+                                            <form action="/admin/settings/api-keys/regenerate-secret/<%= k.id %>"
+                                              method="POST"
+                                              onsubmit="return confirm('تحذير: تجديد السري سيبطل عمل التطبيقات التي تستخدم المفتاح الحالي فوراً. هل أنت متأكد؟')">
+                                              <button class="dropdown-item py-2 text-warning fw-bold" type="submit">
+                                                <i class="bi bi-arrow-repeat ms-2"></i> إصدار سري جديد
+                                              </button>
+                                            </form>
+                                          </li>
+                                          <li>
+                                            <hr class="dropdown-divider">
+                                          </li>
+                                          <li>
+                                            <form action="/admin/settings/api-keys/delete/<%= k.id %>" method="POST"
+                                              onsubmit="return confirm('هل أنت متأكد من حذف اتصال هذا التطبيق؟')">
+                                              <button class="dropdown-item py-2 text-danger" type="submit">
+                                                <i class="bi bi-trash ms-2"></i> إبطال وحذف المفتاح
+                                              </button>
+                                            </form>
+                                          </li>
+                                        </ul>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                  <% }); %>
+                                    <% } %>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+      </section>
+
+      <hr class="my-5 opacity-25">
+
+      <!-- GENERAL SETTINGS SECTION -->
+      <form method="post" action="/admin/settings" id="generalSettingsForm">
+
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2">
+          <h5 class="fw-bold m-0 d-flex align-items-center gap-2">
+            <i class="bi bi-sliders text-success"></i> الإعدادات العامة للمتجر
+          </h5>
+          <button type="submit" class="btn btn-success px-4 rounded-pill shadow-sm"><i class="bi bi-check-lg me-1"></i>
+            حفظ إعدادات النظام</button>
+        </div>
+
+        <div class="row g-4 mb-4">
+
+          <!-- Push Notifications & Auth -->
+          <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-header settings-card-header py-3">
+                <h6 class="fw-bold m-0 text-dark"><i class="bi bi-bell ms-2 text-danger"></i> الإشعارات (OneSignal)</h6>
+              </div>
+              <div class="card-body p-4 bg-light bg-opacity-25">
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-muted">OneSignal App ID</label>
+                  <input type="text" name="onesignal_app_id" class="form-control font-monospace text-muted"
+                    value="<%= settings.onesignal_app_id %>" dir="ltr">
+                </div>
+                <div class="mb-0">
+                  <label class="form-label small fw-bold text-muted">REST API Key</label>
+                  <input type="text" name="onesignal_rest_api_key" class="form-control font-monospace text-muted"
+                    value="<%= settings.onesignal_rest_api_key %>" dir="ltr">
+                </div>
+              </div>
+
+              <div class="card-header settings-card-header py-3 border-top">
+                <h6 class="fw-bold m-0 text-dark"><i class="bi bi-google ms-2 text-info"></i> تسجيل الدخول الاجتماعي
+                  الموحد</h6>
+              </div>
+              <div class="card-body p-4 bg-light bg-opacity-25">
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-muted">Google Client ID</label>
+                  <input type="text" name="google_client_id" class="form-control font-monospace text-muted"
+                    value="<%= settings.google_client_id %>" dir="ltr">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-muted">Google Client Secret</label>
+                  <input type="password" name="google_client_secret" class="form-control font-monospace text-muted"
+                    value="<%= settings.google_client_secret %>" placeholder="••••••••••••••" dir="ltr">
+                </div>
+                <div class="mb-0">
+                  <label class="form-label small fw-bold text-muted"><i class="bi bi-apple"></i> Apple Service
+                    ID</label>
+                  <input type="text" name="apple_service_id" class="form-control font-monospace text-muted"
+                    value="<%= settings.apple_service_id %>" dir="ltr">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Localization & Social -->
+          <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+
+              <div class="card-header settings-card-header py-3 border-bottom-0">
+                <h6 class="fw-bold m-0 text-dark"><i class="bi bi-cash-coin ms-2 text-success"></i> العملة وأسعار الصرف
+                </h6>
+              </div>
+              <div class="card-body p-4 bg-light bg-opacity-25 border-bottom">
+                <div class="row g-3">
+                  <div class="col-sm-6">
+                    <label class="form-label small fw-bold text-muted">رمز العملة الافتراضية</label>
+                    <input type="text" name="default_currency" class="form-control text-center text-primary fw-bold"
+                      value="<%= settings.default_currency || 'LYD' %>" placeholder="LYD, SAR, USD">
+                  </div>
+                  <div class="col-sm-6">
+                    <label class="form-label small fw-bold text-muted">سعر التحويل الأساسي (اختياري)</label>
+                    <div class="input-group">
+                      <input type="number" step="0.01" name="exchange_rate" class="form-control"
+                        value="<%= settings.exchange_rate %>" placeholder="1.00">
+                      <span class="input-group-text bg-white"><i class="bi bi-calculator"></i></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-header settings-card-header py-3 border-bottom-0">
+                <h6 class="fw-bold m-0 text-dark"><i class="bi bi-share ms-2 text-primary"></i> صفحات التواصل الاجتماعي
+                </h6>
+                <p class="small text-muted mb-0 mt-1 fw-normal">تظهر في تطبيق العميل ويتم التحكم بشكلها العام.</p>
+              </div>
+              <div class="card-body p-4 bg-light bg-opacity-25">
+
+                <div class="row g-3 mb-4">
+                  <div class="col-md-6">
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text bg-white border-end-0 text-primary"><i
+                          class="bi bi-facebook"></i></span>
+                      <input type="url" name="social_facebook_url" class="form-control border-start-0"
+                        value="<%= settings.social_facebook_url || '' %>" placeholder="Facebook URL" dir="ltr">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text bg-white border-end-0" style="color:#C13584"><i
+                          class="bi bi-instagram"></i></span>
+                      <input type="url" name="social_instagram_url" class="form-control border-start-0"
+                        value="<%= settings.social_instagram_url || '' %>" placeholder="Insta URL" dir="ltr">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text bg-white border-end-0 text-success"><i
+                          class="bi bi-whatsapp"></i></span>
+                      <input type="url" name="social_whatsapp_url" class="form-control border-start-0"
+                        value="<%= settings.social_whatsapp_url || '' %>" placeholder="WA.me URL" dir="ltr">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text bg-white border-end-0 text-dark"><i class="bi bi-tiktok"></i></span>
+                      <input type="url" name="social_tiktok_url" class="form-control border-start-0"
+                        value="<%= settings.social_tiktok_url || '' %>" placeholder="TikTok URL" dir="ltr">
+                    </div>
+                  </div>
                 </div>
 
-                <div class="table-responsive">
-                  <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                      <tr>
-                        <th>الاسم</th>
-                        <th>Consumer Key</th>
-                        <th>Consumer Secret</th>
-                        <th>الصلاحية</th>
-                        <th width="200">الإجراءات</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <% if (!apiKeys || apiKeys.length===0) { %>
-                        <tr>
-                          <td colspan="5" class="text-center text-muted py-4">
-                            <i class="bi bi-key d-block fs-2 mb-2 opacity-50"></i>
-                            لا توجد مفاتيح. أنشئ مفتاحاً من النموذج أعلاه.
-                          </td>
-                        </tr>
-                        <% } else { %>
-                          <% apiKeys.forEach(function(k) { const showSecret=(typeof newApiKey !=='undefined' &&
-                            newApiKey && newApiKey.consumer_key===k.consumer_key) || (typeof regeneratedKeyId
-                            !=='undefined' && regeneratedKeyId==k.id); const secretDisplay=showSecret ?
-                            k.consumer_secret : ('••••••••' + (k.consumer_secret ? k.consumer_secret.slice(-4) : '' ));
-                            %>
-                            <tr>
-                              <td><strong>
-                                  <%= k.name %>
-                                </strong></td>
-                              <td><code class="small text-break"><%= k.consumer_key %></code></td>
-                              <td><code
-                                  class="small <%= showSecret ? 'text-success' : '' %>"><%= secretDisplay %></code></td>
-                              <td>
-                                <span class="badge bg-<%= k.permission === 'read_write' ? 'primary' : 'secondary' %>">
-                                  <%= k.permission==='read_write' ? 'قراءة وكتابة' : 'قراءة فقط' %>
-                                </span>
-                              </td>
-                              <td>
-                                <div class="d-flex flex-wrap gap-1">
-                                  <form method="post" action="/admin/settings/api-keys/edit/<%= k.id %>"
-                                    class="d-inline">
-                                    <div class="input-group input-group-sm" style="width: auto;">
-                                      <input type="text" name="name" class="form-control form-control-sm"
-                                        style="width:90px" value="<%= k.name %>" placeholder="الاسم" title="الاسم">
-                                      <select name="permission" class="form-select form-select-sm" style="width:100px">
-                                        <option value="read_only" <%=k.permission==='read_only' ? 'selected' : '' %>
-                                          >قراءة فقط</option>
-                                        <option value="read_write" <%=k.permission==='read_write' ? 'selected' : '' %>
-                                          >قراءة وكتابة</option>
-                                      </select>
-                                      <button type="submit" class="btn btn-sm btn-outline-primary"
-                                        title="حفظ التعديل"><i class="bi bi-check-lg"></i></button>
-                                    </div>
-                                  </form>
-                                  <form method="post" action="/admin/settings/api-keys/regenerate-secret/<%= k.id %>"
-                                    class="d-inline"
-                                    onsubmit="return confirm('تجديد الـ Secret سيبطل المفتاح الحالي في التطبيقات. متابعة؟');">
-                                    <button type="submit" class="btn btn-sm btn-outline-warning" title="تجديد Secret"><i
-                                        class="bi bi-arrow-repeat"></i></button>
-                                  </form>
-                                  <form method="post" action="/admin/settings/api-keys/delete/<%= k.id %>"
-                                    class="d-inline" onsubmit="return confirm('حذف هذا المفتاح؟');">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="حذف"><i
-                                        class="bi bi-trash"></i></button>
-                                  </form>
-                                </div>
-                              </td>
-                            </tr>
-                            <% }); %>
-                              <% } %>
-                    </tbody>
-                  </table>
+                <div class="row g-3 p-3 bg-white rounded border">
+                  <div class="col-sm-4">
+                    <label class="form-label small fw-bold text-muted" style="font-size: 0.75rem;">شكل الأيقونات</label>
+                    <select name="social_icon_shape" class="form-select form-select-sm">
+                      <option value="circle" <%=(settings.social_icon_shape || 'circle' )==='circle' ? 'selected' : ''
+                        %>>دائري</option>
+                      <option value="rounded" <%=(settings.social_icon_shape || '' )==='rounded' ? 'selected' : '' %>
+                        >بحواف (Rounded)</option>
+                      <option value="none" <%=(settings.social_icon_shape || '' )==='none' ? 'selected' : '' %>>فري لانس
+                        (بدون خلفية)</option>
+                    </select>
+                  </div>
+                  <div class="col-sm-4">
+                    <label class="form-label small fw-bold text-muted" style="font-size: 0.75rem;">الخلفية
+                      الموحدة</label>
+                    <div class="d-flex align-items-center gap-2">
+                      <input type="color" name="social_icon_bg_color" class="form-control form-control-color p-1"
+                        value="<%= settings.social_icon_bg_color || '#14acec' %>" style="width: 38px; height: 31px;">
+                      <code class="small text-muted"
+                        id="bgColorHex"><%= settings.social_icon_bg_color || '#14acec' %></code>
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <label class="form-label small fw-bold text-muted" style="font-size: 0.75rem;">الرمز الموحد</label>
+                    <div class="d-flex align-items-center gap-2">
+                      <input type="color" name="social_icon_symbol_color" class="form-control form-control-color p-1"
+                        value="<%= settings.social_icon_symbol_color || '#ffffff' %>"
+                        style="width: 38px; height: 31px;">
+                      <code class="small text-muted"
+                        id="smColorHex"><%= settings.social_icon_symbol_color || '#ffffff' %></code>
+                    </div>
+                  </div>
                 </div>
-      </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </form>
     </div>
 
-    <form method="post" action="/admin/settings" class="card border-0 shadow-sm p-4">
-      <h6 class="border-bottom pb-2 mb-3">OneSignal — الإشعارات</h6>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">OneSignal App ID</label>
-          <input type="text" name="onesignal_app_id" class="form-control" value="<%= settings.onesignal_app_id %>">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">REST API Key</label>
-          <input type="text" name="onesignal_rest_api_key" class="form-control"
-            value="<%= settings.onesignal_rest_api_key %>">
-        </div>
-      </div>
-
-      <h6 class="border-bottom pb-2 mb-3 mt-4">الدخول الاجتماعي</h6>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Google Client ID</label>
-          <input type="text" name="google_client_id" class="form-control" value="<%= settings.google_client_id %>">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Google Client Secret</label>
-          <input type="password" name="google_client_secret" class="form-control"
-            value="<%= settings.google_client_secret %>" placeholder="اتركه فارغاً لعدم التغيير">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Apple Service ID</label>
-          <input type="text" name="apple_service_id" class="form-control" value="<%= settings.apple_service_id %>">
-        </div>
-      </div>
-
-      <h6 class="border-bottom pb-2 mb-3 mt-4">العملة وسعر الصرف</h6>
-      <div class="row">
-        <div class="col-md-4 mb-3">
-          <label class="form-label">العملة الافتراضية</label>
-          <input type="text" name="default_currency" class="form-control"
-            value="<%= settings.default_currency || 'LYD' %>" placeholder="مثل LYD أو USD">
-        </div>
-        <div class="col-md-4 mb-3">
-          <label class="form-label">سعر الصرف (مثلاً 1 USD = ? د.ل)</label>
-          <input type="number" step="0.01" name="exchange_rate" class="form-control"
-            value="<%= settings.exchange_rate %>" placeholder="مثال: 4.85">
-        </div>
-      </div>
-
-      <h6 class="border-bottom pb-2 mb-3 mt-4">روابط السوشيال ميديا</h6>
-      <p class="text-muted small mb-3">الروابط تظهر في تطبيق العميل (تبويب حسابي). يمكن اختيار شكل الأيقونة ولون الخلفية
-        ولون الرمز.</p>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">فيسبوك</label>
-          <input type="url" name="social_facebook_url" class="form-control"
-            value="<%= settings.social_facebook_url || '' %>" placeholder="https://facebook.com/...">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">انستقرام</label>
-          <input type="url" name="social_instagram_url" class="form-control"
-            value="<%= settings.social_instagram_url || '' %>" placeholder="https://instagram.com/...">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">واتساب</label>
-          <input type="url" name="social_whatsapp_url" class="form-control"
-            value="<%= settings.social_whatsapp_url || '' %>" placeholder="https://wa.me/...">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">تيك توك</label>
-          <input type="url" name="social_tiktok_url" class="form-control"
-            value="<%= settings.social_tiktok_url || '' %>" placeholder="https://tiktok.com/...">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">يوتيوب</label>
-          <input type="url" name="social_youtube_url" class="form-control"
-            value="<%= settings.social_youtube_url || '' %>" placeholder="https://youtube.com/...">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">تويتر / X</label>
-          <input type="url" name="social_twitter_url" class="form-control"
-            value="<%= settings.social_twitter_url || '' %>" placeholder="https://twitter.com/...">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">تيليجرام</label>
-          <input type="url" name="social_telegram_url" class="form-control"
-            value="<%= settings.social_telegram_url || '' %>" placeholder="https://t.me/...">
-        </div>
-        <div class="col-md-4 mb-3">
-          <label class="form-label">شكل الأيقونة</label>
-          <select name="social_icon_shape" class="form-select">
-            <option value="circle" <%=(settings.social_icon_shape || 'circle' )==='circle' ? 'selected' : '' %>>دائري
-            </option>
-            <option value="rounded" <%=(settings.social_icon_shape || '' )==='rounded' ? 'selected' : '' %>>مربع بزوايا
-              دائرية</option>
-            <option value="square" <%=(settings.social_icon_shape || '' )==='square' ? 'selected' : '' %>>مربع بزوايا
-              حادة</option>
-            <option value="none" <%=(settings.social_icon_shape || '' )==='none' ? 'selected' : '' %>>بدون إطار (الرمز
-              فقط)</option>
-          </select>
-        </div>
-        <div class="col-md-4 mb-3">
-          <label class="form-label">لون خلفية الأيقونة</label>
-          <input type="color" name="social_icon_bg_color" class="form-control form-control-color"
-            value="<%= settings.social_icon_bg_color || '#14acec' %>" title="لون الخلفية">
-        </div>
-        <div class="col-md-4 mb-3">
-          <label class="form-label">لون الرمز</label>
-          <input type="color" name="social_icon_symbol_color" class="form-control form-control-color"
-            value="<%= settings.social_icon_symbol_color || '#ffffff' %>" title="لون الرمز">
-        </div>
-      </div>
-
-      <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
-    </form>
-
     <script>
+      // Copy helper
       function copyToClipboard(inputId, btn) {
         var el = document.getElementById(inputId);
         if (!el) return;
@@ -301,33 +418,55 @@
         el.setSelectionRange(0, 99999);
         try {
           navigator.clipboard.writeText(el.value);
-          var orig = btn.innerHTML;
-          btn.innerHTML = '<i class="bi bi-check"></i> تم النسخ';
-          btn.classList.add('btn-success');
-          btn.classList.remove('btn-outline-secondary');
-          setTimeout(function () { btn.innerHTML = orig; btn.classList.remove('btn-success'); btn.classList.add('btn-outline-secondary'); }, 2000);
+          var origHtml = btn.innerHTML;
+          var origClass = btn.className;
+          btn.innerHTML = '<i class="bi bi-check-all"></i> منسوخ';
+          btn.classList.add('btn-dark', 'text-white');
+          btn.classList.remove('btn-outline-success', 'btn-success', 'btn-warning');
+          setTimeout(function () {
+            btn.innerHTML = origHtml;
+            btn.className = origClass;
+          }, 3000);
         } catch (e) {
           alert('النسخ غير متاح. انسخ من الحقل يدوياً.');
         }
       }
+
+      // Verify key testing
       document.getElementById('btnVerifyKey').onclick = function () {
         var ck = document.getElementById('verifyCk').value.trim();
         var cs = document.getElementById('verifyCs').value.trim();
         var resultEl = document.getElementById('verifyResult');
-        resultEl.innerHTML = '<span class="text-muted">جاري التحقق...</span>';
+
+        if (!ck || !cs) {
+          resultEl.innerHTML = '<span class="text-warning"><i class="bi bi-exclamation-triangle"></i> يرجى إدخال المفتاحين للفحص</span>';
+          return;
+        }
+
+        resultEl.innerHTML = '<span class="text-secondary"><i class="spinner-border spinner-border-sm"></i> فحص الاتصال...</span>';
+
         fetch('/admin/settings/api-keys/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: 'consumerKey=' + encodeURIComponent(ck) + '&consumerSecret=' + encodeURIComponent(cs)
         }).then(function (r) { return r.json(); }).then(function (data) {
           if (data.ok) {
-            resultEl.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> ' + data.message + '</span>';
+            resultEl.innerHTML = '<span class="bg-success text-white px-2 py-1 rounded small"><i class="bi bi-check-circle"></i> ' + data.message + '</span>';
           } else {
-            resultEl.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> ' + (data.message || 'فشل التحقق') + '</span>';
+            resultEl.innerHTML = '<span class="bg-danger text-white px-2 py-1 rounded small"><i class="bi bi-x-circle"></i> ' + (data.message || 'فشل التحقق: تأكد من القيم') + '</span>';
           }
         }).catch(function () {
-          resultEl.innerHTML = '<span class="text-danger">خطأ في الاتصال</span>';
+          resultEl.innerHTML = '<span class="text-danger">فشل الاتصال بالخادم.</span>';
         });
       };
+
+      // Color picker helpers
+      document.querySelector('input[name="social_icon_bg_color"]').addEventListener('input', function (e) {
+        document.getElementById('bgColorHex').innerText = e.target.value;
+      });
+      document.querySelector('input[name="social_icon_symbol_color"]').addEventListener('input', function (e) {
+        document.getElementById('smColorHex').innerText = e.target.value;
+      });
     </script>
+
     <%- include('../partials/scripts') %>

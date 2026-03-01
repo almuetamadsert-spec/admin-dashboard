@@ -1,22 +1,111 @@
-<%- include('../partials/head', { title: page.title_ar }) %>
-<%- include('../partials/sidebar', { adminUsername }) %>
+<%- include('../partials/head', { title: page.title_ar + ' - تعديل المحتوى' }) %>
+  <%- include('../partials/sidebar', { adminUsername }) %>
 
-<h4 class="mb-4"><%= page.title_ar %></h4>
-<form method="post" action="/admin/cms/save/<%= page.slug %>" class="card p-4">
-  <div class="row mb-3">
-    <div class="col-md-6"><label class="form-label">العنوان (عربي)</label><input type="text" name="title_ar" class="form-control" value="<%= page.title_ar %>"></div>
-    <div class="col-md-6"><label class="form-label">العنوان (إنجليزي)</label><input type="text" name="title_en" class="form-control" value="<%= page.title_en %>"></div>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">المحتوى (عربي)</label>
-    <textarea name="content_ar" class="form-control" rows="8"><%= page.content_ar %></textarea>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">المحتوى (إنجليزي)</label>
-    <textarea name="content_en" class="form-control" rows="8"><%= page.content_en %></textarea>
-  </div>
-  <button type="submit" class="btn btn-primary">حفظ</button>
-  <a href="/admin/cms" class="btn btn-outline-secondary">إلغاء</a>
-</form>
+    <style>
+      textarea.form-control {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+      }
 
-<%- include('../partials/scripts') %>
+      textarea.form-control:focus {
+        border-color: var(--bs-primary);
+        box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.1);
+      }
+    </style>
+
+    <div class="container-fluid py-4 px-4">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+              <li class="breadcrumb-item"><a href="/admin/cms" class="text-decoration-none text-muted">إدارة المحتوى</a>
+              </li>
+              <li class="breadcrumb-item active" aria-current="page">
+                <%= page.title_ar %>
+              </li>
+            </ol>
+          </nav>
+          <h4 class="fw-bold m-0 text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-pencil-square text-primary"></i> تحرير: <%= page.title_ar %>
+          </h4>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/admin/cms" class="btn btn-light px-4 border"><i class="bi bi-arrow-right ms-2"></i> عودة للقائمة</a>
+          <button type="submit" form="cmsForm" class="btn btn-primary px-4"><i class="bi bi-check-circle ms-2"></i> حفظ
+            التغييرات</button>
+        </div>
+      </div>
+
+      <!-- Edit Form -->
+      <form id="cmsForm" method="post" action="/admin/cms/save/<%= page.slug %>">
+        <div class="row g-4">
+
+          <!-- Arabic Content (Right Side) -->
+          <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100 border-top border-primary border-4">
+              <div class="card-header bg-white py-3 border-0">
+                <h6 class="fw-bold m-0 text-primary d-flex align-items-center gap-2">
+                  <i class="bi bi-translate"></i> المحتوى باللغة العربية
+                </h6>
+              </div>
+              <div class="card-body p-4 pt-0">
+                <div class="mb-4">
+                  <label class="form-label small text-muted fw-bold">عنوان الصفحة (عربي) *</label>
+                  <input type="text" name="title_ar" class="form-control form-control-lg bg-light"
+                    value="<%= page.title_ar %>" required>
+                </div>
+                <div class="mb-0">
+                  <label class="form-label small text-muted fw-bold d-flex justify-content-between">
+                    <span>نص المحتوى (عربي)</span>
+                    <span class="badge bg-light text-muted border">يدعم النص العادي</span>
+                  </label>
+                  <textarea name="content_ar" class="form-control bg-light" rows="18"
+                    placeholder="اكتب محتوى الصفحة هنا..." dir="rtl"><%= page.content_ar %></textarea>
+                  <div class="form-text mt-2"><i class="bi bi-info-circle me-1"></i> هذا النص سيظهر للمستخدمين الذين
+                    يتصفحون التطبيق باللغة العربية.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- English Content (Left Side) -->
+          <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100 border-top border-info border-4">
+              <div class="card-header bg-white py-3 border-0">
+                <h6 class="fw-bold m-0 text-info d-flex align-items-center gap-2">
+                  <i class="bi bi-translate"></i> English Content
+                </h6>
+              </div>
+              <div class="card-body p-4 pt-0">
+                <div class="mb-4">
+                  <label class="form-label small text-muted fw-bold" dir="ltr">Page Title (English) *</label>
+                  <input type="text" name="title_en" class="form-control form-control-lg bg-light"
+                    value="<%= page.title_en %>" dir="ltr" required>
+                </div>
+                <div class="mb-0">
+                  <label class="form-label small text-muted fw-bold d-flex justify-content-between flex-row-reverse"
+                    dir="ltr">
+                    <span>Page Content (English)</span>
+                    <span class="badge bg-light text-muted border">Plain Text inside App</span>
+                  </label>
+                  <textarea name="content_en" class="form-control bg-light text-start" rows="18"
+                    placeholder="Write page content here..." dir="ltr"><%= page.content_en %></textarea>
+                  <div class="form-text mt-2 text-end" dir="ltr"><i class="bi bi-info-circle ms-1"></i> This content
+                    will be shown to users browsing the app in English.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sticky Footer for Mobile / Easy Access -->
+        <div class="d-block d-md-none mt-4 text-center">
+          <button type="submit" class="btn btn-primary w-100 py-3 mb-2 fw-bold shadow-sm">حفظ التغييرات الآن</button>
+          <a href="/admin/cms" class="btn btn-outline-secondary w-100 py-2">إلغاء وعودة</a>
+        </div>
+      </form>
+    </div>
+
+    <%- include('../partials/scripts') %>

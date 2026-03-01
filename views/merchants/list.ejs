@@ -1,124 +1,251 @@
-<%- include('../partials/head', { title: 'إدارة التجار' }) %>
-<%- include('../partials/sidebar', { adminUsername }) %>
+<%- include('../partials/head', { title: 'إدارة التجار والشركاء' }) %>
+  <%- include('../partials/sidebar', { adminUsername }) %>
 
-<div class="main-content">
-  <div class="d-flex align-items-center justify-content-between mb-4">
-    <div>
-      <h4 class="page-title mb-1">إدارة التجار</h4>
-      <p class="text-muted small mb-0">توجيه الطلبات والإشعارات حسب المدينة. لون البطاقة وحد الطلبات (منطق نظام المعتمد).</p>
-    </div>
-    <div class="d-flex gap-2">
-      <a href="/admin/merchants/export" class="btn btn-outline-success"><i class="bi bi-download me-1"></i> تصدير CSV</a>
-      <a href="/admin/merchants/stats" class="btn btn-outline-info"><i class="bi bi-graph-up me-1"></i> إحصائيات الأداء</a>
-      <a href="/admin/merchants/new" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> إضافة تاجر جديد</a>
-    </div>
-  </div>
-  <% if (typeof query !== 'undefined' && query.import === 'ok') { %>
-  <div class="alert alert-success">تم استيراد التجار بنجاح. عدد: <%= query.count || 0 %>، تخطي: <%= query.skipped || 0 %>.</div>
-  <% } %>
-  <% if (typeof query !== 'undefined' && query.import === 'no_file') { %>
-  <div class="alert alert-warning">لم يتم اختيار ملف للاستيراد.</div>
-  <% } %>
-  <form method="post" action="/admin/merchants/import" enctype="multipart/form-data" class="mb-3 d-flex align-items-end gap-2">
-    <div><label class="form-label small">استيراد تجار (CSV)</label><input type="file" name="csv_file" class="form-control form-control-sm" accept=".csv" required></div>
-    <button type="submit" class="btn btn-outline-primary btn-sm">استيراد</button>
-  </form>
-
-  <form method="get" action="/admin/merchants" class="mb-3">
-    <div class="row g-2 align-items-end">
-      <div class="col-sm-5">
-        <label class="form-label small mb-1">بحث</label>
-        <input type="text" name="q" value="<%= query.q || '' %>" class="form-control form-control-sm" placeholder="الاسم، المتجر، الإيميل، الهاتف...">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h4 class="fw-bold m-0 text-dark">إدارة التجار والشركاء</h4>
+        <p class="text-muted small mb-0">تحليل الأداء، إدارة العمولات، وتوجيه التنبيهات</p>
       </div>
-      <div class="col-sm-3">
-        <label class="form-label small mb-1">المدينة</label>
-        <select name="city_id" class="form-select form-select-sm">
-          <option value="">كل المدن</option>
-          <% cities.forEach(c => { %>
-          <option value="<%= c.id %>" <%= query.city_id == c.id ? 'selected' : '' %>><%= c.name %></option>
-          <% }); %>
-        </select>
-      </div>
-      <div class="col-sm-2">
-        <label class="form-label small mb-1">الحالة</label>
-        <select name="status" class="form-select form-select-sm">
-          <option value="">الكل</option>
-          <option value="active" <%= query.status === 'active' ? 'selected' : '' %>>نشط</option>
-          <option value="inactive" <%= query.status === 'inactive' ? 'selected' : '' %>>معطل</option>
-        </select>
-      </div>
-      <div class="col-sm-2 d-flex gap-1">
-        <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-search me-1"></i>بحث</button>
-        <a href="/admin/merchants" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x-lg"></i></a>
+      <div class="d-flex gap-2">
+        <a href="/admin/merchants/export" class="btn btn-emerald text-white px-3 fw-500">
+          <i class="bi bi-file-earmark-spreadsheet ms-1"></i> تصدير CSV
+        </a>
+        <a href="/admin/merchants/new" class="btn btn-primary px-3 fw-500">
+          <i class="bi bi-person-plus ms-1"></i> إضافة تاجر
+        </a>
       </div>
     </div>
-  </form>
 
-  <div class="card">
-    <div class="card-header d-flex align-items-center">
-      <i class="bi bi-people me-2"></i>
-      قائمة التجار (<%= merchants.length %>)
+    <!-- Merchant Stats Summary -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="card stat-card p-4">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-card-icon" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">
+              <i class="bi bi-people"></i>
+            </div>
+            <div>
+              <h6 class="text-muted mb-1">إجمالي التجار</h6>
+              <h3 class="mb-0 fw-bold">
+                <%= merchants.length %>
+              </h3>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card p-4">
+          <div class="d-flex align-items-center gap-3">
+            <% const activeCount=merchants.filter(m=> m.is_active).length; %>
+              <div class="stat-card-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                <i class="bi bi-check-circle"></i>
+              </div>
+              <div>
+                <h6 class="text-muted mb-1">تجار نشطون</h6>
+                <h3 class="mb-0 fw-bold text-success">
+                  <%= activeCount %>
+                </h3>
+              </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card p-4">
+          <div class="d-flex align-items-center gap-3">
+            <% const citiesCount=new Set(merchants.map(m=> m.city_id)).size; %>
+              <div class="stat-card-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+                <i class="bi bi-geo-alt"></i>
+              </div>
+              <div>
+                <h6 class="text-muted mb-1">تغطية المدن</h6>
+                <h3 class="mb-0 fw-bold">
+                  <%= citiesCount %>
+                </h3>
+              </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card p-4">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-card-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+              <i class="bi bi-graph-up"></i>
+            </div>
+            <div>
+              <h6 class="text-muted mb-1">أداء المبيعات</h6>
+              <a href="/admin/merchants/stats" class="text-decoration-none small fw-500">عرض التفاصيل <i
+                  class="bi bi-chevron-left ms-1"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead>
-          <tr>
-            <th>اسم المالك</th>
-            <th>اسم المتجر</th>
-            <th>المدينة</th>
-            <th>الهاتف</th>
-            <th>البريد</th>
-            <th>لون البطاقة</th>
-            <th>حد الطلبات</th>
-            <th>الحالة</th>
-            <th width="140"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <% merchants.forEach(function(m) { %>
-          <tr>
-            <td><strong><%= m.name %></strong></td>
-            <td><%= m.store_name || '—' %></td>
-            <td><%= m.city_name || '—' %></td>
-            <td><%= m.phone || '—' %></td>
-            <td><%= m.email || '—' %></td>
-            <td>
-              <% if (m.card_color) { %>
-              <span class="d-inline-block rounded" style="width:20px;height:20px;background:<%= m.card_color %>" title="<%= m.card_color %>"></span>
-              <% } else { %>
-              <span class="text-muted small">افتراضي</span>
-              <% } %>
-            </td>
-            <td><%= m.order_limit != null ? m.order_limit : 20 %></td>
-            <td>
-              <% if (m.is_active) { %>
-              <span class="badge bg-success">نشط</span>
-              <% } else { %>
-              <span class="badge bg-secondary">معطل</span>
-              <% } %>
-            </td>
-            <td>
-              <a href="/admin/merchants/edit/<%= m.id %>" class="btn btn-sm btn-outline-primary">
-                <i class="bi bi-pencil"></i>
-              </a>
-              <form action="/admin/merchants/delete/<%= m.id %>" method="post" class="d-inline" onsubmit="return confirm('حذف التاجر «<%= m.name %>»؟');">
-                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-              </form>
-            </td>
-          </tr>
-          <% }); %>
-          <% if (!merchants.length) { %>
-          <tr>
-            <td colspan="9" class="text-center text-muted py-5">
-              <i class="bi bi-people display-6 d-block mb-2"></i>
-              لا يوجد تجار. <a href="/admin/merchants/new">إضافة تاجر جديد</a>
-            </td>
-          </tr>
-          <% } %>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
 
-<%- include('../partials/scripts') %>
+    <% if (typeof query !=='undefined' && query.import==='ok' ) { %>
+      <div class="alert alert-emerald alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> تم استيراد <strong>
+          <%= query.count || 0 %>
+        </strong> تاجر بنجاح. تخطي <strong>
+          <%= query.skipped || 0 %>
+        </strong>.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      <% } %>
+
+        <!-- Filter and Search Card -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <div class="row align-items-center g-3">
+              <div class="col-lg-8">
+                <form method="get" action="/admin/merchants" class="row g-2">
+                  <div class="col-md-5">
+                    <div class="input-group">
+                      <span class="input-group-text bg-light border-0"><i class="bi bi-search text-muted"></i></span>
+                      <input type="text" name="q" value="<%= query.q || '' %>" class="form-control bg-light border-0"
+                        placeholder="بحث بالاسم، المتجر، الهاتف...">
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <select name="city_id" class="form-select bg-light border-0">
+                      <option value="">كل المدن</option>
+                      <% cities.forEach(c=> { %>
+                        <option value="<%= c.id %>" <%=query.city_id==c.id ? 'selected' : '' %>><%= c.name %>
+                        </option>
+                        <% }); %>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <select name="status" class="form-select bg-light border-0">
+                      <option value="">كل الحالات</option>
+                      <option value="active" <%=query.status==='active' ? 'selected' : '' %>>نشط</option>
+                      <option value="inactive" <%=query.status==='inactive' ? 'selected' : '' %>>معطل</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-3 shadow-none">بحث</button>
+                    <a href="/admin/merchants" class="btn btn-light px-3"><i class="bi bi-arrow-clockwise"></i></a>
+                  </div>
+                </form>
+              </div>
+              <div class="col-lg-4 border-start d-none d-lg-block">
+                <form method="post" action="/admin/merchants/import" enctype="multipart/form-data"
+                  class="d-flex align-items-center gap-2 ps-3">
+                  <div class="flex-grow-1">
+                    <input type="file" name="csv_file" class="form-control form-control-sm border-dashed" accept=".csv"
+                      required id="csvImport">
+                  </div>
+                  <button type="submit" class="btn btn-outline-secondary btn-sm px-3">استيراد</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Merchants Table Section -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light bg-opacity-50">
+                  <tr>
+                    <th class="ps-4" width="280">التاجر / المتجر</th>
+                    <th>المدينة</th>
+                    <th>معلومات الاتصال</th>
+                    <th class="text-center">حد الطلبات</th>
+                    <th class="text-center">لون البطاقة</th>
+                    <th class="text-center">الحالة</th>
+                    <th class="text-end pe-4">إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% merchants.forEach(function(m) { %>
+                    <tr>
+                      <td class="ps-4">
+                        <div class="d-flex align-items-center">
+                          <div
+                            class="avatar-sm bg-primary bg-opacity-10 text-primary rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold"
+                            style="width: 40px; height: 40px;">
+                            <%= (m.name || 'T' )[0].toUpperCase() %>
+                          </div>
+                          <div class="d-flex flex-column">
+                            <span class="fw-bold text-dark">
+                              <%= m.name %>
+                            </span>
+                            <span class="text-muted small">
+                              <%= m.store_name || 'بدون متجر' %>
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="text-muted"><i class="bi bi-geo-alt ms-1"></i>
+                          <%= m.city_name || '—' %>
+                        </span>
+                      </td>
+                      <td>
+                        <div class="d-flex flex-column small">
+                          <span class="text-secondary"><i class="bi bi-phone ms-2"></i>
+                            <%= m.phone || '—' %>
+                          </span>
+                          <span class="text-muted"><i class="bi bi-envelope ms-2"></i>
+                            <%= m.email || '—' %>
+                          </span>
+                        </div>
+                      </td>
+                      <td class="text-center">
+                        <span class="badge bg-light text-dark fw-bold px-3">
+                          <%= m.order_limit !=null ? m.order_limit : 20 %>
+                        </span>
+                      </td>
+                      <td class="text-center">
+                        <div class="d-flex justify-content-center">
+                          <% if (m.card_color) { %>
+                            <div class="rounded-pill border"
+                              style="width: 32px; height: 12px; background: <%= m.card_color %>"
+                              title="<%= m.card_color %>"></div>
+                            <% } else { %>
+                              <div class="rounded-pill border" style="width: 32px; height: 12px; background: #10b981;"
+                                title="افتراضي"></div>
+                              <% } %>
+                        </div>
+                      </td>
+                      <td class="text-center">
+                        <% if (m.is_active) { %>
+                          <span class="badge bg-success bg-opacity-10 text-success border-0 px-3 py-2">نشط</span>
+                          <% } else { %>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 px-3 py-2">معطل</span>
+                            <% } %>
+                      </td>
+                      <td class="text-end pe-4">
+                        <div class="d-flex justify-content-end gap-2">
+                          <a href="/admin/merchants/edit/<%= m.id %>" class="btn btn-icon-light">
+                            <i class="bi bi-pencil text-primary"></i>
+                          </a>
+                          <form action="/admin/merchants/delete/<%= m.id %>" method="post" class="m-0"
+                            onsubmit="return confirm('حذف التاجر «<%= m.name %>»؟');">
+                            <button type="submit" class="btn btn-icon-light">
+                              <i class="bi bi-trash text-danger"></i>
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                    <% }); %>
+                      <% if (!merchants.length) { %>
+                        <tr>
+                          <td colspan="7" class="text-center py-5">
+                            <div class="py-5 text-muted">
+                              <i class="bi bi-people display-4 d-block mb-3 opacity-25"></i>
+                              <h5>لا يوجد تجار حالياً</h5>
+                              <p class="small mb-0">جرّب تغيير فلاتر البحث أو أضف تاجراً جديداً</p>
+                            </div>
+                          </td>
+                        </tr>
+                        <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <%- include('../partials/scripts') %>

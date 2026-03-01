@@ -1,57 +1,136 @@
 <%- include('../partials/head', { title: 'تعديل مستخدم التطبيق' }) %>
-<%- include('../partials/sidebar', { adminUsername }) %>
+  <%- include('../partials/sidebar', { adminUsername }) %>
 
-<h4 class="mb-4">ربط حساب التاجر بمتجر</h4>
+    <div class="container-fluid py-4 px-4">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+              <li class="breadcrumb-item"><a href="/admin/app-users" class="text-decoration-none text-muted">مستخدمو
+                  التطبيق</a></li>
+              <li class="breadcrumb-item active" aria-current="page">تعديل حساب</li>
+            </ol>
+          </nav>
+          <h4 class="fw-bold m-0 text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-pencil-square text-primary"></i> إدارة الحساب: <span
+              class="font-monospace text-muted fs-5 ms-2" dir="ltr">
+              <%= user.email %>
+            </span>
+          </h4>
+        </div>
+      </div>
 
-<% if (!merchants || merchants.length === 0) { %>
-<div class="alert alert-warning">لا يوجد تجار. <a href="/admin/merchants">أضف تاجراً</a> أولاً ثم ارجع لربط الحساب به.</div>
-<% } %>
+      <% if (!merchants || merchants.length===0) { %>
+        <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center gap-2 mb-4">
+          <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+          <span>لا يوجد تجار حالياً بقاعدة البيانات. <a href="/admin/merchants"
+              class="fw-bold text-decoration-underline">أضف تاجراً</a> أولاً لكي تتمكن من ربط الحسابات التجارية.</span>
+        </div>
+        <% } %>
 
-<div class="card">
-  <div class="card-body">
-    <form method="post" action="/admin/app-users/edit/<%= user.id %>">
-      <div class="mb-3">
-        <label class="form-label">الإيميل</label>
-        <input type="text" class="form-control" value="<%= user.email %>" readonly>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">الرتبة</label>
-        <select name="role" class="form-select" id="editRole">
-          <option value="customer" <%= user.role === 'customer' ? 'selected' : '' %>>عميل</option>
-          <option value="merchant" <%= user.role === 'merchant' ? 'selected' : '' %>>تاجر</option>
-        </select>
-      </div>
-      <div class="mb-3" id="editMerchantWrap">
-        <label class="form-label">ربط بالتاجر (المتجر)</label>
-        <select name="merchant_id" class="form-select">
-          <option value="">— اختر التاجر —</option>
-          <% (merchants || []).forEach(function(m) { %>
-          <option value="<%= m.id %>" <%= user.merchant_id == m.id ? 'selected' : '' %>><%= m.name %> — <%= m.store_name || '' %></option>
-          <% }); %>
-        </select>
-        <p class="form-text text-warning mb-0">حساب التاجر يجب أن يكون مرتبطاً بتاجر من قائمة التجار حتى يعمل في التطبيق.</p>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">كلمة مرور جديدة (اختياري)</label>
-        <input type="password" name="password" class="form-control" placeholder="اتركه فارغاً للإبقاء على الحالية" minlength="4">
-      </div>
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary">حفظ</button>
-        <a href="/admin/app-users" class="btn btn-secondary">إلغاء</a>
-      </div>
-    </form>
-  </div>
-</div>
+          <div class="row">
+            <div class="col-lg-6">
+              <div class="card border-0 shadow-sm border-top border-primary border-4">
+                <div class="card-body p-4">
+                  <form method="post" action="/admin/app-users/edit/<%= user.id %>">
+                    <!-- Email (Readonly typically, but showing it clearly) -->
+                    <div class="mb-4">
+                      <label class="form-label small text-muted fw-bold">البريد الإلكتروني للإدارة</label>
+                      <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i
+                            class="bi bi-envelope text-muted"></i></span>
+                        <input type="text" class="form-control bg-light border-start-0 text-muted font-monospace"
+                          value="<%= user.email %>" readonly dir="ltr" style="text-align: right;">
+                      </div>
+                    </div>
 
-<script>
-(function() {
-  var role = document.getElementById('editRole');
-  var wrap = document.getElementById('editMerchantWrap');
-  if (!role || !wrap) return;
-  function toggle() { wrap.style.display = role.value === 'merchant' ? '' : 'none'; }
-  role.addEventListener('change', toggle);
-  toggle();
-})();
-</script>
+                    <!-- Role -->
+                    <div class="mb-4">
+                      <label class="form-label small text-muted fw-bold">نوع الحساب والصلاحيات الأساسية</label>
+                      <select name="role" class="form-select form-select-lg bg-light" id="editRole">
+                        <option value="customer" <%=user.role==='customer' ? 'selected' : '' %>>عميل (تسوق من التطبيق)
+                        </option>
+                        <option value="merchant" <%=user.role==='merchant' ? 'selected' : '' %>>تاجر (الوصول لإدارة
+                          متجره)</option>
+                      </select>
+                    </div>
 
-<%- include('../partials/scripts') %>
+                    <!-- Merchant Link -->
+                    <div class="mb-4" id="editMerchantWrap" style="display:none;">
+                      <label class="form-label small text-muted fw-bold text-warning d-flex align-items-center gap-1">
+                        <i class="bi bi-link-45deg"></i> ربط الحساب ببيانات عرض التاجر
+                      </label>
+                      <div class="p-3 bg-warning bg-opacity-10 border border-warning rounded">
+                        <select name="merchant_id" class="form-select border-warning mb-2" id="merchantSelect">
+                          <option value="">— يجب اختيار المتجر المرتبط —</option>
+                          <% (merchants || []).forEach(function(m) { %>
+                            <option value="<%= m.id %>" <%=user.merchant_id==m.id ? 'selected' : '' %>>
+                              <%= m.name %> — <%= m.store_name || '(بدون اسم متجر)' %>
+                            </option>
+                            <% }); %>
+                        </select>
+                        <p class="small text-muted mb-0"><i class="bi bi-info-circle ms-1"></i> لكي يتمكن التاجر من
+                          إدارة منتجاته وطلباته في التطبيق، يجب ربط هذا الحساب بالتاجر المعرّف مسبقاً من قسم التجار.</p>
+                      </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-4">
+                      <label class="form-label small text-muted fw-bold">تغيير كلمة المرور</label>
+                      <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-key text-muted"></i></span>
+                        <input type="password" name="password" class="form-control border-start-0"
+                          placeholder="اتركه فارغاً للإبقاء على كلمة المرور الحالية" minlength="4" dir="ltr"
+                          style="text-align: right;">
+                      </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex gap-3 justify-content-end pt-3 border-top mt-4">
+                      <a href="/admin/app-users" class="btn btn-light px-4 border">إلغاء وعودة</a>
+                      <button type="submit" class="btn btn-primary px-5"><i class="bi bi-check-circle ms-2"></i> حفظ
+                        الإعدادات</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6 d-none d-lg-block">
+              <div
+                class="bg-light p-5 rounded-4 h-100 d-flex flex-column align-items-center justify-content-center text-center text-muted border border-dashed">
+                <i class="bi bi-shield-lock display-1 mb-4 text-primary opacity-50"></i>
+                <h5 class="fw-bold mb-3">حماية حسابات التطبيق</h5>
+                <p class="mb-0 mx-4">التحكم في هذه الصفحة يعدل صلاحيات الدخول المباشر من النسخة النهائية لتطبيق المستخدم
+                  والتاجر المبنية بتقنية (Flutter). يرجى التأكد من ربط حساب التاجر بمتجره الصحيح لمشاهدة بياناته.</p>
+              </div>
+            </div>
+          </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const roleSelect = document.getElementById('editRole');
+        const merchantWrap = document.getElementById('editMerchantWrap');
+        const merchantSelect = document.getElementById('merchantSelect');
+
+        function toggleMerchantRequired() {
+          if (roleSelect.value === 'merchant') {
+            merchantWrap.style.display = 'block';
+            merchantSelect.setAttribute('required', 'required');
+          } else {
+            merchantWrap.style.display = 'none';
+            merchantSelect.removeAttribute('required');
+            merchantSelect.value = ''; // clear selection if changing to customer
+          }
+        }
+
+        if (roleSelect && merchantWrap) {
+          roleSelect.addEventListener('change', toggleMerchantRequired);
+          toggleMerchantRequired(); // run on initial load
+        }
+      });
+    </script>
+
+    <%- include('../partials/scripts') %>

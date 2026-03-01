@@ -1,258 +1,583 @@
-<%- include('../partials/head', { title: 'المنتجات' }) %>
+<%- include('../partials/head', { title: 'إدارة المنتجات' }) %>
   <%- include('../partials/sidebar', { adminUsername }) %>
 
-    <h4 class="mb-4">المنتجات</h4>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <div>
-        <a href="/admin/products/new" class="btn btn-primary"><i class="bi bi-plus"></i> إضافة منتج</a>
-        <button type="button" class="btn btn-outline-success ms-2" data-bs-toggle="modal" data-bs-target="#importModal">
-          <i class="bi bi-file-earmark-excel"></i> استيراد من ووكومرس (CSV)
-        </button>
-        <button id="bulkDeleteBtn" class="btn btn-danger ms-2" style="display: none;">
-          <i class="bi bi-trash"></i> حذف المحدد (<span id="selectedCount">0</span>)
-        </button>
+    <style>
+      .product-img-wrapper {
+        position: relative;
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .product-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 2px;
+      }
+
+      .stats-icon-box {
+        width: 54px;
+        height: 54px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .table-premium th {
+        font-weight: 600;
+        color: #6c757d;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+      }
+    </style>
+
+    <div class="container-fluid py-4 px-4 pb-5">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold m-0 text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-box-seam text-primary"></i> مستودع المنتجات
+          </h4>
+          <p class="text-muted small mt-1 mb-0">إدارة المخزون، وتحديث الأسعار والمواصفات لجميع منتجات المتجر.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-light shadow-sm border px-3 fw-bold text-dark" data-bs-toggle="modal"
+            data-bs-target="#importModal">
+            <i class="bi bi-file-earmark-excel text-success ms-1"></i> استيراد CSV
+          </button>
+          <a href="/admin/products/new" class="btn btn-primary px-4 shadow-sm fw-bold">
+            <i class="bi bi-plus-circle ms-1"></i> إضافة منتج جديد
+          </a>
+        </div>
       </div>
-    </div>
-    <div class="card">
-      <div class="table-responsive">
-        <table class="table table-hover mb-0">
-          <thead>
-            <tr>
-              <th style="width: 40px;"><input type="checkbox" id="selectAll"></th>
-              <th>صورة</th>
-              <th>الاسم</th>
-              <th>السعر</th>
-              <th>التخفيض</th>
-              <th>الشركة</th>
-              <th>التصنيف</th>
-              <th>المخزون</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <% products.forEach(function(p) { %>
-              <tr>
-                <td><input type="checkbox" class="product-checkbox" value="<%= p.id %>"></td>
-                <td>
-                  <% if (p.image_path) { %>
-                    <img src="/uploads/<%= p.image_path %>" alt=""
-                      style="width:50px;height:50px;object-fit:cover;border-radius:6px">
-                    <% } else { %>
-                      <span class="text-muted">—</span>
-                      <% } %>
-                </td>
-                <td>
-                  <%= p.name_ar || p.name_en || '—' %>
-                </td>
-                <td>
-                  <%= Number(p.price).toFixed(2) %> د.ل
-                </td>
-                <td>
-                  <%= p.discount_percent ? p.discount_percent + '%' : '—' %>
-                </td>
-                <td>
-                  <%= p.company || '—' %>
-                </td>
-                <td>
-                  <%= p.category_name || '—' %>
-                </td>
-                <td>
-                  <%= p.stock %>
-                </td>
-                <td>
-                  <a href="/admin/products/edit/<%= p.id %>" class="btn btn-sm btn-outline-primary">تعديل</a>
-                  <form action="/admin/products/delete/<%= p.id %>" method="post" class="d-inline"
-                    onsubmit="return confirm('حذف المنتج؟');">
-                    <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
-                  </form>
-                </td>
-              </tr>
-              <% }); %>
-                <% if (!products.length) { %>
-                  <tr>
-                    <td colspan="8" class="text-center text-muted">لا توجد منتجات</td>
-                  </tr>
-                  <% } %>
-          </tbody>
-        </table>
-      </div>
-    </div>
 
-    <% if (totalPages> 1) { %>
-      <nav aria-label="Products pagination" class="mt-4">
-        <ul class="pagination justify-content-center">
-          <li class="page-item <%= currentPage <= 1 ? 'disabled' : '' %>">
-            <a class="page-link" href="?page=<%= currentPage - 1 %>">السابق</a>
-          </li>
-
-          <% for(let i=1; i <=totalPages; i++) { %>
-            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-              <a class="page-link" href="?page=<%= i %>">
-                <%= i %>
-              </a>
-            </li>
-            <% } %>
-
-              <li class="page-item <%= currentPage >= totalPages ? 'disabled' : '' %>">
-                <a class="page-link" href="?page=<%= currentPage + 1 %>">التالي</a>
-              </li>
-        </ul>
-      </nav>
-      <% } %>
-
-        <!-- Modal استيراد المنتجات -->
-        <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <form id="importForm" action="/admin/products/import" method="post" enctype="multipart/form-data">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="importModalLabel">استيراد المنتجات (Excel / CSV)</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
-                </div>
-                <div class="modal-body">
-                  <div class="alert alert-info" role="alert">
-                    يرجى تصدير منتجاتك من WooCommerce بصيغة CSV أو رفع ملف Excel (.xlsx, .xls) هنا. سنتعرف على الأعمدة
-                    الرئيسية كاسم المنتج، السعر، المخزون وغيرها ونقوم بإضافتها لمتجرك الحالي.
-                  </div>
-
-                  <div id="importAlert" style="display: none;"></div>
-
-                  <div class="mb-3">
-                    <label class="form-label fw-bold">اختر ملف Excel او CSV:</label>
-                    <input type="file" class="form-control" name="csv_file"
-                      accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                      required>
-                  </div>
-
-                  <div id="importProgressBox" style="display: none;" class="mt-3">
-                    <div class="d-flex justify-content-between mb-1">
-                      <span id="importProgressText" style="font-size: 14px;">جاري الرفع والمعالجة...</span>
-                    </div>
-                    <div class="progress" style="height: 10px;">
-                      <div id="importProgressBg"
-                        class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar"
-                        style="width: 50%;"></div>
-                    </div>
-                  </div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                  <button type="submit" id="importSubmitBtn" class="btn btn-success">استيراد الآن</button>
-                </div>
-              </form>
+      <!-- Inventory Stats Cards -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm h-100 p-4 border-start border-primary border-4">
+            <div class="d-flex align-items-center gap-3">
+              <div class="stats-icon-box bg-primary bg-opacity-10 text-primary">
+                <i class="bi bi-boxes"></i>
+              </div>
+              <div>
+                <small class="text-muted fw-bold d-block mb-1">إجمالي المنتجات</small>
+                <h3 class="fw-bold m-0 text-dark">
+                  <%= stats.total %>
+                </h3>
+              </div>
             </div>
           </div>
         </div>
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm h-100 p-4 border-start border-success border-4">
+            <div class="d-flex align-items-center gap-3">
+              <div class="stats-icon-box bg-success bg-opacity-10 text-success">
+                <i class="bi bi-check-circle-fill"></i>
+              </div>
+              <div>
+                <small class="text-muted fw-bold d-block mb-1">المنتجات النشطة بالمتجر</small>
+                <h3 class="fw-bold m-0 text-dark">
+                  <%= stats.active %>
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm h-100 p-4 border-start border-warning border-4">
+            <div class="d-flex align-items-center gap-3">
+              <div class="stats-icon-box bg-warning bg-opacity-10 text-warning">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+              </div>
+              <div>
+                <small class="text-muted fw-bold d-block mb-1">قاربت على النفاد</small>
+                <h3 class="fw-bold m-0 text-dark">
+                  <%= stats.lowStock %>
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm h-100 p-4 border-start border-danger border-4">
+            <div class="d-flex align-items-center gap-3">
+              <div class="stats-icon-box bg-danger bg-opacity-10 text-danger">
+                <i class="bi bi-x-circle-fill"></i>
+              </div>
+              <div>
+                <small class="text-muted fw-bold d-block mb-1">نفدت الكمية بالمخزن</small>
+                <h3 class="fw-bold m-0 text-danger">
+                  <%= stats.outOfStock %>
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <script>
-          document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('importForm');
-            if (form) {
-              form.addEventListener('submit', async function (e) {
-                e.preventDefault();
+      <!-- Filter Bar -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <form method="get" action="/admin/products" class="row g-3 align-items-end">
+            <div class="col-lg-5">
+              <label class="form-label small fw-bold text-muted"><i class="bi bi-search me-1"></i> بحث دقيق</label>
+              <div class="input-group">
+                <input type="text" name="q" class="form-control bg-light"
+                  placeholder="ابحث باسم المنتج أوالعلامة التجارية..." value="<%= filters.q %>">
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-4">
+              <label class="form-label small fw-bold text-muted"><i class="bi bi-tags me-1"></i> تصفية بالتصنيف</label>
+              <select name="category_id" class="form-select bg-light">
+                <option value="">كافة التصنيفات</option>
+                <% categories.forEach(cat=> { %>
+                  <option value="<%= cat.id %>" <%=filters.category_id==cat.id ? 'selected' : '' %>><%= cat.name_ar %>
+                  </option>
+                  <% }) %>
+              </select>
+            </div>
+            <div class="col-lg-2 col-md-4">
+              <label class="form-label small fw-bold text-muted"><i class="bi bi-toggle-on me-1"></i> الحالة</label>
+              <select name="is_active" class="form-select bg-light">
+                <option value="">الكل</option>
+                <option value="1" <%=filters.is_active==='1' ? 'selected' : '' %>>نشط (معروض)</option>
+                <option value="0" <%=filters.is_active==='0' ? 'selected' : '' %>>غير نشط (مخفي)</option>
+              </select>
+            </div>
+            <div class="col-lg-2 col-md-4">
+              <div class="d-flex gap-2 w-100">
+                <button type="submit" class="btn btn-primary flex-grow-1 fw-bold"><i class="bi bi-funnel-fill"></i>
+                  تطبيق</button>
+                <a href="/admin/products" class="btn btn-light border px-3" title="إلغاء الفلاتر"><i
+                    class="bi bi-x-lg text-danger"></i></a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
 
-                const formData = new FormData(form);
-                const btn = document.getElementById('importSubmitBtn');
-                const alertBox = document.getElementById('importAlert');
-                const progressBox = document.getElementById('importProgressBox');
-                const progressBg = document.getElementById('importProgressBg');
-                const progressText = document.getElementById('importProgressText');
+      <!-- Products Table -->
+      <div class="card border-0 shadow-sm overflow-hidden border-top border-primary border-3">
 
-                alertBox.style.display = 'none';
-                btn.disabled = true;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> جاري الرفع والتحليل...';
+        <!-- Table Toolbar -->
+        <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-3">
+            <div class="form-check m-0 ms-2">
+              <input type="checkbox" class="form-check-input border-secondary" id="selectAll"
+                style="transform: scale(1.1);">
+            </div>
+            <button id="bulkDeleteBtn"
+              class="btn btn-danger btn-sm shadow-sm rounded-pill px-3 fw-bold animate__animated animate__fadeIn"
+              style="display: none;">
+              <i class="bi bi-trash-fill ms-1"></i> حذف المحدد (<span id="selectedCount">0</span>)
+            </button>
+          </div>
+          <div>
+            <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-normal">
+              <i class="bi bi-list-ul text-primary ms-1"></i> إجمالي النتائج: <strong>
+                <%= totalProducts %>
+              </strong>
+            </span>
+          </div>
+        </div>
 
-                try {
-                  progressBox.style.display = 'block';
-                  progressBg.style.width = '50%';
-                  progressText.innerText = 'يتم الآن قراءة وتحليل الملف...';
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 table-premium">
+            <thead class="bg-light bg-opacity-75">
+              <tr>
+                <th style="width: 40px;" class="ps-4"></th>
+                <th>المنتج الدليل</th>
+                <th>التصنيف الدليل</th>
+                <th class="text-center">السعر</th>
+                <th class="text-center">المخزون المتوفر</th>
+                <th class="text-center">حالة العرض</th>
+                <th class="text-end pe-4" style="width: 80px;">إدارة</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% products.forEach(function(p) { %>
+                <tr>
+                  <td class="ps-4">
+                    <input type="checkbox" class="product-checkbox form-check-input border-secondary"
+                      value="<%= p.id %>">
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="product-img-wrapper shadow-sm">
+                        <% if (p.image_path) { %>
+                          <img src="/uploads/<%= p.image_path %>" alt="Product Image">
+                          <% } else { %>
+                            <i class="bi bi-image text-muted fs-4"></i>
+                            <% } %>
+                      </div>
+                      <div>
+                        <h6 class="fw-bold m-0 text-dark text-truncate" style="max-width: 200px;"
+                          title="<%= p.name_ar %>">
+                          <%= p.name_ar %>
+                        </h6>
+                        <div class="d-flex align-items-center gap-1 mt-1">
+                          <% if (p.company) { %>
+                            <span
+                              class="badge bg-secondary bg-opacity-10 text-secondary border px-2 border-secondary border-opacity-25 rounded-pill"
+                              style="font-size:0.6rem;">
+                              <i class="bi bi-building"></i>
+                              <%= p.company %>
+                            </span>
+                            <% } %>
+                              <% if (p.colors || p.sizes) { %>
+                                <span
+                                  class="badge bg-info bg-opacity-10 text-info border px-2 border-info border-opacity-25 rounded-pill"
+                                  style="font-size:0.6rem;">
+                                  <i class="bi bi-sliders"></i> خيارات
+                                </span>
+                                <% } %>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="text-dark fw-bold small">
+                      <i class="bi bi-tag text-muted me-1 dropdown d-inline-block"></i>
+                      <%= p.category_name || '— بدون تصنيف —' %>
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <div class="d-flex flex-column align-items-center">
+                      <% if (p.discount_percent> 0) {
+                        let discPrice = p.price - (p.price * (p.discount_percent/100));
+                        %>
+                        <span class="fw-bold text-success" style="font-size: 0.95rem;">
+                          <%= Number(discPrice).toFixed(2) %> <small class="text-muted fw-normal">د.ل</small>
+                        </span>
+                        <span class="text-muted text-decoration-line-through" style="font-size: 0.70rem;">
+                          <%= Number(p.price).toFixed(2) %>
+                        </span>
+                        <span class="badge bg-danger rounded-pill px-2 mt-1" style="font-size:0.6rem;">🔻 <%=
+                            p.discount_percent %>%</span>
+                        <% } else { %>
+                          <span class="fw-bold text-dark" style="font-size: 0.95rem;">
+                            <%= Number(p.price).toFixed(2) %> <small class="text-muted fw-normal">د.ل</small>
+                          </span>
+                          <% } %>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <% let stockBg='bg-success bg-opacity-10 text-success border-success' ; let
+                      stockIcon='bi-check2-circle' ; let stockText='متوفر' ; if (p.stock <=0) {
+                      stockBg='bg-danger bg-opacity-10 text-danger border-danger' ; stockIcon='bi-x-circle' ;
+                      stockText='نفد بالكامل' ; } else if (p.stock <=p.low_stock_alert) {
+                      stockBg='bg-warning bg-opacity-10 text-dark border-warning' ; stockIcon='bi-exclamation-circle' ;
+                      stockText='أوشك على النفاد' ; } %>
+                      <div class="d-flex flex-column align-items-center gap-1">
+                        <span class="badge <%= stockBg %> border rounded-pill px-3 py-1 fs-6 shadow-sm font-monospace"
+                          style="min-width: 50px;">
+                          <%= p.stock %>
+                        </span>
+                        <small
+                          class="<%= stockBg.replace('bg-opacity-10', '').replace('border-', 'text-!').split(' ')[1] %> fw-bold"
+                          style="font-size: 0.65rem;">
+                          <i class="bi <%= stockIcon %>"></i>
+                          <%= stockText %>
+                        </small>
+                      </div>
+                  </td>
+                  <td class="text-center">
+                    <% if (p.is_active) { %>
+                      <span class="badge bg-success rounded-pill px-3 py-2 shadow-sm"><i
+                          class="bi bi-eye-fill ms-1"></i> معروض</span>
+                      <% } else { %>
+                        <span class="badge bg-secondary rounded-pill px-3 py-2 shadow-sm"><i
+                            class="bi bi-eye-slash-fill ms-1"></i> مسودة مخفية</span>
+                        <% } %>
+                  </td>
+                  <td class="text-end pe-4">
+                    <div class="dropdown">
+                      <button class="btn btn-light btn-sm rounded-circle border shadow-sm" type="button"
+                        data-bs-toggle="dropdown" style="width: 36px; height: 36px;">
+                        <i class="bi bi-three-dots-vertical"></i>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-1 rounded-3">
+                        <li>
+                          <a class="dropdown-item py-2 px-3 rounded text-dark fw-bold"
+                            href="/admin/products/edit/<%= p.id %>">
+                            <i class="bi bi-pencil-square ms-2 text-primary"></i> <span class="pt-1">تعديل
+                              البيانات</span>
+                          </a>
+                        </li>
+                        <li>
+                          <hr class="dropdown-divider my-1">
+                        </li>
+                        <li>
+                          <form action="/admin/products/delete/<%= p.id %>" method="POST"
+                            onsubmit="return confirm('تأكيد الحذف النهائي للمنتج (هذا الإجراء لا يمكن التراجع عنه)؟')">
+                            <button type="submit"
+                              class="dropdown-item py-2 px-3 rounded text-danger fw-bold hover-bg-danger">
+                              <i class="bi bi-trash-fill ms-2"></i> <span class="pt-1">حذف نهائي</span>
+                            </button>
+                          </form>
+                        </li>
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+                <% }); %>
+                  <% if (!products.length) { %>
+                    <tr>
+                      <td colspan="7" class="text-center py-5">
+                        <div class="text-muted">
+                          <div
+                            class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                            style="width: 80px; height: 80px;">
+                            <i class="bi bi-inbox fs-1 text-secondary opacity-50"></i>
+                          </div>
+                          <h6 class="fw-bold">القائمة فارغة</h6>
+                          <p class="mb-0 small">لم يتم العثور على أي منتجات مطابقة للبحث أو لا توجد منتجات بالمخزن
+                            حالياً.</p>
+                        </div>
+                      </td>
+                    </tr>
+                    <% } %>
+            </tbody>
+          </table>
+        </div>
 
-                  const res = await fetch('/admin/products/import', {
-                    method: 'POST',
-                    body: formData
-                  });
+        <!-- Pagination Footer -->
+        <% if (totalPages> 1) { %>
+          <div
+            class="card-footer bg-white border-top py-4 d-flex justify-content-between align-items-center border-0 px-4">
+            <div class="text-muted small fw-bold">
+              عرض الصفحة <span class="badge bg-light text-dark border px-2 mx-1">
+                <%= currentPage %>
+              </span> من <span class="badge bg-light text-dark border px-2 mx-1">
+                <%= totalPages %>
+              </span>
+            </div>
+            <nav>
+              <ul class="pagination pagination-sm m-0 gap-2">
+                <li class="page-item <%= currentPage <= 1 ? 'disabled' : '' %>">
+                  <a class="page-link rounded-pill px-3 py-2 fw-bold shadow-sm <%= currentPage <= 1 ? 'bg-light text-muted border-0' : 'text-primary border-primary' %>"
+                    href="?<%= queryString ? queryString + '&' : '' %>page=<%= currentPage - 1 %>">السابق</a>
+                </li>
 
-                  const data = await res.json();
-                  progressBg.style.width = '100%';
-                  progressText.innerText = 'اكتملت العملية!';
-                  progressBg.classList.replace('bg-primary', data.success ? 'bg-success' : 'bg-danger');
+                <% let startPage=Math.max(1, currentPage - 2); let endPage=Math.min(totalPages, startPage + 4); if
+                  (endPage - startPage < 4) startPage=Math.max(1, endPage - 4); %>
 
-                  if (data.success) {
-                    alertBox.className = 'alert alert-success mt-3';
-                    alertBox.innerHTML = '<i class="bi bi-check-circle"></i> ' + data.message;
-                    alertBox.style.display = 'block';
-                    setTimeout(() => location.reload(), 2000);
-                  } else {
-                    throw new Error(data.message || 'حدث خطأ غير متوقع');
-                  }
-                } catch (err) {
-                  alertBox.className = 'alert alert-danger mt-3';
-                  alertBox.innerHTML = '<i class="bi bi-exclamation-triangle"></i> ' + err.message;
-                  alertBox.style.display = 'block';
-                  progressBox.style.display = 'none';
-                } finally {
-                  btn.disabled = false;
-                  btn.innerHTML = 'استيراد الآن';
-                }
-              });
-            }
+                  <% for(let i=startPage; i <=endPage; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                      <a class="page-link rounded-circle fw-bold shadow-sm d-flex align-items-center justify-content-center border-0"
+                        style="width: 36px; height: 36px; <%= i === currentPage ? 'background-color: var(--bs-primary);' : 'color: #333; background-color: #f8f9fa;' %>"
+                        href="?<%= queryString ? queryString + '&' : '' %>page=<%= i %>">
+                        <%= i %>
+                      </a>
+                    </li>
+                    <% } %>
 
-            // Bulk Delete Logic
-            const selectAll = document.getElementById('selectAll');
-            const productCheckboxes = document.querySelectorAll('.product-checkbox');
-            const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
-            const selectedCountSpan = document.getElementById('selectedCount');
+                      <li class="page-item <%= currentPage >= totalPages ? 'disabled' : '' %>">
+                        <a class="page-link rounded-pill px-3 py-2 fw-bold shadow-sm border-0 <%= currentPage >= totalPages ? 'bg-light text-muted' : 'bg-primary text-white' %>"
+                          href="?<%= queryString ? queryString + '&' : '' %>page=<%= currentPage + 1 %>">التالي</a>
+                      </li>
+              </ul>
+            </nav>
+          </div>
+          <% } %>
+      </div>
+    </div>
 
-            function updateBulkDeleteUI() {
-              const selected = Array.from(productCheckboxes).filter(cb => cb.checked);
-              if (selected.length > 0) {
-                bulkDeleteBtn.style.display = 'inline-block';
-                selectedCountSpan.innerText = selected.length;
+    <!-- Import Modal (Premium Style) -->
+    <div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+          <div class="modal-header border-0 bg-light pb-4 pt-4 px-4 position-relative">
+            <div class="position-absolute top-0 start-0 w-100 h-100 bg-success bg-opacity-10"></div>
+            <div class="position-relative z-1 d-flex align-items-center w-100">
+              <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm me-3"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-file-earmark-excel-fill text-success fs-3"></i>
+              </div>
+              <div>
+                <h5 class="fw-bold m-0 text-dark">استيراد منتجات خارجية</h5>
+                <p class="small text-muted mb-0 mt-1">عبر ملفات بصيغة CSV أو Excel (WooCommerce)</p>
+              </div>
+              <button type="button" class="btn-close ms-auto align-self-start" data-bs-dismiss="modal"
+                aria-label="Close"></button>
+            </div>
+          </div>
+
+          <form id="importForm" action="/admin/products/import" method="post" enctype="multipart/form-data">
+            <div class="modal-body p-4 bg-white">
+              <p class="small text-muted mb-4 border-start border-3 border-info ps-3 py-1 bg-light rounded-end">
+                النظام يتعرف تلقائياً على الأعمدة القياسية مثل: الاسم، الوصف، السعر العادي، المخزون، والروابط الخاصة
+                بالصور.
+              </p>
+
+              <div id="importAlert" style="display: none;" class="mb-3 rounded-3 shadow-none border"></div>
+
+              <div class="mb-4">
+                <label class="form-label fw-bold text-dark mb-2">اختر الملف من جهازك <span
+                    class="text-danger">*</span></label>
+                <div class="input-group">
+                  <input type="file" class="form-control form-control-lg bg-light fs-6" name="csv_file"
+                    accept=".csv, .xlsx, .xls" required>
+                </div>
+              </div>
+
+              <div id="importProgressBox" style="display: none;" class="mt-4 p-3 border rounded-3 bg-light">
+                <div class="d-flex justify-content-between mb-2">
+                  <span id="importProgressText" class="small fw-bold text-primary"><i
+                      class="spinner-border spinner-border-sm me-1"></i> يتم قراءة الملف ومحاولة تحميل الصور...</span>
+                </div>
+                <div class="progress" style="height: 10px; border-radius: 5px;">
+                  <div id="importProgressBg" class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                    role="progressbar" style="width: 20%;"></div>
+                </div>
+                <p class="small text-muted mt-2 mb-0 text-center" style="font-size:0.7rem;">قد تستغرق هذه العملية دقائق
+                  حسب حجم الملف وسرعة اتصال الخادم بمصادر الصور.</p>
+              </div>
+            </div>
+
+            <div class="modal-footer border-0 p-4 pt-0 bg-white">
+              <div class="row w-100 g-2 m-0">
+                <div class="col-6 p-0 pe-1">
+                  <button type="button" class="btn btn-light w-100 border text-dark fw-bold py-2"
+                    data-bs-dismiss="modal">إلغاء الأمر</button>
+                </div>
+                <div class="col-6 p-0 ps-1">
+                  <button type="submit" id="importSubmitBtn" class="btn btn-success w-100 fw-bold py-2">
+                    <i class="bi bi-cloud-upload-fill me-1"></i> بدء الاستيراد
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .hover-bg-danger:hover {
+        background-color: #dc3545 !important;
+        color: white !important;
+      }
+
+      .product-checkbox {
+        cursor: pointer;
+      }
+    </style>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        // Import Logic
+        const importForm = document.getElementById('importForm');
+        if (importForm) {
+          importForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(importForm);
+            const btn = document.getElementById('importSubmitBtn');
+            const alertBox = document.getElementById('importAlert');
+            const progressBox = document.getElementById('importProgressBox');
+            const progressBg = document.getElementById('importProgressBg');
+            const progressText = document.getElementById('importProgressText');
+
+            alertBox.style.display = 'none';
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> يرجى الانتظار...';
+            progressBox.style.display = 'block';
+            progressBg.style.width = '60%';
+            progressBg.className = 'progress-bar progress-bar-striped progress-bar-animated bg-primary';
+            progressText.innerHTML = '<i class="spinner-border spinner-border-sm me-1"></i> جاري استيراد المنتجات...';
+
+            try {
+              const res = await fetch('/admin/products/import', { method: 'POST', body: formData });
+              const data = await res.json();
+              progressBg.style.width = '100%';
+
+              if (data.success) {
+                progressBg.className = 'progress-bar bg-success';
+                progressText.innerHTML = '<i class="bi bi-check2-all me-1"></i> اكتمل الاستيراد بنجاح!';
+                alertBox.className = 'alert alert-success small py-3 fw-bold';
+                alertBox.innerHTML = '<i class="bi bi-check-circle-fill ms-2 fs-5"></i> ' + data.message;
+                alertBox.style.display = 'block';
+                setTimeout(() => location.reload(), 2000);
               } else {
-                bulkDeleteBtn.style.display = 'none';
+                throw new Error(data.message || 'فشل الاستيراد');
               }
-            }
-
-            if (selectAll) {
-              selectAll.addEventListener('change', function () {
-                productCheckboxes.forEach(cb => cb.checked = this.checked);
-                updateBulkDeleteUI();
-              });
-            }
-
-            productCheckboxes.forEach(cb => {
-              cb.addEventListener('change', updateBulkDeleteUI);
-            });
-
-            if (bulkDeleteBtn) {
-              bulkDeleteBtn.addEventListener('click', async function () {
-                const selectedIds = Array.from(productCheckboxes)
-                  .filter(cb => cb.checked)
-                  .map(cb => cb.value);
-
-                if (selectedIds.length === 0) return;
-
-                if (!confirm(`هل أنت متأكد من حذف ${selectedIds.length} منتج؟`)) return;
-
-                try {
-                  const res = await fetch('/admin/products/bulk-delete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ids: selectedIds })
-                  });
-                  const data = await res.json();
-                  if (data.success) {
-                    alert(data.message);
-                    location.reload();
-                  } else {
-                    alert('خطأ: ' + data.message);
-                  }
-                } catch (err) {
-                  alert('حدث خطأ فني أثناء الحذف');
-                }
-              });
+            } catch (err) {
+              progressBox.style.display = 'none';
+              alertBox.className = 'alert alert-danger small py-3 fw-bold';
+              alertBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill ms-2 fs-5"></i> خطأ: ' + err.message;
+              alertBox.style.display = 'block';
+            } finally {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="bi bi-cloud-upload-fill me-1"></i> إعادة المحاولة';
             }
           });
-        </script>
+        }
 
-        <%- include('../partials/scripts') %>
+        // Bulk Delete Logic
+        const selectAll = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.product-checkbox');
+        const bulkBtn = document.getElementById('bulkDeleteBtn');
+        const countSpan = document.getElementById('selectedCount');
+
+        function updateUI() {
+          const selected = Array.from(checkboxes).filter(cb => cb.checked);
+          bulkBtn.style.display = selected.length > 0 ? 'inline-block' : 'none';
+          countSpan.innerText = selected.length;
+        }
+
+        if (selectAll) {
+          selectAll.addEventListener('change', () => {
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            updateUI();
+          });
+        }
+
+        checkboxes.forEach(cb => cb.addEventListener('change', updateUI));
+
+        if (bulkBtn) {
+          bulkBtn.addEventListener('click', async () => {
+            const ids = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+            if (!confirm(`تحذير نهائي: هل أنت متأكد من حذف ${ids.length} منتج؟ لا يمكن التراجع عن هذا الإجراء.`)) return;
+
+            bulkBtn.disabled = true;
+            bulkBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> جاري الحذف...';
+
+            try {
+              const res = await fetch('/admin/products/bulk-delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids })
+              });
+              const data = await res.json();
+              if (data.success) {
+                location.reload();
+              } else {
+                alert('خطأ: ' + data.message);
+                bulkBtn.disabled = false;
+                bulkBtn.innerHTML = '<i class="bi bi-trash-fill ms-1"></i> حذف المحدد (' + ids.length + ')';
+              }
+            } catch (err) {
+              alert('حدث خطأ فني أثناء المعالجة.');
+              bulkBtn.disabled = false;
+              bulkBtn.innerHTML = '<i class="bi bi-trash-fill ms-1"></i> حذف المحدد (' + ids.length + ')';
+            }
+          });
+        }
+      });
+    </script>
+
+    <%- include('../partials/scripts') %>

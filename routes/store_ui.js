@@ -46,6 +46,15 @@ async function listPage(req, res) {
     db.prepare('SELECT * FROM store_slides ORDER BY sort_order ASC, id ASC').all(),
     getSettings(db)
   ]);
+
+  // Stats for the header
+  const stats = {
+    totalSlides: slides.length,
+    activeInterval: settings.store_slider_interval || '5',
+    hasLogo: !!settings.store_logo_url,
+    layoutType: settings.store_product_layout || 'grid_2'
+  };
+
   const interval = settings.store_slider_interval || '5';
   const productLayout = settings.store_product_layout || 'grid_2';
   const cardBg = settings.store_product_card_bg || '#ffffff';
@@ -77,6 +86,7 @@ async function listPage(req, res) {
 
   res.render('store_ui/list', {
     slides,
+    stats,
     interval,
     productLayout,
     cardBg,

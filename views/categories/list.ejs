@@ -1,251 +1,340 @@
-<%- include('../partials/head', { title: 'التصنيفات' }) %>
+<%- include('../partials/head', { title: 'إدارة التصنيفات' }) %>
   <style>
     .category-icon-preview {
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.1rem;
-      transition: color 0.15s, background 0.15s;
-    }
-
-    .category-icon-preview:not(.icon-adaptive) {
-      background: #f0f0f0;
+      font-size: 1.2rem;
+      transition: all 0.2s ease;
     }
 
     .category-icon-preview.icon-adaptive {
       background: transparent !important;
       color: currentColor;
-      border: 1px solid var(--border-color, #e2e8f0);
-    }
-
-    .category-icon-cell i {
-      font-size: 1.1rem;
-    }
-
-    .category-icon-cell.icon-adaptive {
-      background: transparent !important;
-      color: currentColor;
       border: 1px solid rgba(0, 0, 0, 0.1);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .category-icon-cell.icon-adaptive {
-        border-color: rgba(255, 255, 255, 0.2);
-      }
     }
   </style>
   <%- include('../partials/sidebar', { adminUsername }) %>
-    <% var DEFAULT_ICON_PRESETS=[ { value: 'case_cover' , label: 'غطاء حماية (Case / Cover)' , icon: 'bi-phone' }, {
-      value: 'screen_protector' , label: 'لاصقة حماية الشاشة (Screen Protector)' , icon: 'bi-phone-vibrate' }, {
-      value: 'camera_lens_protector' , label: 'لاصقة حماية الكاميرا (Camera Lens Protector)' , icon: 'bi-camera' }, {
-      value: 'phone_grip' , label: 'مسكة هاتف (Phone Grip / PopSocket)' , icon: 'bi-phone' }, { value: 'phone_strap' ,
-      label: 'ميدالية هاتف (Phone Strap)' , icon: 'bi-phone' }, { value: 'wall_charger' ,
-      label: 'رأس شاحن (Wall Charger / Power Adapter)' , icon: 'bi-plug' }, { value: 'charging_cable' ,
-      label: 'كابل شحن (Charging Cable - Type-C / Lightning)' , icon: 'bi-lightning-charging' }, { value: 'power_bank' ,
-      label: 'شاحن متنقل (Power Bank)' , icon: 'bi-battery-charging' }, { value: 'wireless_charging_pad' ,
-      label: 'قاعدة شحن لاسلكي (Wireless Charging Pad)' , icon: 'bi-broadcast' }, { value: 'car_charger' ,
-      label: 'شاحن سيارة (Car Charger)' , icon: 'bi-car-front' }, { value: 'wired_earphones' ,
-      label: 'سماعات أذن سلكية (Wired Earphones)' , icon: 'bi-headphones' }, { value: 'wireless_earbuds' ,
-      label: 'سماعات بلوتوث (Wireless Earbuds)' , icon: 'bi-headphones' }, { value: 'bluetooth_speaker' ,
-      label: 'مكبر صوت بلوتوث (Bluetooth Speaker)' , icon: 'bi-speaker' }, { value: 'audio_adapter' ,
-      label: 'محول صوت (Audio Adapter - Type-C to 3.5mm)' , icon: 'bi-usb-symbol' }, { value: 'tripod' ,
-      label: 'حامل ثلاثي (Tripod)' , icon: 'bi-camera' }, { value: 'selfie_stick' , label: 'عصا سيلفي (Selfie Stick)' ,
-      icon: 'bi-camera' }, { value: 'gimbal' , label: 'مانع اهتزاز (Gimbal)' , icon: 'bi-camera-video' }, {
-      value: 'ring_light' , label: 'إضاءة حلقية (Ring Light)' , icon: 'bi-brightness-high' }, { value: 'stylus_pen' ,
-      label: 'قلم ذكي (Stylus Pen)' , icon: 'bi-pencil' }, { value: 'car_phone_holder' ,
-      label: 'حامل هاتف للسيارة (Car Phone Holder)' , icon: 'bi-phone' }, { value: 'desktop_stand' ,
-      label: 'حامل مكتب (Desktop Stand)' , icon: 'bi-display' }, { value: 'aux_cable' ,
-      label: 'وصلة تشغيل الوسائط (AUX Cable)' , icon: 'bi-music-note-beamed' }, { value: 'power_bank_portable' ,
-      label: 'باور بانك (Power Bank / Portable Charger)' , icon: 'bi-battery-charging' }, { value: 'solar_power_bank' ,
-      label: 'شاحن طاقة شمسية (Solar Power Bank)' , icon: 'bi-sun' }, { value: 'portable_power_station' ,
-      label: 'محطة طاقة محمولة (Portable Power Station)' , icon: 'bi-lightning-charging' }, { value: 'dslr_camera' ,
-      label: 'كاميرا احترافية (DSLR / Mirrorless Camera)' , icon: 'bi-camera' }, { value: 'action_camera' ,
-      label: 'كاميرا رياضية (Action Camera / GoPro)' , icon: 'bi-camera-video' }, { value: 'security_camera' ,
-      label: 'كاميرا مراقبة ذكية (Smart Security Camera)' , icon: 'bi-camera-video' }, { value: 'external_phone_lenses'
-      , label: 'عدسات هاتف خارجية (External Phone Lenses)' , icon: 'bi-camera' }, { value: 'smartwatch' ,
-      label: 'ساعة ذكية (Smartwatch)' , icon: 'bi-smartwatch' } ]; var iconPresetsList=(typeof iconPresets
-      !=='undefined' && iconPresets && iconPresets.length) ? iconPresets : DEFAULT_ICON_PRESETS;
-      iconPresetsList.forEach(function(p) { if (!p.icon) p.icon='bi-circle' ; }); %>
-      <h4 class="mb-4">التصنيفات</h4>
-      <div class="card mb-3">
-        <div class="card-body">
-          <form id="addCategoryForm" class="row g-3" enctype="multipart/form-data">
-            <div class="col-md-3">
-              <label class="form-label">اسم التصنيف * <span class="text-muted small">(يكتب يدوياً)</span></label>
-              <input type="text" id="name_ar" name="name_ar" class="form-control" required
-                placeholder="أدخل اسم التصنيف">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">رمز الأيقونة</label>
-              <div class="d-flex align-items-center gap-2">
-                <div id="icon_preview" class="category-icon-preview flex-shrink-0" title="معاينة اللون"><i
-                    class="bi bi-tag"></i></div>
-                <select id="icon_name" name="icon_name" class="form-select flex-grow-1">
-                  <option value="">— بدون —</option>
-                  <% iconPresetsList.forEach(function(p) { %>
-                    <option value="<%= p.value %>" data-icon="<%= p.icon || 'bi-circle' %>">
-                      <%= p.label %>
-                    </option>
-                    <% }); %>
-                </select>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">شكل الأيقونة</label>
-              <select id="icon_type" name="icon_type" class="form-select">
-                <option value="circle">دائري</option>
-                <option value="rounded">مربع بزوايا دائرية</option>
-                <option value="sharp">مربع بزوايا حادة</option>
-              </select>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">لون الأيقونة (المحيط)</label>
-              <input type="color" id="icon_color" name="icon_color" class="form-control form-control-color"
-                value="#14acec" title="لون المحيط">
-              <div class="form-check form-check-inline mt-1">
-                <input type="checkbox" class="form-check-input" id="icon_color_transparent"
-                  name="icon_color_transparent">
-                <label class="form-check-label small" for="icon_color_transparent">شفاف</label>
-              </div>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">لون الرمز</label>
-              <input type="color" id="icon_symbol_color" name="icon_symbol_color"
-                class="form-control form-control-color" value="#ffffff" title="لون الرمز">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">شفافية الأيقونة <span id="icon_opacity_val" class="small">100%</span></label>
-              <input type="range" id="icon_opacity" name="icon_opacity" class="form-range" min="0" max="100"
-                value="100">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">ترتيب</label>
-              <input type="number" id="sort_order" name="sort_order" class="form-control" value="0" min="0">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">أيقونة من الجهاز (اختياري)</label>
-              <input type="file" id="icon_file" name="icon" class="form-control" accept="image/*">
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-              <button type="submit" class="btn btn-primary w-100">إضافة</button>
-            </div>
-          </form>
+
+    <div class="container-fluid py-4 px-4">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold m-0 text-dark">تصنيفات المنتجات</h4>
+          <p class="text-muted small mb-0">تنظيم وهيكلة المنتجات وتسهيل عملية التصفح والبحث</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-primary px-4" data-bs-toggle="collapse"
+            data-bs-target="#addCategoryCollapse">
+            <i class="bi bi-plus-lg ms-2"></i> تصنيف جديد
+          </button>
         </div>
       </div>
-      <div class="card">
+
+      <!-- Stats Cards -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 p-3">
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-grid-fill fs-4"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block">إجمالي التصنيفات</small>
+                <h4 class="fw-bold m-0">
+                  <%= stats.total %>
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 p-3 border-start border-info border-4">
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-box-seam fs-4"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block">إجمالي المنتجات</small>
+                <h4 class="fw-bold m-0 text-info">
+                  <%= stats.totalProducts %>
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 p-3 border-start border-warning border-4">
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-lightning-charge fs-4"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block">تصنيفات مميزة</small>
+                <h4 class="fw-bold m-0 text-warning">
+                  <%= stats.highPriority %>
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Category Form -->
+      <div class="collapse mb-4" id="addCategoryCollapse">
+        <div class="card border-0 shadow-sm border-start border-primary border-4">
+          <div class="card-body p-4">
+            <h6 class="fw-bold mb-3 text-dark">إضافة تصنيف جديد للمتجر</h6>
+            <form id="addCategoryForm" class="row g-3" enctype="multipart/form-data">
+              <div class="col-md-3">
+                <label class="form-label small text-muted">اسم التصنيف (بالعربية) *</label>
+                <input type="text" name="name_ar" class="form-control" placeholder="مثال: هواتف ذكية" required>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small text-muted">رمز الأيقونة</label>
+                <div class="d-flex align-items-center gap-2">
+                  <div id="icon_preview" class="category-icon-preview flex-shrink-0 bg-light"><i class="bi bi-tag"></i>
+                  </div>
+                  <select id="icon_name" name="icon_name" class="form-select">
+                    <option value="">— بدون —</option>
+                    <% iconPresets.forEach(function(p) { %>
+                      <option value="<%= p.value %>" data-icon="<%= p.icon || 'bi-circle' %>">
+                        <%= p.label %>
+                      </option>
+                      <% }); %>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small text-muted">شكل الإطار</label>
+                <select name="icon_type" class="form-select">
+                  <option value="circle">دائري</option>
+                  <option value="rounded" selected>مربع دائري</option>
+                  <option value="sharp">مربع حاد</option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small text-muted">لون المحيط</label>
+                <div class="d-flex gap-2 align-items-center">
+                  <input type="color" id="icon_color" name="icon_color" class="form-control form-control-color border-0"
+                    value="#14acec" style="width: 40px; height: 35px;">
+                  <div class="form-check form-check-inline m-0">
+                    <input type="checkbox" class="form-check-input" id="icon_color_transparent"
+                      name="icon_color_transparent">
+                    <label class="form-check-label small" for="icon_color_transparent">شفاف</label>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small text-muted">لون الرمز</label>
+                <input type="color" id="icon_symbol_color" name="icon_symbol_color"
+                  class="form-control form-control-color border-0" value="#ffffff" style="width: 40px; height: 35px;">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small text-muted">الترتيب</label>
+                <input type="number" name="sort_order" class="form-control" value="0">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small text-muted">صورة مخصصة (اختياري)</label>
+                <input type="file" name="icon" class="form-control" accept="image/*">
+              </div>
+              <div class="col-md-5">
+                <label class="form-label small text-muted">الشفافية: <span id="icon_opacity_val">100%</span></label>
+                <input type="range" id="icon_opacity" name="icon_opacity" class="form-range" min="0" max="100"
+                  value="100">
+              </div>
+              <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100 py-2">إضافة التصنيف</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories Table -->
+      <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="card-header bg-white py-3 border-0 d-flex align-items-center justify-content-between">
+          <h5 class="fw-bold m-0"><i class="bi bi-list-task ms-2 text-primary"></i>قائمة التصنيفات الحالية</h5>
+          <span class="text-muted small">عرض <%= categories.length %> تصنيف</span>
+        </div>
+
         <div class="table-responsive">
-          <table class="table table-hover mb-0">
-            <thead>
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light bg-opacity-50">
               <tr>
-                <th>الأيقونة</th>
-                <th>اسم التصنيف</th>
-                <th>الشكل</th>
-                <th>اللون</th>
-                <th>الترتيب</th>
-                <th></th>
+                <th class="ps-4" style="width: 80px;">الأيقونة</th>
+                <th>الاسم والترتيب</th>
+                <th class="text-center">شكل الإطار</th>
+                <th class="text-center">الألوان</th>
+                <th class="text-center">ترتيب العرض</th>
+                <th class="text-end pe-4">الإجراءات</th>
               </tr>
             </thead>
             <tbody id="categoriesTable">
               <% categories.forEach(function(c) { %>
-                <tr data-id="<%= c.id %>" data-icon-type="<%= c.icon_type || 'circle' %>"
-                  data-icon-name="<%= c.icon_name || '' %>"
-                  data-icon-color="<%= (c.icon_color != null && c.icon_color !== '') ? c.icon_color : '#14acec' %>"
-                  data-icon-symbol-color="<%= (c.icon_symbol_color != null && c.icon_symbol_color !== '') ? c.icon_symbol_color : '#ffffff' %>"
-                  data-icon-opacity="<%= c.icon_opacity != null ? Math.min(100, Math.max(0, c.icon_opacity)) : 100 %>">
-                  <td>
-                    <% var catIconPreset=iconPresetsList.filter(function(p){ return p.value===(c.icon_name || '' );
-                      })[0]; var catIconClass=(catIconPreset && catIconPreset.icon) ? catIconPreset.icon : '' ; var
-                      catIconColor=c.icon_color || '#14acec' ; var catSymbolColor=(c.icon_symbol_color !=null &&
-                      c.icon_symbol_color !=='' ) ? c.icon_symbol_color : '#ffffff' ; var catOpacity=c.icon_opacity
-                      !=null ? Math.min(100, Math.max(0, c.icon_opacity)) : 100; var
-                      catIconRadius=(c.icon_type==='circle' ) ? '50%' : (c.icon_type==='rounded' ? '8px' : '0' ); %>
-                      <% var isTransparent=(catIconColor==='transparent' ); %>
-                        <% var bgStyle='transparent' ; if (!isTransparent && catIconColor && catIconColor.length>= 6) {
-                          var h = catIconColor.replace(/^#/,'');
-                          if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
-                          var n = parseInt(h, 16);
-                          if (!isNaN(n)) { var r = (n>>16)&255, g = (n>>8)&255, b = n&255; bgStyle =
-                          'rgba('+r+','+g+','+b+','+(catOpacity/100)+')'; }
-                          else bgStyle = catIconColor;
-                          } else if (!isTransparent && catIconColor) bgStyle = catIconColor;
-                          %>
-                          <% if (c.icon_path) { %>
-                            <span class="d-inline-flex align-items-center justify-content-center"
-                              style="width:36px;height:36px;border-radius:<%= catIconRadius %>;background:<%= bgStyle %>;"><img
-                                src="/uploads/<%= c.icon_path %>" alt=""
-                                style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"></span>
-                            <% } else if (catIconClass) { %>
-                              <span
-                                class="d-inline-flex align-items-center justify-content-center category-icon-cell <%= isTransparent ? 'icon-adaptive' : '' %>"
-                                style="width:36px;height:36px;<%= isTransparent ? 'background:transparent;color:currentColor' : 'background:' + bgStyle + ';color:' + catSymbolColor %>;border-radius:<%= catIconRadius %>;"><i
-                                  class="bi <%= catIconClass %>"></i></span>
-                              <% } else { %>
-                                <span
-                                  class="d-inline-block rounded category-icon-cell <%= isTransparent ? 'icon-adaptive' : '' %>"
-                                  style="width:36px;height:36px;background:<%= bgStyle %>;border-radius:<%= catIconRadius %>;"></span>
-                                <% } %>
-                  </td>
-                  <td><span class="cat-name-ar">
-                      <%= c.name_ar %>
-                    </span></td>
-                  <td><span class="cat-icon-type">
-                      <%= c.icon_type==='circle' ? 'دائري' : c.icon_type==='rounded' ? 'مربع دائري' : 'مربع حاد' %>
-                    </span></td>
-                  <td>
-                    <% var dispColor=c.icon_color || '#14acec' ; var dispSym=(c.icon_symbol_color !=null &&
-                      c.icon_symbol_color !=='' ) ? c.icon_symbol_color : '#fff' ; %>
-                      <% if (dispColor==='transparent' ) { %><span class="text-muted">شفاف</span>
-                        <% } else { %><span class="cat-icon-color" style="color:<%= dispColor %>">●</span> محيط <span
-                            class="cat-icon-color" style="color:<%= dispSym %>">◆</span> رمز<% } %> <span
-                              class="small text-muted">
-                              <%= c.icon_opacity !=null ? c.icon_opacity : 100 %>%
-                            </span>
-                  </td>
-                  <td><span class="cat-sort-order">
-                      <%= c.sort_order !=null ? c.sort_order : 0 %>
-                    </span></td>
-                  <td>
-                    <button type="button" class="btn btn-sm btn-outline-primary btn-edit">تعديل</button>
-                    <button type="button" class="btn btn-sm btn-outline-danger btn-delete">حذف</button>
-                  </td>
-                </tr>
-                <% }); %>
-                  <% if (!categories.length) { %>
-                    <tr>
-                      <td colspan="6" class="text-center text-muted">لا توجد تصنيفات. أضف تصنيفاً من النموذج أعلاه.</td>
-                    </tr>
-                    <% } %>
+                <% const preset=iconPresets.find(p=> p.value === c.icon_name);
+                  const iconClass = preset ? preset.icon : 'bi-tag';
+                  const radius = c.icon_type === 'circle' ? '50%' : (c.icon_type === 'rounded' ? '10px' : '0');
+                  const isTransparent = c.icon_color === 'transparent';
+
+                  let bgStyle = 'transparent';
+                  if (!isTransparent && c.icon_color) {
+                  const hex = c.icon_color.replace('#', '');
+                  const r = parseInt(hex.substring(0, 2), 16);
+                  const g = parseInt(hex.substring(2, 4), 16);
+                  const b = parseInt(hex.substring(4, 6), 16);
+                  bgStyle = `rgba(${r}, ${g}, ${b}, ${(c.icon_opacity || 100) / 100})`;
+                  }
+                  %>
+                  <tr data-id="<%= c.id %>" data-name-ar="<%= c.name_ar %>" data-icon-type="<%= c.icon_type %>"
+                    data-icon-name="<%= c.icon_name %>" data-icon-color="<%= c.icon_color %>"
+                    data-icon-symbol-color="<%= c.icon_symbol_color %>" data-icon-opacity="<%= c.icon_opacity %>"
+                    data-sort-order="<%= c.sort_order %>">
+                    <td class="ps-4">
+                      <% if (c.icon_path) { %>
+                        <div class="category-icon-preview"
+                          style="background: <%= bgStyle %>; border-radius: <%= radius %>;">
+                          <img src="/uploads/<%= c.icon_path %>" style="width: 80%; height: 80%; object-fit: contain;">
+                        </div>
+                        <% } else { %>
+                          <div class="category-icon-preview <%= isTransparent ? 'icon-adaptive' : '' %>"
+                            style="background: <%= isTransparent ? 'transparent' : bgStyle %>; color: <%= isTransparent ? 'currentColor' : (c.icon_symbol_color || '#fff') %>; border-radius: <%= radius %>;">
+                            <i class="bi <%= iconClass %>"></i>
+                          </div>
+                          <% } %>
+                    </td>
+                    <td>
+                      <span class="fw-bold text-dark d-block">
+                        <%= c.name_ar %>
+                      </span>
+                      <small class="text-muted">
+                        <%= c.name_en || '—' %>
+                      </small>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge bg-light text-dark fw-normal border">
+                        <%= c.icon_type==='circle' ? 'دائري' : (c.icon_type==='rounded' ? 'مربع دائري' : 'مربع حاد' ) %>
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <div class="d-flex align-items-center justify-content-center gap-2">
+                        <span class="d-inline-block rounded-circle"
+                          style="width: 12px; height: 12px; background: <%= isTransparent ? '#ccc' : c.icon_color %>;"
+                          title="محيط"></span>
+                        <span class="d-inline-block rounded-circle border"
+                          style="width: 12px; height: 12px; background: <%= c.icon_symbol_color || '#fff' %>;"
+                          title="رمز"></span>
+                        <small class="text-muted">
+                          <%= c.icon_opacity || 100 %>%
+                        </small>
+                      </div>
+                    </td>
+                    <td class="text-center fw-bold">
+                      <%= c.sort_order %>
+                    </td>
+                    <td class="text-end pe-4">
+                      <div class="dropdown">
+                        <button class="btn btn-light btn-sm rounded-circle" type="button" data-bs-toggle="dropdown"
+                          style="width: 32px; height: 32px; padding: 0;">
+                          <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                          <li><button class="dropdown-item py-2 btn-edit" type="button"><i
+                                class="bi bi-pencil ms-2 text-info"></i> تعديل</button></li>
+                          <li>
+                            <hr class="dropdown-divider">
+                          </li>
+                          <li><button class="dropdown-item py-2 text-danger btn-delete" type="button"><i
+                                class="bi bi-trash ms-2"></i> حذف نهائي</button></li>
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                  <% }); %>
+                    <% if (!categories.length) { %>
+                      <tr>
+                        <td colspan="6" class="text-center py-5">
+                          <div class="text-muted opacity-50">
+                            <i class="bi bi-grid-3x3 fs-1 d-block mb-3"></i>
+                            <p class="m-0">لا توجد تصنيفات حالياً</p>
+                          </div>
+                        </td>
+                      </tr>
+                      <% } %>
             </tbody>
           </table>
         </div>
-      </div>
 
-      <!-- modal تعديل -->
-      <div class="modal fade" id="editModal" tabindex="-1">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">تعديل التصنيف</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <!-- Pagination Footer -->
+        <% if (totalPages> 1) { %>
+          <div class="card-footer bg-white border-0 py-4 d-flex justify-content-between align-items-center">
+            <div class="text-muted small">
+              عرض الصفحة <strong>
+                <%= currentPage %>
+              </strong> من <strong>
+                <%= totalPages %>
+              </strong> (إجمالي <strong>
+                <%= totalCount %>
+              </strong> تصنيف)
             </div>
-            <div class="modal-body">
-              <form id="editCategoryForm">
-                <input type="hidden" id="edit_id">
-                <div class="mb-2">
-                  <label class="form-label">اسم التصنيف * <span class="text-muted small">(يكتب يدوياً)</span></label>
-                  <input type="text" id="edit_name_ar" class="form-control" required placeholder="أدخل اسم التصنيف">
-                </div>
-                <div class="mb-2">
-                  <label class="form-label">رمز الأيقونة</label>
+            <nav>
+              <ul class="pagination pagination-sm m-0 gap-1">
+                <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                  <a class="page-link rounded-pill px-3 border-0 shadow-none bg-light text-dark"
+                    href="?page=<%= currentPage - 1 %>">السابق</a>
+                </li>
+                <% for(let i=1; i <=totalPages; i++) { %>
+                  <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                    <a class="page-link rounded-circle border-0 shadow-none d-flex align-items-center justify-content-center"
+                      style="width: 32px; height: 32px;" href="?page=<%= i %>">
+                      <%= i %>
+                    </a>
+                  </li>
+                  <% } %>
+                    <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                      <a class="page-link rounded-pill px-3 border-0 shadow-none bg-light text-dark"
+                        href="?page=<%= currentPage + 1 %>">التالي</a>
+                    </li>
+              </ul>
+            </nav>
+          </div>
+          <% } %>
+      </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header border-0 pt-4 px-4">
+            <h5 class="fw-bold m-0">تعديل التصنيف</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <form id="editCategoryForm">
+              <input type="hidden" id="edit_id">
+              <div class="mb-3">
+                <label class="form-label small text-muted">اسم التصنيف (بالعربية)</label>
+                <input type="text" id="edit_name_ar" class="form-control" required>
+              </div>
+              <div class="row g-3 mb-3">
+                <div class="col-6">
+                  <label class="form-label small text-muted">رمز الأيقونة</label>
                   <div class="d-flex align-items-center gap-2">
-                    <div id="edit_icon_preview" class="category-icon-preview flex-shrink-0" title="معاينة اللون"><i
+                    <div id="edit_icon_preview" class="category-icon-preview flex-shrink-0 bg-light"><i
                         class="bi bi-tag"></i></div>
-                    <select id="edit_icon_name" class="form-select flex-grow-1">
+                    <select id="edit_icon_name" class="form-select">
                       <option value="">— بدون —</option>
-                      <% iconPresetsList.forEach(function(p) { %>
+                      <% iconPresets.forEach(function(p) { %>
                         <option value="<%= p.value %>" data-icon="<%= p.icon || 'bi-circle' %>">
                           <%= p.label %>
                         </option>
@@ -253,201 +342,167 @@
                     </select>
                   </div>
                 </div>
-                <div class="mb-2">
-                  <label class="form-label">شكل الأيقونة</label>
+                <div class="col-6">
+                  <label class="form-label small text-muted">شكل الإطار</label>
                   <select id="edit_icon_type" class="form-select">
                     <option value="circle">دائري</option>
-                    <option value="rounded">مربع بزوايا دائرية</option>
-                    <option value="sharp">مربع بزوايا حادة</option>
+                    <option value="rounded">مربع دائري</option>
+                    <option value="sharp">مربع حاد</option>
                   </select>
                 </div>
-                <div class="mb-2">
-                  <label class="form-label">لون الأيقونة (المحيط)</label>
-                  <input type="color" id="edit_icon_color" class="form-control form-control-color" value="#14acec">
-                  <div class="form-check form-check-inline mt-1">
-                    <input type="checkbox" class="form-check-input" id="edit_icon_color_transparent">
-                    <label class="form-check-label small" for="edit_icon_color_transparent">شفاف</label>
+              </div>
+              <div class="row g-3 mb-3">
+                <div class="col-6">
+                  <label class="form-label small text-muted">لون المحيط</label>
+                  <div class="d-flex gap-2 align-items-center">
+                    <input type="color" id="edit_icon_color" class="form-control form-control-color border-0"
+                      style="width: 40px; height: 35px;">
+                    <div class="form-check m-0">
+                      <input type="checkbox" class="form-check-input" id="edit_icon_color_transparent">
+                      <label class="form-check-label small" for="edit_icon_color_transparent">شفاف</label>
+                    </div>
                   </div>
                 </div>
-                <div class="mb-2">
-                  <label class="form-label">لون الرمز</label>
-                  <input type="color" id="edit_icon_symbol_color" class="form-control form-control-color"
-                    value="#ffffff">
+                <div class="col-6">
+                  <label class="form-label small text-muted">لون الرمز</label>
+                  <input type="color" id="edit_icon_symbol_color" class="form-control form-control-color border-0"
+                    style="width: 40px; height: 35px;">
                 </div>
-                <div class="mb-2">
-                  <label class="form-label">شفافية الأيقونة <span id="edit_icon_opacity_val"
-                      class="small">100%</span></label>
-                  <input type="range" id="edit_icon_opacity" class="form-range" min="0" max="100" value="100">
+              </div>
+              <div class="row g-3 mb-3">
+                <div class="col-6">
+                  <label class="form-label small text-muted">الترتيب</label>
+                  <input type="number" id="edit_sort_order" class="form-control" value="0">
                 </div>
-                <div class="mb-2">
-                  <label class="form-label">ترتيب</label>
-                  <input type="number" id="edit_sort_order" class="form-control" value="0" min="0">
-                </div>
-                <div class="mb-2">
-                  <label class="form-label">أيقونة جديدة من الجهاز (اختياري)</label>
+                <div class="col-6">
+                  <label class="form-label small text-muted">تغيير الأيقونة (ملف)</label>
                   <input type="file" id="edit_icon_file" class="form-control" accept="image/*">
                 </div>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-              <button type="button" class="btn btn-primary" id="editSaveBtn">حفظ</button>
-            </div>
+              </div>
+              <div class="mb-0">
+                <label class="form-label small text-muted">الشفافية: <span
+                    id="edit_icon_opacity_val">100%</span></label>
+                <input type="range" id="edit_icon_opacity" class="form-range" min="0" max="100">
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer border-0 pb-4 px-4">
+            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">إلغاء</button>
+            <button type="button" class="btn btn-primary px-4" id="editSaveBtn">حفظ التغييرات</button>
           </div>
         </div>
       </div>
+    </div>
 
-      <script>
-        const iconPresets = <% - JSON.stringify(iconPresetsList) %>;
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
 
-        function updateIconPreview(selectId, colorId, symbolColorId, opacityId, opacityLabelId, previewId, transparentCheckboxId) {
-          var sel = document.getElementById(selectId);
-          var colorEl = document.getElementById(colorId);
-          var symbolColorEl = symbolColorId ? document.getElementById(symbolColorId) : null;
-          var opacityEl = opacityId ? document.getElementById(opacityId) : null;
-          var preview = document.getElementById(previewId);
-          var transparentCb = transparentCheckboxId ? document.getElementById(transparentCheckboxId) : null;
-          if (!sel || !preview) return;
-          var isTransparent = transparentCb && transparentCb.checked;
-          var bgColor = (colorEl && colorEl.value) ? colorEl.value : '#14acec';
-          var symColor = (symbolColorEl && symbolColorEl.value) ? symbolColorEl.value : '#ffffff';
-          var opacity = (opacityEl && opacityEl.value !== '') ? Math.min(100, Math.max(0, parseInt(opacityEl.value, 10))) : 100;
-          if (opacityLabelId) {
-            var lbl = document.getElementById(opacityLabelId);
-            if (lbl) lbl.textContent = opacity + '%';
-          }
-          var opt = sel.options[sel.selectedIndex];
-          var iconClass = opt && opt.getAttribute('data-icon') ? opt.getAttribute('data-icon') : 'bi-tag';
-          preview.innerHTML = '<i class="bi ' + iconClass + '"></i>';
-          preview.style.opacity = '';
-          if (isTransparent) {
+        function updatePreview(prefix) {
+          const select = document.getElementById(`${prefix}icon_name`);
+          const preview = document.getElementById(`${prefix}icon_preview`);
+          const colorInput = document.getElementById(`${prefix}icon_color`);
+          const symbolInput = document.getElementById(`${prefix}icon_symbol_color`);
+          const opacityInput = document.getElementById(`${prefix}icon_opacity`);
+          const opacityLabel = document.getElementById(`${prefix}icon_opacity_val`);
+          const transCheck = document.getElementById(`${prefix}icon_color_transparent`);
+
+          if (!select || !preview) return;
+
+          const iconClass = select.options[select.selectedIndex].dataset.icon || 'bi-tag';
+          const opacity = opacityInput.value;
+          const color = transCheck.checked ? 'transparent' : colorInput.value;
+          const symbolColor = symbolInput.value;
+
+          opacityLabel.textContent = `${opacity}%`;
+          preview.innerHTML = `<i class="bi ${iconClass}"></i>`;
+
+          if (transCheck.checked) {
             preview.style.background = 'transparent';
             preview.style.color = 'currentColor';
             preview.classList.add('icon-adaptive');
           } else {
-            var bgStyle = bgColor;
-            if (bgColor && bgColor.indexOf('#') === 0) {
-              var h = bgColor.slice(1);
-              if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-              var n = parseInt(h, 16);
-              if (!isNaN(n)) bgStyle = 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + (opacity / 100) + ')';
-            }
-            preview.style.background = bgStyle;
-            preview.style.color = symColor;
+            const hex = color.replace('#', '');
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            preview.style.background = `rgba(${r}, ${g}, ${b}, ${opacity / 100})`;
+            preview.style.color = symbolColor;
             preview.classList.remove('icon-adaptive');
           }
         }
-        function setupIconPreview(selectId, colorId, symbolColorId, opacityId, opacityLabelId, previewId, transparentCheckboxId) {
-          var sel = document.getElementById(selectId);
-          var colorEl = document.getElementById(colorId);
-          var symbolColorEl = symbolColorId ? document.getElementById(symbolColorId) : null;
-          var opacityEl = opacityId ? document.getElementById(opacityId) : null;
-          var transparentCb = transparentCheckboxId ? document.getElementById(transparentCheckboxId) : null;
-          var update = function () { updateIconPreview(selectId, colorId, symbolColorId, opacityId, opacityLabelId, previewId, transparentCheckboxId); };
-          if (sel) sel.addEventListener('change', update);
-          if (colorEl) { colorEl.addEventListener('input', update); colorEl.addEventListener('change', update); }
-          if (symbolColorEl) { symbolColorEl.addEventListener('input', update); symbolColorEl.addEventListener('change', update); }
-          if (opacityEl) { opacityEl.addEventListener('input', update); opacityEl.addEventListener('change', update); }
-          if (transparentCb) transparentCb.addEventListener('change', update);
-          update();
-        }
 
-        document.getElementById('addCategoryForm').onsubmit = async function (e) {
+        ['', 'edit_'].forEach(prefix => {
+          ['icon_name', 'icon_color', 'icon_symbol_color', 'icon_opacity', 'icon_color_transparent'].forEach(suffix => {
+            const el = document.getElementById(`${prefix}${suffix}`);
+            if (el) el.addEventListener('input', () => updatePreview(prefix));
+            if (el) el.addEventListener('change', () => updatePreview(prefix));
+          });
+          updatePreview(prefix);
+        });
+
+        // Add Category
+        document.getElementById('addCategoryForm').addEventListener('submit', async (e) => {
           e.preventDefault();
-          var nameArEl = document.getElementById('name_ar');
-          var nameAr = nameArEl && nameArEl.value ? nameArEl.value.trim() : '';
-          if (!nameAr) {
-            alert('الرجاء إدخال اسم التصنيف (مطلوب).');
-            if (nameArEl) { nameArEl.focus(); nameArEl.select(); }
-            return;
-          }
-          var form = document.getElementById('addCategoryForm');
-          var fd = new FormData(form);
+          const fd = new FormData(e.target);
           if (document.getElementById('icon_color_transparent').checked) fd.set('icon_color', 'transparent');
-          var op = document.getElementById('icon_opacity');
-          fd.set('icon_opacity', (op && op.value !== '') ? op.value : '100');
-          var res = await fetch('/admin/categories', { method: 'POST', body: fd });
-          if (!res.ok) {
-            var err = await res.text();
-            try { var j = JSON.parse(err); err = j.error || err; } catch (_) { }
-            return alert('خطأ: ' + err);
-          }
-          const { id } = await res.json();
-          const tbody = document.getElementById('categoriesTable');
-          const emptyRow = tbody.querySelector('tr td[colspan]');
-          if (emptyRow) emptyRow.closest('tr').remove();
-          location.reload();
-        };
 
-        let editModal, editForm;
-        document.addEventListener('DOMContentLoaded', function () {
-          editModal = new bootstrap.Modal(document.getElementById('editModal'));
-          setupIconPreview('icon_name', 'icon_color', 'icon_symbol_color', 'icon_opacity', 'icon_opacity_val', 'icon_preview', 'icon_color_transparent');
-          setupIconPreview('edit_icon_name', 'edit_icon_color', 'edit_icon_symbol_color', 'edit_icon_opacity', 'edit_icon_opacity_val', 'edit_icon_preview', 'edit_icon_color_transparent');
-          document.getElementById('icon_opacity').addEventListener('input', function () { var v = document.getElementById('icon_opacity_val'); if (v) v.textContent = this.value + '%'; });
-          document.getElementById('edit_icon_opacity').addEventListener('input', function () { var v = document.getElementById('edit_icon_opacity_val'); if (v) v.textContent = this.value + '%'; });
-        });
-        document.getElementById('editModal').addEventListener('shown.bs.modal', function () {
-          updateIconPreview('edit_icon_name', 'edit_icon_color', 'edit_icon_symbol_color', 'edit_icon_opacity', 'edit_icon_opacity_val', 'edit_icon_preview', 'edit_icon_color_transparent');
+          const res = await fetch('/admin/categories', { method: 'POST', body: fd });
+          if (res.ok) location.reload();
+          else alert('حدث خطأ أثناء الإضافة');
         });
 
-        document.getElementById('categoriesTable').addEventListener('click', async function (e) {
-          const tr = e.target.closest('tr[data-id]');
+        // Table Actions
+        document.getElementById('categoriesTable').addEventListener('click', async (e) => {
+          const tr = e.target.closest('tr');
           if (!tr) return;
           const id = tr.dataset.id;
+
           if (e.target.classList.contains('btn-delete')) {
-            if (!confirm('حذف التصنيف؟')) return;
-            await fetch('/admin/categories/' + id, { method: 'DELETE' });
-            tr.remove();
+            if (!confirm('هل أنت متأكد من حذف هذا التصنيف؟')) return;
+            const res = await fetch(`/admin/categories/${id}`, { method: 'DELETE' });
+            if (res.ok) tr.remove();
           }
+
           if (e.target.classList.contains('btn-edit')) {
             document.getElementById('edit_id').value = id;
-            document.getElementById('edit_name_ar').value = tr.querySelector('.cat-name-ar').textContent;
-            document.getElementById('edit_icon_type').value = tr.dataset.iconType || 'circle';
-            document.getElementById('edit_icon_name').value = tr.dataset.iconName || '';
-            var editColor = tr.dataset.iconColor || '#14acec';
-            document.getElementById('edit_icon_color_transparent').checked = (editColor === 'transparent');
-            document.getElementById('edit_icon_color').value = (editColor === 'transparent') ? '#14acec' : editColor;
+            document.getElementById('edit_name_ar').value = tr.dataset.nameAr;
+            document.getElementById('edit_icon_type').value = tr.dataset.iconType;
+            document.getElementById('edit_icon_name').value = tr.dataset.iconName;
+
+            const color = tr.dataset.iconColor;
+            document.getElementById('edit_icon_color_transparent').checked = (color === 'transparent');
+            document.getElementById('edit_icon_color').value = color === 'transparent' ? '#14acec' : color;
             document.getElementById('edit_icon_symbol_color').value = tr.dataset.iconSymbolColor || '#ffffff';
-            var editOp = tr.dataset.iconOpacity !== undefined && tr.dataset.iconOpacity !== '' ? tr.dataset.iconOpacity : '100';
-            document.getElementById('edit_icon_opacity').value = editOp;
-            var editOpVal = document.getElementById('edit_icon_opacity_val');
-            if (editOpVal) editOpVal.textContent = editOp + '%';
-            document.getElementById('edit_sort_order').value = tr.querySelector('.cat-sort-order').textContent;
-            document.getElementById('edit_icon_file').value = '';
+            document.getElementById('edit_icon_opacity').value = tr.dataset.iconOpacity || 100;
+            document.getElementById('edit_sort_order').value = tr.dataset.sortOrder;
+
+            updatePreview('edit_');
             editModal.show();
           }
         });
 
-        document.getElementById('editSaveBtn').onclick = async function () {
-          var editNameAr = document.getElementById('edit_name_ar');
-          var nameAr = editNameAr && editNameAr.value ? editNameAr.value.trim() : '';
-          if (!nameAr) {
-            alert('الرجاء إدخال الاسم بالعربية (مطلوب).');
-            if (editNameAr) { editNameAr.focus(); editNameAr.select(); }
-            return;
-          }
+        // Save Edit
+        document.getElementById('editSaveBtn').addEventListener('click', async () => {
           const id = document.getElementById('edit_id').value;
           const fd = new FormData();
-          fd.append('name_ar', nameAr);
+          fd.append('name_ar', document.getElementById('edit_name_ar').value);
           fd.append('name_en', '');
           fd.append('icon_type', document.getElementById('edit_icon_type').value);
           fd.append('icon_name', document.getElementById('edit_icon_name').value);
           fd.append('icon_color', document.getElementById('edit_icon_color_transparent').checked ? 'transparent' : document.getElementById('edit_icon_color').value);
-          fd.append('icon_symbol_color', document.getElementById('edit_icon_symbol_color').value || '#ffffff');
-          var editOpEl = document.getElementById('edit_icon_opacity');
-          fd.append('icon_opacity', (editOpEl && editOpEl.value !== '') ? editOpEl.value : '100');
+          fd.append('icon_symbol_color', document.getElementById('edit_icon_symbol_color').value);
+          fd.append('icon_opacity', document.getElementById('edit_icon_opacity').value);
           fd.append('sort_order', document.getElementById('edit_sort_order').value);
-          const f = document.getElementById('edit_icon_file').files[0];
-          if (f) fd.append('icon', f);
-          const res = await fetch('/admin/categories/' + id, { method: 'PUT', body: fd });
-          if (!res.ok) {
-            var err = await res.text();
-            try { var j = JSON.parse(err); err = j.error || err; } catch (_) { }
-            return alert('خطأ: ' + err);
-          }
-          editModal.hide();
-          location.reload();
-        };
-      </script>
-      <%- include('../partials/scripts') %>
+
+          const file = document.getElementById('edit_icon_file').files[0];
+          if (file) fd.append('icon', file);
+
+          const res = await fetch(`/admin/categories/${id}`, { method: 'PUT', body: fd });
+          if (res.ok) location.reload();
+          else alert('حدث خطأ أثناء التعديل');
+        });
+      });
+    </script>
+
+    <%- include('../partials/scripts') %>

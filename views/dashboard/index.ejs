@@ -1,125 +1,205 @@
 <%- include('../partials/head', { title: 'الرئيسية' }) %>
-<%- include('../partials/sidebar', { adminUsername }) %>
+  <%- include('../partials/sidebar', { adminUsername }) %>
 
-<h4 class="mb-4">لوحة التحكم</h4>
-<div class="row g-3 mb-4">
-  <div class="col-md-2">
-    <div class="card stat-card h-100">
-      <div class="card-body">
-        <h6 class="text-muted">الطلبات اليوم</h6>
-        <h3><%= ordersToday %></h3>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="fw-bold m-0 text-dark">نظرة عامة على المتجر</h4>
+      <div class="text-muted small">
+        <%= new Date().toLocaleDateString('ar-LY', { weekday: 'long' , year: 'numeric' , month: 'long' , day: 'numeric'
+          }) %>
       </div>
     </div>
-  </div>
-  <div class="col-md-2">
-    <div class="card stat-card h-100">
-      <div class="card-body">
-        <h6 class="text-muted">طلبات الأسبوع</h6>
-        <h3><%= ordersThisWeek %></h3>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-2">
-    <div class="card stat-card h-100">
-      <div class="card-body">
-        <h6 class="text-muted">مبيعات اليوم</h6>
-        <h3><%= Number(todaySales).toFixed(0) %> د.ل</h3>
-        <a href="/admin/sales" class="small">التقارير</a>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-2">
-    <div class="card stat-card h-100">
-      <div class="card-body">
-        <h6 class="text-muted">إجمالي المبيعات</h6>
-        <h3><%= Number(totalSales).toFixed(0) %> د.ل</h3>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-2">
-    <div class="card stat-card h-100">
-      <div class="card-body">
-        <h6 class="text-muted">المنتجات</h6>
-        <h3><%= productsCount %></h3>
-        <a href="/admin/products" class="small">عرض الكل</a>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-2">
-    <div class="card stat-card h-100">
-      <div class="card-body">
-        <h6 class="text-muted">العملاء</h6>
-        <h3><%= customersCount %></h3>
-        <a href="/admin/customers" class="small">عرض الكل</a>
-      </div>
-    </div>
-  </div>
-</div>
 
-<% if (lowStockProducts && lowStockProducts.length) { %>
-<div class="card border-warning mb-4">
-  <div class="card-header bg-warning bg-opacity-25"><i class="bi bi-exclamation-triangle"></i> تنبيه المخزون (منتجات تحت حد التنبيه)</div>
-  <div class="card-body py-2">
-    <ul class="mb-0 list-unstyled">
-      <% lowStockProducts.forEach(function(p) { %>
-      <li><a href="/admin/products/edit/<%= p.id %>"><%= p.name_ar || 'منتج' %></a> — الكمية: <strong><%= p.stock %></strong> (الحد: <%= p.low_stock_alert %>)</li>
-      <% }); %>
-    </ul>
-    <a href="/admin/inventory" class="btn btn-sm btn-outline-warning mt-2">عرض كل التنبيهات</a>
-  </div>
-</div>
-<% } %>
-
-<div class="row">
-  <div class="col-lg-8">
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span>آخر الطلبات</span>
-        <a href="/admin/orders" class="btn btn-sm btn-outline-primary">كل الطلبات</a>
+    <div class="row g-3 mb-4">
+      <!-- Stat Cards -->
+      <div class="col-md-3">
+        <div class="card stat-card p-4">
+          <div class="stat-card-icon" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">
+            <i class="bi bi-cart3"></i>
+          </div>
+          <div class="mt-4 pt-2">
+            <h6>طلبات اليوم</h6>
+            <h3>
+              <%= ordersToday %>
+            </h3>
+            <p class="text-muted mb-0 small">أخر 24 ساعة</p>
+          </div>
+        </div>
       </div>
-      <div class="table-responsive">
-        <table class="table table-sm table-hover mb-0">
-          <thead>
-            <tr>
-              <th>رقم الطلب</th>
-              <th>العميل</th>
-              <th>الهاتف</th>
-              <th>المبلغ</th>
-              <th>الحالة</th>
-              <th>التاريخ</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <% (lastOrders || []).forEach(function(o) { %>
-            <tr>
-              <td><%= o.order_number %></td>
-              <td><%= o.display_name || '—' %></td>
-              <td><%= o.display_phone || '—' %></td>
-              <td><%= Number(o.total_amount).toFixed(2) %> د.ل</td>
-              <td><span class="badge bg-<%= o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'danger' : 'warning' %>"><%= STATUS_LABELS[o.status] || o.status %></span></td>
-              <td><%= new Date(o.created_at).toLocaleDateString('ar-LY') %></td>
-              <td><a href="/admin/orders/view/<%= o.id %>" class="btn btn-sm btn-outline-secondary">عرض</a></td>
-            </tr>
-            <% }); %>
-            <% if (!lastOrders || !lastOrders.length) { %>
-            <tr><td colspan="7" class="text-center text-muted">لا توجد طلبات</td></tr>
-            <% } %>
-          </tbody>
-        </table>
+      <div class="col-md-3">
+        <div class="card stat-card p-4">
+          <div class="stat-card-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+            <i class="bi bi-currency-dollar"></i>
+          </div>
+          <div class="mt-4 pt-2">
+            <h6>مبيعات اليوم</h6>
+            <h3>
+              <%= Number(todaySales).toLocaleString('ar-LY') %> <small class="fw-normal">د.ل</small>
+            </h3>
+            <a href="/admin/sales" class="text-decoration-none small text-primary">عرض التقارير</a>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-  <div class="col-lg-4">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">إجراءات سريعة</h5>
-        <a href="/admin/orders/new" class="btn btn-success w-100 mb-2"><i class="bi bi-cart-plus"></i> طلب جديد</a>
-        <a href="/admin/products/new" class="btn btn-primary w-100 mb-2"><i class="bi bi-plus"></i> منتج جديد</a>
-        <a href="/admin/customers" class="btn btn-outline-secondary w-100">العملاء</a>
+      <div class="col-md-3">
+        <div class="card stat-card p-4">
+          <div class="stat-card-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+            <i class="bi bi-box-seam"></i>
+          </div>
+          <div class="mt-4 pt-2">
+            <h6>المنتجات</h6>
+            <h3>
+              <%= productsCount %>
+            </h3>
+            <a href="/admin/products" class="text-decoration-none small text-primary">إدارة المنتجات</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card p-4">
+          <div class="stat-card-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+            <i class="bi bi-people"></i>
+          </div>
+          <div class="mt-4 pt-2">
+            <h6>العملاء</h6>
+            <h3>
+              <%= customersCount %>
+            </h3>
+            <a href="/admin/customers" class="text-decoration-none small text-primary">قائمة العملاء</a>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<%- include('../partials/scripts') %>
+    <% if (lowStockProducts && lowStockProducts.length) { %>
+      <div class="card border-0 mb-4 shadow-sm" style="border-right: 4px solid var(--brand-warning) !important;">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <i class="bi bi-exclamation-octagon text-warning fs-4 ms-2"></i>
+            <h6 class="mb-0 fw-bold">تنبيه المخزون المنخفض</h6>
+          </div>
+          <div class="row">
+            <% lowStockProducts.forEach(function(p) { %>
+              <div class="col-md-6 col-lg-4 mb-2">
+                <div class="p-2 border rounded bg-light d-flex justify-content-between align-items-center">
+                  <span class="small fw-500 text-truncate ms-2" style="max-width: 150px;">
+                    <%= p.name_ar %>
+                  </span>
+                  <span class="badge bg-white text-danger border">
+                    <%= p.stock %> حبة
+                  </span>
+                </div>
+              </div>
+              <% }); %>
+          </div>
+          <div class="text-start">
+            <a href="/admin/inventory" class="btn btn-sm btn-link text-warning p-0 text-decoration-none fw-bold">إدارة
+              المستودع <i class="bi bi-arrow-left"></i></a>
+          </div>
+        </div>
+      </div>
+      <% } %>
+
+        <div class="row">
+          <div class="col-lg-8">
+            <div class="card h-100">
+              <div class="card-body p-0">
+                <div class="p-4 d-flex justify-content-between align-items-center border-bottom">
+                  <h5 class="fw-bold m-0"><i class="bi bi-receipt ms-2 text-primary"></i>آخر الطلبات</h5>
+                  <a href="/admin/orders" class="btn btn-sm btn-light">كل الطلبات</a>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-hover mb-0">
+                    <thead>
+                      <tr>
+                        <th>الطلب</th>
+                        <th>العميل</th>
+                        <th>المبلغ</th>
+                        <th>الحالة</th>
+                        <th>التاريخ</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% (lastOrders || []).forEach(function(o) { %>
+                        <tr>
+                          <td class="fw-bold">#<%= o.order_number %>
+                          </td>
+                          <td>
+                            <div class="d-flex flex-column">
+                              <span class="small fw-bold">
+                                <%= o.display_name %>
+                              </span>
+                              <span class="text-muted" style="font-size: 0.7rem;">
+                                <%= o.display_phone %>
+                              </span>
+                            </div>
+                          </td>
+                          <td class="fw-bold">
+                            <%= Number(o.total_amount).toFixed(2) %> <small>د.ل</small>
+                          </td>
+                          <td>
+                            <% let badgeClass='bg-warning' ; if(o.status==='delivered' ) badgeClass='bg-success' ; else
+                              if(o.status==='confirmed' ) badgeClass='bg-info' ; else if(o.status==='cancelled' )
+                              badgeClass='bg-danger' ; else if(o.status==='shipped' ) badgeClass='bg-primary' ; %>
+                              <span
+                                class="badge <%= badgeClass %> bg-opacity-10 text-<%= badgeClass.replace('bg-', '') %>">
+                                <%= STATUS_LABELS[o.status] || o.status %>
+                              </span>
+                          </td>
+                          <td class="text-muted small">
+                            <%= new Date(o.created_at).toLocaleDateString('ar-LY') %>
+                          </td>
+                          <td class="text-start"><a href="/admin/orders/view/<%= o.id %>" class="btn btn-sm btn-icon"><i
+                                class="bi bi-eye"></i></a></td>
+                        </tr>
+                        <% }); %>
+                          <% if (!lastOrders || !lastOrders.length) { %>
+                            <tr>
+                              <td colspan="6" class="text-center py-5 text-muted">لا توجد طلبات لعرضها حالياً</td>
+                            </tr>
+                            <% } %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card h-100">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-4"><i class="bi bi-lightning-charge ms-2 text-warning"></i>إجراءات سريعة</h5>
+                <div class="d-grid gap-3">
+                  <a href="/admin/orders/new"
+                    class="btn btn-primary d-flex align-items-center justify-content-center py-3">
+                    <i class="bi bi-cart-plus fs-5 ms-2"></i>
+                    إنشاء طلب بيع جديد
+                  </a>
+                  <a href="/admin/products/new"
+                    class="btn btn-light d-flex align-items-center justify-content-center py-3 border">
+                    <i class="bi bi-plus-circle fs-5 ms-2"></i>
+                    إضافة منتج للمتجر
+                  </a>
+                  <div class="row g-2">
+                    <div class="col-6">
+                      <a href="/admin/customers" class="btn btn-light w-100 py-3 border small">
+                        <i class="bi bi-people d-block mb-1"></i> العملاء
+                      </a>
+                    </div>
+                    <div class="col-6">
+                      <a href="/admin/settings" class="btn btn-light w-100 py-3 border small">
+                        <i class="bi bi-gear d-block mb-1"></i> الإعدادات
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-5 p-3 rounded-4 bg-primary bg-opacity-10">
+                  <p class="small text-primary mb-0"><strong>نصيحة:</strong> يمكنك استخدام اختصارات لوحة المفاتيح لإضافة
+                    منتجات بسرعة.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <%- include('../partials/scripts') %>

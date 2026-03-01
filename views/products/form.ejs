@@ -1,128 +1,307 @@
-<%- include('../partials/head', { title: product ? 'تعديل منتج' : 'منتج جديد' }) %>
+<%- include('../partials/head', { title: product ? 'تعديل بيانات منتج' : 'إضافة منتج جديد' }) %>
   <%- include('../partials/sidebar', { adminUsername }) %>
 
-    <h4 class="mb-4">
-      <%= product ? 'تعديل المنتج' : 'إضافة منتج جديد' %>
-    </h4>
-    <form method="post" action="<%= product ? '/admin/products/edit/' + product.id : '/admin/products' %>"
-      enctype="multipart/form-data" class="card p-4">
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">الاسم (عربي) *</label>
-          <input type="text" name="name_ar" class="form-control" value="<%= product ? product.name_ar : '' %>" required>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">الاسم (إنجليزي)</label>
-          <input type="text" name="name_en" class="form-control" value="<%= product ? product.name_en : '' %>">
-        </div>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">الوصف القصير</label>
-        <textarea name="short_description" class="form-control"
-          rows="2"><%= product ? product.short_description : '' %></textarea>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">الوصف الطويل</label>
-        <textarea name="long_description" class="form-control"
-          rows="4"><%= product ? product.long_description : '' %></textarea>
-      </div>
-      <div class="row">
-        <div class="col-md-4 mb-3">
-          <label class="form-label">السعر (د.ل) *</label>
-          <input type="number" step="0.01" name="price" class="form-control" value="<%= product ? product.price : '' %>"
-            required>
-        </div>
-        <div class="col-md-4 mb-3">
-          <label class="form-label">نسبة التخفيض %</label>
-          <input type="number" step="0.01" name="discount_percent" class="form-control"
-            value="<%= product ? product.discount_percent : 0 %>">
-        </div>
-        <div class="col-md-4 mb-3">
-          <label class="form-label">الشركة</label>
-          <input type="text" name="company" class="form-control" value="<%= product ? product.company : '' %>">
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">التصنيف</label>
-          <select name="category_id" class="form-select">
-            <option value="">— بدون تصنيف —</option>
-            <% categories.forEach(function(c) { %>
-              <option value="<%= c.id %>" <%=product && product.category_id==c.id ? 'selected' : '' %>><%= c.name_ar %>
-              </option>
-              <% }); %>
-          </select>
-        </div>
-        <div class="col-md-3 mb-3">
-          <label class="form-label">الكمية في المخزون</label>
-          <input type="number" name="stock" class="form-control" value="<%= product ? product.stock : 0 %>">
-        </div>
-        <div class="col-md-2 mb-3">
-          <label class="form-label">حد التنبيه عند النفاد</label>
-          <input type="number" name="low_stock_alert" class="form-control"
-            value="<%= product ? (product.low_stock_alert || 0) : 0 %>" placeholder="0 = لا تنبيه">
-        </div>
-        <div class="col-md-2 mb-3">
-          <label class="form-label">إخفاء عند نفاد الكمية</label>
-          <select name="hide_when_out_of_stock" class="form-select">
-            <option value="0" <%=product && !product.hide_when_out_of_stock ? 'selected' : '' %>>لا</option>
-            <option value="1" <%=product && product.hide_when_out_of_stock ? 'selected' : '' %>>نعم</option>
-          </select>
-        </div>
-      </div>
-      <hr class="text-muted">
-      <h6 class="mb-3">خيارات المنتج (اتركها فارغة إذا لم توجد)</h6>
-      <div class="row">
-        <div class="col-md-3 mb-3">
-          <label class="form-label">الألوان</label>
-          <input type="text" name="colors" class="form-control"
-            value="<%= product && product.colors ? product.colors : '' %>" placeholder="مثال: أسود,أحمر,أبيض">
-          <small class="text-muted">مفصولة بفاصلة</small>
-        </div>
-        <div class="col-md-3 mb-3">
-          <label class="form-label">الأحجام / المقاسات</label>
-          <input type="text" name="sizes" class="form-control"
-            value="<%= product && product.sizes ? product.sizes : '' %>" placeholder="مثال: S,M,L,XL">
-        </div>
-        <div class="col-md-3 mb-3">
-          <label class="form-label">سعات التخزين</label>
-          <input type="text" name="storage_capacities" class="form-control"
-            value="<%= product && product.storage_capacities ? product.storage_capacities : '' %>"
-            placeholder="مثال: 64GB,128GB">
-        </div>
-        <div class="col-md-3 mb-3">
-          <label class="form-label">سعات البطارية</label>
-          <input type="text" name="battery_capacities" class="form-control"
-            value="<%= product && product.battery_capacities ? product.battery_capacities : '' %>"
-            placeholder="مثال: 4000mAh,5000mAh">
-        </div>
-      </div>
-      <hr class="text-muted">
-      <div class="row">
-        <div class="col-md-4 mb-3">
-          <div class="col-md-2 mb-3">
-            <label class="form-label">الحالة</label>
-            <select name="is_active" class="form-select">
-              <option value="1" <%=product && product.is_active !=0 ? 'selected' : '' %>>نشط</option>
-              <option value="0" <%=product && product.is_active==0 ? 'selected' : '' %>>معطل</option>
-            </select>
-          </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">صورة رئيسية</label>
-          <input type="file" name="image" class="form-control" accept="image/*">
-          <% if (product && product.image_path) { %>
-            <small class="text-muted">الصورة الحالية: /uploads/<%= product.image_path %></small>
-            <% } %>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">صور إضافية (متعددة)</label>
-          <input type="file" name="images" class="form-control" accept="image/*" multiple>
+    <style>
+      .req-star {
+        color: #dc3545;
+        font-weight: bold;
+        margin-right: 2px;
+      }
+
+      .form-section-header {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+        padding: 12px 20px;
+        margin-top: 0;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 8px 8px 0 0;
+      }
+
+      .form-section-header h6 {
+        margin: 0;
+        font-weight: 700;
+        color: #343a40;
+      }
+
+      .form-section {
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 24px;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.02);
+      }
+    </style>
+
+    <div class="container-fluid py-4 px-4">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+          <h4 class="fw-bold m-0 text-dark">
+            <i class="bi <%= product ? 'bi-pencil-square text-info' : 'bi-plus-circle text-primary' %> me-2"></i>
+            <%= product ? 'تحديث بيانات المنتج' : 'إدراج منتج جديد' %>
+          </h4>
+          <p class="text-muted small mt-1 mb-0">
+            <%= product ? 'أنت الآن تقوم بتعديل تفاصيل المنتج: ' + product.name_ar
+              : 'أضف تفاصيل المنتج، الصور، التسعير والمخزون.' %>
+          </p>
         </div>
         <div class="d-flex gap-2">
-          <button type="submit" class="btn btn-primary">حفظ</button>
-          <a href="/admin/products" class="btn btn-outline-secondary">إلغاء</a>
+          <a href="/admin/products" class="btn btn-light shadow-sm border"><i class="bi bi-arrow-right ms-1"></i> العودة
+            للقائمة</a>
         </div>
-    </form>
+      </div>
+
+      <form method="post" action="<%= product ? '/admin/products/edit/' + product.id : '/admin/products' %>"
+        enctype="multipart/form-data">
+
+        <div class="row g-4">
+          <!-- Left Column (Main Details) -->
+          <div class="col-lg-8">
+
+            <!-- Basic Information -->
+            <div class="form-section pb-4 px-0">
+              <div class="form-section-header">
+                <i class="bi bi-info-circle-fill text-primary"></i>
+                <h6>المعلومات الأساسية</h6>
+              </div>
+              <div class="px-4">
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold small text-muted">اسم المنتج (عربي) <span
+                        class="req-star">*</span></label>
+                    <input type="text" name="name_ar" class="form-control" value="<%= product ? product.name_ar : '' %>"
+                      placeholder="مثال: هاتف آيفون 15 برو" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold small text-muted">الاسم (إنجليزي) </label>
+                    <input type="text" name="name_en" class="form-control" value="<%= product ? product.name_en : '' %>"
+                      placeholder="e.g: iPhone 15 Pro" dir="ltr">
+                  </div>
+                </div>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold small text-muted">العلامة التجارية / الماركة</label>
+                    <input type="text" name="company" class="form-control" value="<%= product ? product.company : '' %>"
+                      placeholder="مثال: Apple, Samsung...">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold small text-muted">التصنيف الرئيسي <span
+                        class="req-star">*</span></label>
+                    <div class="input-group">
+                      <span class="input-group-text bg-light text-muted"><i class="bi bi-tags"></i></span>
+                      <select name="category_id" class="form-select" required>
+                        <option value="">— اختر تصنيفاً —</option>
+                        <% categories.forEach(function(c) { %>
+                          <option value="<%= c.id %>" <%=product && product.category_id==c.id ? 'selected' : '' %>><%=
+                              c.name_ar %>
+                          </option>
+                          <% }); %>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold small text-muted">نبذة مختصرة (تظهر في البطاقات)</label>
+                  <textarea name="short_description" class="form-control" rows="2"
+                    placeholder="وصف موجز للمنتج سطرين كحد أقصى..."><%= product ? product.short_description : '' %></textarea>
+                </div>
+                <div class="mb-0">
+                  <label class="form-label fw-bold small text-muted">الوصف الشامل والتفاصيل</label>
+                  <textarea name="long_description" class="form-control" rows="5"
+                    placeholder="اكتب وصفاً مفصلاً يبرز مميزات المنتج..."><%= product ? product.long_description : '' %></textarea>
+                  <small class="text-muted" style="font-size: 0.70rem;">يمكنك استخدام فقرات منظمة لتسهيل القراءة
+                    للعميل.</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Attributes & Options -->
+            <div class="form-section pb-4 px-0">
+              <div class="form-section-header">
+                <i class="bi bi-sliders text-info"></i>
+                <h6>الخيارات المتاحة للمنتج (المتغيرات)</h6>
+              </div>
+              <div class="px-4">
+                <p class="small text-muted mb-4 border-bottom pb-2">اترك الحقل فارغاً إذا كان المنتج لا يحتوي على هذه
+                  الخيارات. يجب الفصل بين القيم بفاصلة إنجليزية (,) أو شرطة.</p>
+
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold small text-muted">الألوان المتاحة</label>
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text bg-white"><i class="bi bi-palette text-muted"></i></span>
+                      <input type="text" name="colors" class="form-control"
+                        value="<%= product && product.colors ? product.colors : '' %>"
+                        placeholder="مثال: أسود, أحمر, أزرق">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold small text-muted">الأحجام أو المقاسات (للملابس/الأحذية)</label>
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text bg-white"><i class="bi bi-aspect-ratio text-muted"></i></span>
+                      <input type="text" name="sizes" class="form-control"
+                        value="<%= product && product.sizes ? product.sizes : '' %>"
+                        placeholder="مثال: S, M, L, XL أو 40,41,42">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold small text-muted">سعات التخزين (للإلكترونيات)</label>
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text bg-white"><i class="bi bi-sd-card text-muted"></i></span>
+                      <input type="text" name="storage_capacities" class="form-control"
+                        value="<%= product && product.storage_capacities ? product.storage_capacities : '' %>"
+                        placeholder="مثال: 64GB, 128GB, 256GB">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold small text-muted">قوة البطاريات</label>
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text bg-white"><i class="bi bi-battery-charging text-muted"></i></span>
+                      <input type="text" name="battery_capacities" class="form-control"
+                        value="<%= product && product.battery_capacities ? product.battery_capacities : '' %>"
+                        placeholder="مثال: 4000mAh, 5000mAh">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column (Pricing, Stock, Images) -->
+          <div class="col-lg-4">
+
+            <!-- Pricing & Stock -->
+            <div class="form-section pb-4 px-0 border-top border-success border-4">
+              <div class="form-section-header bg-white">
+                <i class="bi bi-cash-coin text-success"></i>
+                <h6>التسعير والمخزون</h6>
+              </div>
+              <div class="px-4">
+                <div class="mb-3">
+                  <label class="form-label fw-bold small text-muted">سعر البيع الافتراضي <span
+                      class="req-star">*</span></label>
+                  <div class="input-group">
+                    <span class="input-group-text text-dark fw-bold bg-light">د.ل</span>
+                    <input type="number" step="0.01" name="price"
+                      class="form-control text-end fw-bold text-primary fs-5 bg-white"
+                      value="<%= product ? product.price : '' %>" placeholder="0.00" required>
+                  </div>
+                </div>
+                <div class="mb-4">
+                  <label class="form-label fw-bold small text-muted">نسبة التخفيض المؤقت %</label>
+                  <div class="input-group">
+                    <span class="input-group-text text-danger bg-light">%</span>
+                    <input type="number" step="0.01" name="discount_percent"
+                      class="form-control text-end text-danger fw-bold"
+                      value="<%= product ? product.discount_percent : 0 %>" placeholder="0">
+                  </div>
+                </div>
+
+                <hr class="text-muted opacity-25">
+
+                <div class="mb-3 mt-3">
+                  <label class="form-label fw-bold small text-muted">كمية المخزون الفعلي</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light text-muted"><i class="bi bi-box-seam"></i></span>
+                    <input type="number" name="stock" class="form-control text-end"
+                      value="<%= product ? product.stock : 0 %>" placeholder="0">
+                  </div>
+                </div>
+                <div class="row g-2 mb-3">
+                  <div class="col-8">
+                    <label class="form-label fw-bold small text-muted" style="font-size: 0.70rem;">الحد الأدنى للتنبيه
+                      بنفاد الكمية</label>
+                    <input type="number" name="low_stock_alert" class="form-control form-control-sm text-end"
+                      value="<%= product ? (product.low_stock_alert || 0) : 0 %>" placeholder="0">
+                  </div>
+                  <div class="col-4 d-flex align-items-end">
+                    <small class="text-muted mb-2 ms-1" style="font-size: 0.65rem;">(ضع 0 للإلغاء)</small>
+                  </div>
+                </div>
+
+                <div class="form-check form-switch bg-light p-3 rounded border mt-3">
+                  <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="hideStock"
+                    name="hide_when_out_of_stock" value="1" <%=product && product.hide_when_out_of_stock ? 'checked'
+                    : '' %>>
+                  <label class="form-check-label small fw-bold text-dark pt-1" for="hideStock">إخفاء المنتج تلقائياً عند
+                    نفاذ مخزونه؟</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Media (Images) & Status -->
+            <div class="form-section pb-4 px-0 border-top border-warning border-4">
+              <div class="form-section-header bg-white">
+                <i class="bi bi-images text-warning"></i>
+                <h6>الصور وحالة الظهور</h6>
+              </div>
+              <div class="px-4">
+
+                <!-- Status Switch -->
+                <div class="form-floating mb-4">
+                  <select
+                    class="form-select fw-bold border-2 <%= product && product.is_active == 0 ? 'border-secondary text-secondary' : 'border-success text-success' %>"
+                    name="is_active" id="statusSelect"
+                    onchange="this.className = 'form-select fw-bold border-2 ' + (this.value === '1' ? 'border-success text-success' : 'border-secondary text-secondary')">
+                    <option value="1" <%=product && product.is_active !=0 ? 'selected' : '' %>>✅ منتج معروض للمستخدمين
+                    </option>
+                    <option value="0" <%=product && product.is_active==0 ? 'selected' : '' %>>❌ منتج معطل (مسودة)
+                    </option>
+                  </select>
+                  <label for="statusSelect">حالة الظهور للمتجر</label>
+                </div>
+
+                <!-- Main Image -->
+                <div class="mb-3 p-3 bg-light rounded border border-secondary border-opacity-25">
+                  <label class="form-label fw-bold small text-muted d-block"><i class="bi bi-card-image me-1"></i>
+                    الصورة الرئيسية (الواجهة)</label>
+
+                  <% if (product && product.image_path) { %>
+                    <div class="text-center mb-3">
+                      <img src="/uploads/<%= product.image_path %>" class="img-thumbnail shadow-sm rounded-3"
+                        style="max-height: 120px; object-fit: contain;">
+                    </div>
+                    <% } %>
+
+                      <input type="file" name="image" class="form-control form-control-sm" accept="image/*" <%=(!product
+                        || !product.image_path) ? 'required' : '' %>>
+                      <small class="text-muted d-block mt-2" style="font-size: 0.65rem;">يفضل أن تكون بمقاس مربع 800x800
+                        بكسل.</small>
+                </div>
+
+                <!-- Additional Images -->
+                <div class="mb-3 p-3 bg-light rounded border border-secondary border-opacity-10">
+                  <label class="form-label fw-bold small text-muted d-block"><i class="bi bi-collection me-1"></i> صور
+                    تعريفية إضافية (ألبوم)</label>
+                  <% if (product && product.image_paths) { %>
+                    <div class="d-flex flex-wrap gap-2 mb-3 justify-content-center">
+                      <% product.image_paths.split('|').forEach(imgPath=> { %>
+                        <img src="/uploads/<%= imgPath %>" class="img-thumbnail shadow-sm rounded"
+                          style="width: 50px; height: 50px; object-fit: cover;">
+                        <% }); %>
+                    </div>
+                    <% } %>
+                      <input type="file" name="images" class="form-control form-control-sm" accept="image/*" multiple>
+                      <small class="text-muted d-block mt-2" style="font-size: 0.65rem;">يمكنك تحديد أكثر من صورة
+                        معاً.</small>
+                </div>
+
+                <div class="d-grid gap-2 mt-4 pt-2 border-top">
+                  <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm">
+                    <i class="bi <%= product ? 'bi-cloud-arrow-up-fill' : 'bi-plus-circle-fill' %> me-2"></i>
+                    <%= product ? 'تحديث وحفظ التغييرات' : 'إضافة المنتج للمتجر' %>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </form>
+    </div>
 
     <%- include('../partials/scripts') %>

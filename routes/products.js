@@ -10,31 +10,72 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   const db = req.db;
-  const page = parseInt(req.query.page) || 1;
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const q = req.query.q || '';
+  const category_id = req.query.category_id || '';
+  const is_active = req.query.is_active || '';
   const limit = 30;
   const offset = (page - 1) * limit;
 
-  const [categories, products, totalCountResult] = await Promise.all([
+  let where = ' 1=1 ';
+  const params = [];
+
+  if (q.trim()) {
+    const search = '%' + q.trim() + '%';
+    where += ' AND (p.name_ar LIKE ? OR p.name_en LIKE ? OR p.company LIKE ?)';
+    params.push(search, search, search);
+  }
+  if (category_id) {
+    where += ' AND p.category_id = ?';
+    params.push(category_id);
+  }
+  if (is_active !== '') {
+    where += ' AND p.is_active = ?';
+    params.push(is_active);
+  }
+
+  const [categories, products, totalCountResult, stats] = await Promise.all([
     db.prepare('SELECT * FROM categories ORDER BY name_ar').all(),
     db.prepare(`
       SELECT p.*, c.name_ar as category_name
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
+      WHERE ${where}
       ORDER BY p.created_at DESC
       LIMIT ? OFFSET ?
-    `).all(limit, offset),
-    db.prepare('SELECT COUNT(*) as total FROM products').get()
+    `).all(...params, limit, offset),
+    db.prepare(`SELECT COUNT(*) as total FROM products p WHERE ${where}`).get(...params),
+    db.prepare(`
+      SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active,
+        SUM(CASE WHEN stock <= low_stock_alert AND stock > 0 THEN 1 ELSE 0 END) as lowStock,
+        SUM(CASE WHEN stock = 0 THEN 1 ELSE 0 END) as outOfStock
+      FROM products
+    `).get()
   ]);
 
-  const totalPages = Math.ceil(totalCountResult.total / limit);
+  const totalPages = Math.ceil((totalCountResult ? totalCountResult.total : 0) / limit);
 
   res.render('products/list', {
     products,
     categories,
+    stats: {
+      total: stats.total || 0,
+      active: stats.active || 0,
+      lowStock: stats.lowStock || 0,
+      outOfStock: stats.outOfStock || 0
+    },
+    filters: { q, category_id, is_active },
+    queryString: [
+      q && 'q=' + encodeURIComponent(q),
+      category_id && 'category_id=' + category_id,
+      is_active !== '' && 'is_active=' + is_active
+    ].filter(Boolean).join('&'),
     adminUsername: req.session.adminUsername,
     currentPage: page,
     totalPages,
-    totalProducts: totalCountResult.total
+    totalProducts: totalCountResult ? totalCountResult.total : 0
   });
 });
 

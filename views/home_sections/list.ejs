@@ -1,135 +1,129 @@
 <%- include('../partials/head', { title: 'إدارة الصفحة الرئيسية' }) %>
     <%- include('../partials/sidebar', { adminUsername }) %>
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4>إدارة الصفحة الرئيسية</h4>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSectionModal">
-                <i class="bi bi-plus"></i> إضافة قسم جديد
-            </button>
-        </div>
-
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="px-4">العنوان (عربي)</th>
-                                <th>النوع</th>
-                                <th>المصدر</th>
-                                <th>الترتيب</th>
-                                <th>الحالة</th>
-                                <th class="text-end px-4">إجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% if (sections.length===0) { %>
-                                <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">
-                                        لا توجد أقسام مضافة حالياً. ابدأ بإضافة قسم جديد!
-                                    </td>
-                                </tr>
-                                <% } %>
-                                    <% sections.forEach(section=> { %>
-                                        <tr>
-                                            <td class="px-4 font-weight-bold">
-                                                <%= section.title_ar %>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-info text-dark">
-                                                    <%= section.section_type==='slider' ? 'سلايدر' :
-                                                        section.section_type==='list' ? 'قائمة عرض' :
-                                                        section.section_type==='grid' ? 'شبكة' : 'تصنيفات' %>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <small class="text-muted">
-                                                    <%= section.content_source==='latest' ? 'أحدث المنتجات' :
-                                                        section.content_source==='sale' ? 'التخفيضات' :
-                                                        section.content_source==='best_sellers' ? 'الأكثر مبيعاً' :
-                                                        section.content_source==='category' ? 'تصنيف معين' : 'يدوي' %>
-                                                </small>
-                                            </td>
-                                            <td>
-                                                <%= section.sort_order %>
-                                            </td>
-                                            <td>
-                                                <form action="/admin/home-sections/toggle/<%= section.id %>"
-                                                    method="POST" class="d-inline">
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox"
-                                                            onchange="this.form.submit()" <%=section.is_active
-                                                            ? 'checked' : '' %>>
-                                                        <label class="form-check-label">
-                                                            <%= section.is_active ? 'نشط' : 'معطل' %>
-                                                        </label>
-                                                    </div>
-                                                </form>
-                                            </td>
-                                            <td class="text-end px-4">
-                                                <button class="btn btn-sm btn-outline-primary edit-section-btn"
-                                                    data-section='<%= JSON.stringify(section) %>' data-bs-toggle="modal"
-                                                    data-bs-target="#editSectionModal">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <form action="/admin/home-sections/delete/<%= section.id %>"
-                                                    method="POST" class="d-inline"
-                                                    onsubmit="return confirm('هل أنت متأكد من حذف هذا القسم؟')">
-                                                    <button class="btn btn-sm btn-outline-danger"><i
-                                                            class="bi bi-trash"></i></button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                        <% }) %>
-                        </tbody>
-                    </table>
+        <div class="container-fluid py-4 px-4">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold m-0 text-dark">إدارة الصفحة الرئيسية (App)</h4>
+                    <p class="text-muted small mb-0">تحكم في محتوى وترتيب الأقسام المعروضة في الصفحة الرئيسية لتطبيق
+                        المتجر</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-primary px-4" data-bs-toggle="collapse"
+                        data-bs-target="#addSectionCollapse">
+                        <i class="bi bi-plus-lg ms-2"></i> إضافة قسم جديد
+                    </button>
                 </div>
             </div>
-        </div>
 
-        <!-- Add Section Modal -->
-        <div class="modal fade" id="addSectionModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content border-0 shadow">
-                    <form action="/admin/home-sections/add" method="POST">
-                        <div class="modal-header">
-                            <h5 class="modal-title">إضافة قسم جديد</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <!-- Stats Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100 p-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center"
+                                style="width: 48px; height: 48px;">
+                                <i class="bi bi-layers-fill fs-4"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">إجمالي الأقسام</small>
+                                <h4 class="fw-bold m-0">
+                                    <%= stats.total %>
+                                </h4>
+                            </div>
                         </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">عنوان القسم (عربي)</label>
-                                <input type="text" name="title_ar" class="form-control" placeholder="مثال: وصل حديثاً"
-                                    required>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100 p-3 border-start border-success border-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center"
+                                style="width: 48px; height: 48px;">
+                                <i class="bi bi-check-circle-fill fs-4"></i>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">عنوان القسم (إنجليزي - اختياري)</label>
-                                <input type="text" name="title_en" class="form-control" placeholder="New Arrivals">
+                            <div>
+                                <small class="text-muted d-block">أقسام نشطة</small>
+                                <h4 class="fw-bold m-0 text-success">
+                                    <%= stats.active %>
+                                </h4>
                             </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">نوع العرض</label>
-                                    <select name="section_type" class="form-select" required>
-                                        <option value="slider">سلايدر علوي (Banners)</option>
-                                        <option value="list" selected>قائمة عرض أفقية</option>
-                                        <option value="grid">شبكة مربعات</option>
-                                        <option value="categories">دائرة التصنيفات</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">مصدر البيانات</label>
-                                    <select name="content_source" class="form-select" required>
-                                        <option value="latest">أحدث المنتجات</option>
-                                        <option value="sale">التخفيضات</option>
-                                        <option value="best_sellers">الأكثر مبيعاً</option>
-                                        <option value="category">تصنيف محدد</option>
-                                        <option value="manual">اختيار يدوي</option>
-                                    </select>
-                                </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100 p-3 border-start border-warning border-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center"
+                                style="width: 48px; height: 48px;">
+                                <i class="bi bi-images fs-4"></i>
                             </div>
-                            <div class="mb-3 category-select-div" style="display:none">
-                                <label class="form-label">اختر التصنيف</label>
+                            <div>
+                                <small class="text-muted d-block">سلايدر (Banners)</small>
+                                <h4 class="fw-bold m-0 text-warning">
+                                    <%= stats.sliders %>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100 p-3 border-start border-info border-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center"
+                                style="width: 48px; height: 48px;">
+                                <i class="bi bi-grid-3x3-gap-fill fs-4"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">قوائم وشبكة</small>
+                                <h4 class="fw-bold m-0 text-info">
+                                    <%= stats.grv %>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Section Collapse -->
+            <div class="collapse mb-4" id="addSectionCollapse">
+                <div class="card border-0 shadow-sm border-start border-primary border-4">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-4 text-dark">إعداد قسم جديد لتطبيقات الهاتف</h6>
+                        <form action="/admin/home-sections/add" method="POST" class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted">عنوان القسم (بالعربية) *</label>
+                                <input type="text" name="title_ar" class="form-control"
+                                    placeholder="مثال: التخفيضات الكبرى" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted">عنوان القسم (إنجليزي)</label>
+                                <input type="text" name="title_en" class="form-control" placeholder="Big Sales">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted">نوع العرض</label>
+                                <select name="section_type" class="form-select" required>
+                                    <option value="slider">سلايدر علوي (Banners)</option>
+                                    <option value="list" selected>قائمة عرض أفقية (Scroll)</option>
+                                    <option value="grid">شبكة مربعات (Grid)</option>
+                                    <option value="categories">دائرة التصنيفات</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted">مصدر المحتوى</label>
+                                <select name="content_source" class="form-select" required
+                                    onchange="handleSourceChange(this)">
+                                    <option value="latest">أحدث المنتجات</option>
+                                    <option value="sale">التخفيضات</option>
+                                    <option value="best_sellers">الأكثر مبيعاً</option>
+                                    <option value="category">تصنيف محدد</option>
+                                    <option value="manual">اختيار يدوي</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 category-select-div" style="display:none">
+                                <label class="form-label small text-muted">اختر التصنيف</label>
                                 <select name="category_id" class="form-select">
+                                    <option value="">-- اختر التصنيف --</option>
                                     <% categories.forEach(cat=> { %>
                                         <option value="<%= cat.id %>">
                                             <%= cat.name_ar %>
@@ -137,47 +131,162 @@
                                         <% }) %>
                                 </select>
                             </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">عدد العناصر</label>
-                                    <input type="number" name="items_limit" class="form-control" value="10">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">ترتيب العرض</label>
-                                    <input type="number" name="sort_order" class="form-control" value="0">
-                                </div>
+                            <div class="col-md-2">
+                                <label class="form-label small text-muted">عدد العناصر</label>
+                                <input type="number" name="items_limit" class="form-control" value="10">
                             </div>
-                        </div>
-                        <div class="modal-footer bg-light">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                            <button type="submit" class="btn btn-primary">حفظ القسم</button>
-                        </div>
-                    </form>
+                            <div class="col-md-2">
+                                <label class="form-label small text-muted">ترتيب العرض</label>
+                                <input type="number" name="sort_order" class="form-control" value="0">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100 py-2">حفظ القسم</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sections Table -->
+            <div class="card border-0 shadow-sm overflow-hidden">
+                <div class="card-header bg-white py-3 border-0 d-flex align-items-center justify-content-between">
+                    <h5 class="fw-bold m-0"><i class="bi bi-list-stars ms-2 text-primary"></i>ترتيب أقسام الواجهة</h5>
+                    <span class="badge bg-light text-dark border px-3 py-2">إجمالي <%= sections.length %> قسم</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light bg-opacity-50">
+                            <tr>
+                                <th class="ps-4">اسم القسم</th>
+                                <th class="text-center">النوع</th>
+                                <th class="text-center">المصدر</th>
+                                <th class="text-center">العناصر</th>
+                                <th class="text-center">الترتيب</th>
+                                <th class="text-center">الحالة</th>
+                                <th class="text-end pe-4">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% sections.forEach(function(section) { %>
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold text-dark">
+                                                <%= section.title_ar %>
+                                            </span>
+                                            <small class="text-muted">
+                                                <%= section.title_en || '—' %>
+                                            </small>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span
+                                            class="badge rounded-pill border fw-normal py-1 px-3 <%= 
+                    section.section_type==='slider' ? 'bg-warning bg-opacity-10 text-warning border-warning' :
+                    section.section_type==='list' ? 'bg-primary bg-opacity-10 text-primary border-primary' :
+                    section.section_type==='grid' ? 'bg-info bg-opacity-10 text-info border-info' : 'bg-secondary bg-opacity-10 text-secondary' %>">
+                                            <%= section.section_type==='slider' ? 'سلايدر' :
+                                                section.section_type==='list' ? 'قائمة' : section.section_type==='grid'
+                                                ? 'شبكة' : 'تصنيفات' %>
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="text-muted small">
+                                            <i class="bi bi-hdd-network ms-1"></i>
+                                            <%= section.content_source==='latest' ? 'أحدث المنتجات' :
+                                                section.content_source==='sale' ? 'التخفيضات' :
+                                                section.content_source==='best_sellers' ? 'الأكثر مبيعاً' :
+                                                section.content_source==='category' ? 'تصنيف محدد' : 'يدوي' %>
+                                        </span>
+                                    </td>
+                                    <td class="text-center fw-bold text-dark">
+                                        <%= section.items_limit %>
+                                    </td>
+                                    <td class="text-center">
+                                        <%= section.sort_order %>
+                                    </td>
+                                    <td class="text-center">
+                                        <form action="/admin/home-sections/toggle/<%= section.id %>" method="POST">
+                                            <div class="form-check form-switch d-flex justify-content-center">
+                                                <input class="form-check-input shadow-none" type="checkbox"
+                                                    role="switch" onchange="this.form.submit()" <%=section.is_active
+                                                    ? 'checked' : '' %>>
+                                            </div>
+                                        </form>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="dropdown">
+                                            <button class="btn btn-light btn-sm rounded-circle" type="button"
+                                                data-bs-toggle="dropdown"
+                                                style="width: 32px; height: 32px; padding: 0;">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                                <li>
+                                                    <button class="dropdown-item py-2 edit-section-btn" type="button"
+                                                        data-section='<%= JSON.stringify(section) %>'
+                                                        data-bs-toggle="modal" data-bs-target="#editSectionModal">
+                                                        <i class="bi bi-pencil ms-2 text-info"></i> تعديل
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <hr class="dropdown-divider">
+                                                </li>
+                                                <li>
+                                                    <form action="/admin/home-sections/delete/<%= section.id %>"
+                                                        method="POST"
+                                                        onsubmit="return confirm('هل أنت متأكد من حذف هذا القسم نهائياً؟')">
+                                                        <button class="dropdown-item py-2 text-danger" type="submit">
+                                                            <i class="bi bi-trash ms-2"></i> حذف القسم
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                                    <% if (sections.length===0) { %>
+                                        <tr>
+                                            <td colspan="7" class="text-center py-5">
+                                                <div class="text-muted opacity-50 py-4">
+                                                    <i class="bi bi-layout-text-window display-1 d-block mb-3"></i>
+                                                    <h5>لا توجد أقسام مضافة حالياً</h5>
+                                                    <p class="small">ابدأ بتنظيم واجهة التطبيق عبر إضافة أقسام جديدة من
+                                                        الأعلى</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <% } %>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <!-- Edit Section Modal -->
+        <!-- Edit Modal -->
         <div class="modal fade" id="editSectionModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content border-0 shadow">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
                     <form id="editSectionForm" method="POST">
-                        <div class="modal-header">
-                            <h5 class="modal-title">تعديل القسم</h5>
+                        <div class="modal-header border-0 pt-4 px-4 pb-0">
+                            <h5 class="fw-bold m-0"><i class="bi bi-pencil-square ms-2 text-primary"></i>تعديل القسم
+                            </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">عنوان القسم (عربي)</label>
-                                <input type="text" name="title_ar" id="edit_title_ar" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">عنوان القسم (إنجليزي)</label>
-                                <input type="text" name="title_en" id="edit_title_en" class="form-control">
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">نوع العرض</label>
+                        <div class="modal-body p-4">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label small text-muted">عنوان القسم (بالعربية)</label>
+                                    <input type="text" name="title_ar" id="edit_title_ar" class="form-control" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small text-muted">عنوان القسم (إنجليزي)</label>
+                                    <input type="text" name="title_en" id="edit_title_en" class="form-control">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-muted">نوع العرض</label>
                                     <select name="section_type" id="edit_section_type" class="form-select" required>
                                         <option value="slider">سلايدر علوي (Banners)</option>
                                         <option value="list">قائمة عرض أفقية</option>
@@ -185,9 +294,10 @@
                                         <option value="categories">دائرة التصنيفات</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">مصدر البيانات</label>
-                                    <select name="content_source" id="edit_content_source" class="form-select" required>
+                                <div class="col-6">
+                                    <label class="form-label small text-muted">مصدر البيانات</label>
+                                    <select name="content_source" id="edit_content_source" class="form-select" required
+                                        onchange="handleSourceChange(this)">
                                         <option value="latest">أحدث المنتجات</option>
                                         <option value="sale">التخفيضات</option>
                                         <option value="best_sellers">الأكثر مبيعاً</option>
@@ -195,31 +305,31 @@
                                         <option value="manual">اختيار يدوي</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div class="mb-3 category-select-div" id="edit_category_select_div" style="display:none">
-                                <label class="form-label">اختر التصنيف</label>
-                                <select name="category_id" id="edit_category_id" class="form-select">
-                                    <% categories.forEach(cat=> { %>
-                                        <option value="<%= cat.id %>">
-                                            <%= cat.name_ar %>
-                                        </option>
-                                        <% }) %>
-                                </select>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">عدد العناصر</label>
+                                <div class="col-12 category-select-div" id="edit_category_select_div"
+                                    style="display:none">
+                                    <label class="form-label small text-muted">اختر التصنيف</label>
+                                    <select name="category_id" id="edit_category_id" class="form-select">
+                                        <option value="">-- اختر التصنيف --</option>
+                                        <% categories.forEach(cat=> { %>
+                                            <option value="<%= cat.id %>">
+                                                <%= cat.name_ar %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-muted">عدد العناصر</label>
                                     <input type="number" name="items_limit" id="edit_items_limit" class="form-control">
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">ترتيب العرض</label>
+                                <div class="col-6">
+                                    <label class="form-label small text-muted">ترتيب العرض</label>
                                     <input type="number" name="sort_order" id="edit_sort_order" class="form-control">
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-footer bg-light">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                            <button type="submit" class="btn btn-success">تحديث القسم</button>
+                        <div class="modal-footer border-0 p-4 pt-0">
+                            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">إلغاء</button>
+                            <button type="submit" class="btn btn-success px-4">تحديث البيانات</button>
                         </div>
                     </form>
                 </div>
@@ -228,36 +338,29 @@
 
         <script>
             function handleSourceChange(select) {
-                const modal = select.closest('.modal');
-                const div = modal.querySelector('.category-select-div');
+                const parent = select.closest('form');
+                const div = parent.querySelector('.category-select-div');
                 div.style.display = select.value === 'category' ? 'block' : 'none';
             }
 
-            document.querySelectorAll('select[name="content_source"]').forEach(select => {
-                select.addEventListener('change', () => handleSourceChange(select));
-            });
-
             document.querySelectorAll('.edit-section-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const sectionData = btn.getAttribute('data-section');
-                    const section = JSON.parse(sectionData);
-                    editSection(section);
+                    const section = JSON.parse(btn.getAttribute('data-section'));
+                    const form = document.getElementById('editSectionForm');
+                    form.action = '/admin/home-sections/edit/' + section.id;
+
+                    document.getElementById('edit_title_ar').value = section.title_ar;
+                    document.getElementById('edit_title_en').value = section.title_en || '';
+                    document.getElementById('edit_section_type').value = section.section_type;
+                    document.getElementById('edit_content_source').value = section.content_source;
+                    document.getElementById('edit_category_id').value = section.category_id || '';
+                    document.getElementById('edit_items_limit').value = section.items_limit;
+                    document.getElementById('edit_sort_order').value = section.sort_order;
+
+                    // Trigger visibility
+                    handleSourceChange(document.getElementById('edit_content_source'));
                 });
             });
-
-            function editSection(section) {
-                document.getElementById('editSectionForm').action = '/admin/home-sections/edit/' + section.id;
-                document.getElementById('edit_title_ar').value = section.title_ar;
-                document.getElementById('edit_title_en').value = section.title_en || '';
-                document.getElementById('edit_section_type').value = section.section_type;
-                document.getElementById('edit_content_source').value = section.content_source;
-                document.getElementById('edit_category_id').value = section.category_id || '';
-                document.getElementById('edit_items_limit').value = section.items_limit;
-                document.getElementById('edit_sort_order').value = section.sort_order;
-
-                // Trigger visibility of category select
-                handleSourceChange(document.getElementById('edit_content_source'));
-            }
         </script>
 
         <%- include('../partials/scripts') %>

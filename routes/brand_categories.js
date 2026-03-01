@@ -30,9 +30,35 @@ function normStr(v) {
 
 router.get('/', async (req, res) => {
   const db = req.db;
-  const list = await db.prepare('SELECT * FROM brand_categories ORDER BY sort_order ASC, name_ar').all();
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const perPage = 20;
+
+  // Stats Logic
+  const stats = await db.prepare(`
+    SELECT 
+      COUNT(*) as total,
+      (SELECT COUNT(*) FROM products) as totalProducts,
+      (SELECT COUNT(*) FROM brand_categories WHERE icon_size = 'large') as prominentBrands
+    FROM brand_categories
+  `).get();
+
+  const totalRow = await db.prepare('SELECT COUNT(*) as c FROM brand_categories').get();
+  const total = totalRow ? totalRow.c : 0;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  const offset = (page - 1) * perPage;
+
+  const list = await db.prepare('SELECT * FROM brand_categories ORDER BY sort_order ASC, name_ar LIMIT ? OFFSET ?').all(perPage, offset);
+
   res.render('brand_categories/list', {
     list,
+    totalCount: total,
+    totalPages,
+    currentPage: page,
+    stats: {
+      total: stats.total || 0,
+      totalProducts: stats.totalProducts || 0,
+      prominentBrands: stats.prominentBrands || 0
+    },
     adminUsername: req.session.adminUsername,
     iconSizes: ICON_SIZES,
     iconCorners: ICON_CORNERS,

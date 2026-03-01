@@ -44,6 +44,18 @@ router.get('/', async (req, res) => {
   const filters = { q, status, date_from, date_to };
   const { where, params } = getOrdersWhere(filters);
 
+  // Stats Logic
+  const todayStr = new Date().toISOString().split('T')[0];
+  const stats = await db.prepare(`
+    SELECT 
+      COUNT(*) as total,
+      SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+      SUM(CASE WHEN status = 'delivered' THEN 1 ELSE 0 END) as delivered,
+      SUM(CASE WHEN status IN ('shipped', 'confirmed') THEN 1 ELSE 0 END) as inProgress,
+      SUM(CASE WHEN date(created_at) = ? THEN total_amount ELSE 0 END) as todaySales
+    FROM orders
+  `).get(todayStr);
+
   const totalRow = await db.prepare(`
     SELECT COUNT(*) as c FROM orders o LEFT JOIN customers c ON o.customer_id = c.id WHERE ${where}
   `).get(...params);
@@ -52,11 +64,11 @@ router.get('/', async (req, res) => {
   const offset = (page - 1) * PER_PAGE;
 
   const orders = await db.prepare(`
-    SELECT o.*,
+    SELECT o.*, 
       COALESCE(o.customer_name, c.name) as display_name,
       COALESCE(o.customer_phone, c.phone) as display_phone,
       ct.name as city_name
-    FROM orders o
+    FROM orders o 
     LEFT JOIN customers c ON o.customer_id = c.id
     LEFT JOIN cities ct ON o.city_id = ct.id
     WHERE ${where}
@@ -68,10 +80,22 @@ router.get('/', async (req, res) => {
     orders,
     STATUS_LABELS,
     filters: { q, status, date_from, date_to },
+    stats: {
+      total: stats.total || 0,
+      pending: stats.pending || 0,
+      delivered: stats.delivered || 0,
+      inProgress: stats.inProgress || 0,
+      todaySales: stats.todaySales || 0
+    },
     page,
     totalPages,
     total,
-    queryString: [q && 'q=' + encodeURIComponent(q), status && 'status=' + encodeURIComponent(status), date_from && 'date_from=' + encodeURIComponent(date_from), date_to && 'date_to=' + encodeURIComponent(date_to)].filter(Boolean).join('&'),
+    queryString: [
+      q && 'q=' + encodeURIComponent(q),
+      status && 'status=' + encodeURIComponent(status),
+      date_from && 'date_from=' + encodeURIComponent(date_from),
+      date_to && 'date_to=' + encodeURIComponent(date_to)
+    ].filter(Boolean).join('&'),
     adminUsername: req.session.adminUsername
   });
 });

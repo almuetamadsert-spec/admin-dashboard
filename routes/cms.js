@@ -11,11 +11,20 @@ const SLUGS = [
 router.get('/', async (req, res) => {
   const db = req.db;
   const pages = [];
+  let updatedCount = 0;
+
   for (const s of SLUGS) {
     const row = await db.prepare('SELECT * FROM cms_pages WHERE slug = ?').get(s.slug);
+    if (row && row.updated_at) updatedCount++;
     pages.push(row ? { ...s, ...row } : { ...s, id: null, content_ar: '', content_en: '', updated_at: null });
   }
-  res.render('cms/list', { pages, adminUsername: req.session.adminUsername });
+
+  const stats = {
+    totalPages: SLUGS.length,
+    updatedPages: updatedCount
+  };
+
+  res.render('cms/list', { pages, stats, adminUsername: req.session.adminUsername, title: 'إدارة المحتوى' });
 });
 
 router.get('/edit/:slug', async (req, res) => {
